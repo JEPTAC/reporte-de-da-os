@@ -30,6 +30,7 @@
     if(scroll) window.scrollTo({top:0,behavior:'smooth'});
     history.replaceState(null,'',`#${route}`);
     if(route==='documento'){ const f=$('#pdfFrame'); if(f && (f.src.endsWith('about:blank') || f.getAttribute('src')==='about:blank')) f.src=f.dataset.src; }
+    if(route==='territorio') setTimeout(()=>window.refreshTerritoryMap?.(),140);
   }
 
   function initNavigation(){
@@ -100,17 +101,22 @@
     $('#territorialReading').textContent=D.territorialReading;
     $$('[data-sector]').forEach(el=>el.addEventListener('click',()=>openSectorDrawer(el.dataset.sector)));
     renderCompare();
+    window.updateTerritoryMap?.(arr);
   }
 
   function openSectorDrawer(name){
     const t=D.territories.find(x=>x.sector===name); if(!t) return;
+    const geo=(window.TERRITORY_MAP_DATA||[]).find(x=>x.sector===name);
     const drawer=$('#sectorDrawer');
-    $('#drawerContent').innerHTML=`<div class="drawer-title"><span class="eyebrow">FICHA TERRITORIAL</span><h2>${esc(t.sector)}</h2><small>Lectura del consolidado al 18 de agosto de 2026</small></div><div class="drawer-grid">
+    const geoBlock=geo?`<div class="drawer-map-ref"><span>${geo.precision==='verified'?'REFERENCIA CARTOGRÁFICA':'REFERENCIA APROXIMADA'}</span><b>${esc(geo.reference)}</b><small>${geo.lat.toFixed(5)}, ${geo.lng.toFixed(5)} · ${esc(geo.source)}</small></div>`:'';
+    $('#drawerContent').innerHTML=`<div class="drawer-title"><span class="eyebrow">FICHA TERRITORIAL</span><h2>${esc(t.sector)}</h2><small>Lectura del consolidado al 18 de agosto de 2026</small></div>${geoBlock}<div class="drawer-grid">
       ${drawerMetric(t.families,'Familias nominales',colors.green)}${drawerMetric(t.people,'Personas',colors.blue)}${drawerMetric(priorityCount(t),'Casos prioritarios',colors.red)}${drawerMetric(pct(priorityRate(t)),'Tasa prioritaria*',colors.red)}${drawerMetric(t.noState,'Sin estado',colors.amber)}${drawerMetric(t.empty,'Núcleos vacíos',colors.violet)}
       ${drawerMetric(t.noHab,'No habitables',colors.red)}${drawerMetric(t.destroyed,'Destruidas',colors.darkred)}
-    </div><div class="drawer-note"><b>Lectura exploratoria:</b> ${territoryInterpretation(t)}</div><button class="primary-btn" id="drawerCompareBtn" style="margin-top:14px;width:100%;justify-content:center">${selectedSectors.has(t.sector)?'Quitar del comparador':'Añadir al comparador'}</button><p class="footnote">* Métrica calculada por esta micropágina; no constituye clasificación oficial.</p>`;
+    </div><div class="drawer-note"><b>Lectura exploratoria:</b> ${territoryInterpretation(t)}</div><div class="drawer-actions-v4"><button class="primary-btn" id="drawerCompareBtn">${selectedSectors.has(t.sector)?'Quitar del comparador':'Añadir al comparador'}</button>${geo?'<button class="secondary-btn" id="drawerMapBtn">Ubicar en el mapa</button>':''}</div><p class="footnote">* Métrica calculada por esta micropágina; no constituye clasificación oficial.</p>`;
     $('#drawerCompareBtn').addEventListener('click',()=>toggleCompare(t.sector));
+    $('#drawerMapBtn')?.addEventListener('click',()=>{setRoute('territorio',{scroll:false});window.focusTerritoryMap?.(t.sector,true)});
     drawer.classList.add('open'); drawer.setAttribute('aria-hidden','false');
+    if(activeRoute==='territorio') window.focusTerritoryMap?.(t.sector,false);
   }
   function drawerMetric(v,l,c){return `<div class="drawer-metric" style="--tone:${c}"><strong>${typeof v==='number'?fmt(v):v}</strong><span>${esc(l)}</span></div>`}
   function territoryInterpretation(t){
@@ -119,6 +125,7 @@
     if(t.noState>=10) return 'Tiene una brecha importante de registros sin estado del inmueble, lo que limita la priorización de seguridad habitacional.';
     return 'Su lectura debe combinar volumen censal, casos prioritarios y calidad del dato. El volumen de registros no equivale por sí mismo a severidad sísmica.';
   }
+  window.openSectorDrawer=openSectorDrawer;
   function closeDrawer(){ $('#sectorDrawer').classList.remove('open'); $('#sectorDrawer').setAttribute('aria-hidden','true'); }
   function toggleCompare(name){
     if(selectedSectors.has(name)) selectedSectors.delete(name); else if(selectedSectors.size<4) selectedSectors.add(name); else return toast('El comparador admite hasta 4 sectores.');
@@ -151,9 +158,24 @@
   }
 
   function renderHousing(mode='pct'){
-    const max=Math.max(...D.housing.map(x=>x.count));
-    $('#housingBars').innerHTML=D.housing.map(x=>`<div class="housing-row" style="--tone:${colors[x.tone]||colors.gray}"><div class="housing-label"><i class="housing-dot"></i>${esc(x.label)}</div><div class="housing-track"><div class="housing-fill" style="width:${x.count/max*100}%"></div></div><div class="housing-value">${mode==='pct'?pct(x.pct):fmt(x.count)}</div></div>`).join('');
-    $('#housingInterpretation').innerHTML=D.housingInterpretation.map(x=>`<div class="check-item"><i>✓</i><p>${esc(x)}</p></div>`).join('');
+    const base=432;
+    const overview=[
+      {value:251,pct:58.1,label:'Habitable',desc:'Marca censal registrada',tone:colors.green,icon:'✓'},
+      {value:56,pct:13.0,label:'Averiada',desc:'Requiere documentar el daño',tone:colors.orange,icon:'~'},
+      {value:92,pct:21.3,label:'Prioridad inicial',desc:'90 no habitable + 2 destruida',tone:colors.red,icon:'!'},
+      {value:40,pct:9.3,label:'Sin clasificación',desc:'Pendiente de completar',tone:colors.gray,icon:'?'}
+    ];
+    $('#housingOverviewCards').innerHTML=overview.map(x=>`<article class="housing-overview-card" style="--tone:${x.tone}"><i>${x.icon}</i><div><strong>${fmt(x.value)}</strong><span>${esc(x.label)}</span><small>${pct(x.pct)} · ${esc(x.desc)}</small></div></article>`).join('');
+    $('#housingBars').innerHTML=D.housing.map(x=>`<div class="housing-row-v4" style="--tone:${colors[x.tone]||colors.gray}"><div class="housing-row-head"><span><i></i>${esc(x.label)}</span><strong>${mode==='pct'?pct(x.pct):fmt(x.count)}</strong></div><div class="housing-track-v4"><div class="housing-quarter-grid" aria-hidden="true"><i></i><i></i><i></i></div><div class="housing-fill-v4" style="width:${Math.max(1,x.pct)}%"></div><span>${fmt(x.count)} de ${fmt(base)} familias · ${pct(x.pct)}</span></div></div>`).join('');
+    const actions=[
+      {level:'SEGUIMIENTO',title:'Habitable',text:'Mantener orientación de autoprotección, monitoreo y cierre documentado. La marca no certifica seguridad estructural.',tone:colors.green,icon:'01'},
+      {level:'VERIFICAR',title:'Averiada',text:'Describir el daño, ubicarlo y documentarlo; definir si requiere inspección especializada o medida preventiva.',tone:colors.orange,icon:'02'},
+      {level:'PRIORIDAD',title:'No habitable / destruida',text:'Validación prioritaria, control de acceso cuando proceda, alojamiento temporal y trazabilidad de la decisión.',tone:colors.red,icon:'03'}
+    ];
+    $('#housingActionMatrix').innerHTML=actions.map(x=>`<div class="housing-action-row" style="--tone:${x.tone}"><span class="housing-action-no">${x.icon}</span><div><small>${x.level}</small><b>${x.title}</b><p>${x.text}</p></div></div>`).join('');
+    const labels=['Habitable','Averiada','No habitable + destruida','Evacuada fuera de residencia','Marcas múltiples'];
+    const tones=[colors.green,colors.orange,colors.red,colors.blue,colors.violet];
+    $('#housingInterpretation').innerHTML=D.housingInterpretation.map((x,i)=>`<article class="housing-meaning-item" style="--tone:${tones[i]}"><div class="housing-meaning-tag"><i></i><span>${labels[i]}</span></div><p>${esc(x)}</p></article>`).join('');
     $('#priorityHousingNarrative').textContent=D.priorityHousingNarrative;
   }
   function initHousingMode(){ $$('#housingMode button').forEach(b=>b.addEventListener('click',()=>{$$('#housingMode button').forEach(x=>x.classList.toggle('active',x===b));renderHousing(b.dataset.mode)})); }

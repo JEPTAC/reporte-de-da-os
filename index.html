@@ -11,6 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Allura&family=Archivo+Black&family=Cormorant+Garamond:ital,wght@0,600;1,600;1,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3yn0zFhMZqjMZk2FvY5dPp8p9tH0k=" crossorigin="" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -62,24 +63,33 @@
       <div class="content-frame">
         <!-- RESUMEN -->
         <section class="view active" id="view-resumen" data-view="resumen">
-          <div class="hero-card">
-            <div class="hero-copy">
-              <div class="hero-kicker"><span class="live-dot"></span> CORTE CONSOLIDADO · 18 DE AGOSTO DE 2026</div>
-              <div class="hero-script">Datos que orientan la respuesta</div>
-              <h1><span class="display-heavy">Emergencia</span> <span class="display-editorial">sísmica</span><br><span class="display-city">San Pedro</span><small>Valle del Cauca</small></h1>
-              <p>Centro interactivo de información del avance del diligenciamiento RUFE y del censo de familias afectadas por el sismo del 10 de agosto de 2026.</p>
-              <div class="hero-actions">
-                <button class="primary-btn" data-route-jump="territorio">Explorar territorio <b>→</b></button>
-                <button class="ghost-btn" data-route-jump="visual">Ver informe visual</button>
-                <a class="ghost-btn" href="assets/informe-consolidado-18-agosto-2026.pdf" target="_blank">Abrir PDF</a>
+          <div class="hero-card hero-v4">
+            <div class="hero-copy hero-v4-copy">
+              <div class="hero-kicker"><span class="live-dot"></span> INFORME TÉCNICO CONSOLIDADO · CORTE 18/08/2026</div>
+              <div class="hero-script">Una lectura clara para decidir mejor</div>
+              <h1><span class="display-heavy">Emergencia</span> <span class="display-editorial">sísmica</span><br><span class="display-city">San Pedro</span><small>VALLE DEL CAUCA · RUFE + CENSO DE FAMILIAS AFECTADAS</small></h1>
+              <p>Una experiencia interactiva para explorar el avance del censo, la situación registrada de las viviendas, la concentración territorial, las brechas de calidad y las prioridades de respuesta.</p>
+              <div class="hero-v4-metrics" aria-label="Indicadores principales">
+                <div><strong>432</strong><span>familias nominales</span></div>
+                <div><strong>1.024</strong><span>personas registradas</span></div>
+                <div><strong>25</strong><span>territorios / sectores</span></div>
+                <div class="danger"><strong>92</strong><span>casos iniciales prioritarios</span></div>
               </div>
-              <div class="hero-warning"><b>Información preliminar.</b> Las marcas del censo orientan la respuesta, pero no sustituyen la evaluación técnica estructural ni la validación oficial del RUD.</div>
+              <div class="hero-actions">
+                <button class="primary-btn" data-route-jump="territorio">Explorar el mapa <b>→</b></button>
+                <button class="ghost-btn hero-light-btn" data-route-jump="vivienda">Entender vivienda</button>
+                <a class="ghost-btn hero-light-btn" href="assets/informe-consolidado-18-agosto-2026.pdf" target="_blank">Documento fuente</a>
+              </div>
+              <div class="hero-warning"><b>Lectura preliminar y operativa.</b> El censo orienta la respuesta. Las categorías de vivienda no sustituyen una evaluación profesional de seguridad estructural ni la validación oficial del RUD.</div>
             </div>
-            <div class="hero-media">
-              <img src="assets/iglesia-afectada.jpg" alt="Torre de iglesia afectada por el sismo" class="hero-photo main" />
-              <img src="assets/alcaldia.jpg" alt="Edificio de la Alcaldía Municipal de San Pedro" class="hero-photo secondary" />
-              <div class="hero-stamp"><span>EVENTO</span><strong>10 · 08 · 2026</strong><span>CORTE</span><strong>18 · 08 · 2026</strong></div>
-              <svg class="seismo-line" viewBox="0 0 900 150" preserveAspectRatio="none" aria-hidden="true"><path d="M0,82 L90,82 L112,76 L124,89 L138,66 L151,93 L165,44 L178,106 L192,14 L206,128 L220,72 L235,88 L252,80 L285,82 L338,82 L351,77 L360,88 L371,68 L382,99 L394,40 L407,116 L419,18 L433,129 L447,70 L461,91 L478,80 L520,82 L900,82"/></svg>
+            <div class="hero-media hero-v4-media">
+              <div class="hero-v4-seal"><img src="assets/logo-san-pedro.jpg" alt="Alcaldía Municipal de San Pedro" /><span><b>SITREP · 03</b><small>Gestión del riesgo · RUFE</small></span></div>
+              <div class="hero-image-frame hero-image-primary"><img src="assets/iglesia-afectada.jpg" alt="Torre de iglesia afectada por el sismo" /></div>
+              <div class="hero-image-frame hero-image-secondary"><img src="assets/alcaldia.jpg" alt="Edificio de la Alcaldía Municipal de San Pedro" /></div>
+              <div class="hero-date-card"><span>EVENTO</span><strong>10 AGO</strong><small>2026 · 7:34 a. m.</small></div>
+              <div class="hero-cut-card"><span>CORTE</span><strong>18 AGO</strong><small>Consolidado técnico v3.0</small></div>
+              <div class="hero-graphic-label"><i></i><span>San Pedro responde con información, verificación y trazabilidad.</span></div>
+              <svg class="seismo-line seismo-v4" viewBox="0 0 900 150" preserveAspectRatio="none" aria-hidden="true"><path d="M0,82 L90,82 L112,76 L124,89 L138,66 L151,93 L165,44 L178,106 L192,14 L206,128 L220,72 L235,88 L252,80 L285,82 L338,82 L351,77 L360,88 L371,68 L382,99 L394,40 L407,116 L419,18 L433,129 L447,70 L461,91 L478,80 L520,82 L900,82"/></svg>
             </div>
           </div>
 
@@ -149,6 +159,28 @@
             </div>
           </div>
           <div class="territory-summary" id="territorySummary"></div>
+          <article class="panel territory-map-panel">
+            <div class="panel-head territory-map-head">
+              <div><span class="eyebrow">MAPA TERRITORIAL INTERACTIVO</span><h3>25 referencias geográficas conectadas con el censo</h3><p>Selecciona un punto para consultar familias, personas, prioridad y brechas del sector. El mapa se sincroniza con los filtros del explorador.</p></div>
+              <div class="map-actions"><button id="mapFitAll" class="compact-btn">Ver todo</button><button id="mapShowPriority" class="compact-btn map-priority-btn">Sólo con prioridad</button></div>
+            </div>
+            <div class="territory-map-layout">
+              <div class="territory-map-stage">
+                <div id="territoryMap" role="application" aria-label="Mapa de sectores censados de San Pedro"></div>
+                <div class="map-legend-card">
+                  <div><i class="map-dot map-dot-verified"></i><span>Referencia cartográfica verificada</span></div>
+                  <div><i class="map-dot map-dot-reference"></i><span>Referencia aproximada del sector</span></div>
+                  <div><i class="map-dot map-dot-priority"></i><span>Mayor presencia de casos prioritarios</span></div>
+                </div>
+              </div>
+              <aside class="map-index-panel">
+                <div class="map-index-title"><span class="eyebrow">ÍNDICE GEOGRÁFICO</span><h4>Localizaciones del informe</h4></div>
+                <label class="inline-search full map-search"><span>⌕</span><input id="mapSectorSearch" type="search" placeholder="Buscar una localización…" /></label>
+                <div id="mapReferenceList" class="map-reference-list"></div>
+              </aside>
+            </div>
+            <p class="footnote map-note"><b>Nota cartográfica:</b> los puntos permiten ubicar referencias territoriales para lectura del informe. No representan límites oficiales de barrios, veredas o corregimientos. Cuando no existe un punto abierto verificable para el nombre exacto del sector, se muestra una referencia aproximada claramente identificada.</p>
+          </article>
           <article class="panel territory-lab">
             <div class="panel-head"><div><span class="eyebrow">LABORATORIO VISUAL</span><h3>Volumen censal × prioridad</h3></div><div class="chart-key"><span><i class="key-blue"></i> sector</span><span><i class="key-red"></i> mayor tasa prioritaria</span></div></div>
             <div class="bubble-chart-wrap"><svg id="territoryBubblePlot" class="bubble-chart" viewBox="0 0 1000 420" role="img" aria-label="Dispersión de familias y tasa prioritaria por sector"></svg><div id="bubbleTooltip" class="chart-tooltip" hidden></div></div>
@@ -163,15 +195,40 @@
 
         <!-- VIVIENDA -->
         <section class="view" id="view-vivienda" data-view="vivienda">
-          <div class="page-title-row"><div><span class="eyebrow">VIVIENDA Y AFECTACIÓN</span><h1>Clasificación registrada del inmueble</h1><p>Lectura censal de 432 familias. Las categorías no son totalmente excluyentes.</p></div><div class="mode-switch" id="housingMode"><button class="active" data-mode="pct">%</button><button data-mode="count">N.º</button></div></div>
-          <div class="housing-grid">
-            <article class="panel housing-chart-card"><div class="panel-head"><div><span class="eyebrow">DISTRIBUCIÓN</span><h3>Marcas de estado registradas</h3></div></div><div id="housingBars" class="housing-bars"></div></article>
-            <article class="panel housing-priority-card"><div class="priority-ring"><strong>92</strong><span>no habitable + destruida</span></div><div class="priority-list"><div><span>Evacuadas fuera de residencia</span><b>2</b></div><div><span>Sin clasificación</span><b>40</b></div><div><span>Marcas múltiples</span><b>9</b></div></div><p>Primer universo de verificación prioritaria; no equivale a dictamen estructural.</p></article>
+          <div class="housing-hero-v4">
+            <div class="housing-hero-copy"><span class="eyebrow">VIVIENDA Y AFECTACIÓN</span><div class="housing-script">Del registro censal a la decisión técnica</div><h1>¿Qué nos dice realmente la clasificación de las viviendas?</h1><p>La base contiene marcas declaradas sobre 432 familias. Esta sección separa con claridad <b>estado registrado</b>, <b>necesidad de verificación</b> y <b>brechas que todavía deben corregirse</b>.</p></div>
+            <div class="housing-hero-focus"><small>UNIVERSO INICIAL DE VERIFICACIÓN PRIORITARIA</small><strong>92</strong><span>90 “no habitables” + 2 “destruidas”</span><p>No equivale a un dictamen estructural definitivo.</p></div>
           </div>
-          <div class="dashboard-grid two-one">
-            <article class="panel"><div class="panel-head"><div><span class="eyebrow">INTERPRETACIÓN TÉCNICA</span><h3>Cómo leer cada marca</h3></div></div><div id="housingInterpretation" class="check-list"></div></article>
-            <article class="panel photo-card"><img src="assets/iglesia-afectada.jpg" alt="Daños visibles en torre de iglesia" /><div><span class="eyebrow">VERIFICACIÓN EN CAMPO</span><h3>La marca censal orienta, no certifica.</h3><p id="priorityHousingNarrative"></p></div></article>
+
+          <div id="housingOverviewCards" class="housing-overview-cards"></div>
+
+          <div class="housing-layout-v4">
+            <article class="panel housing-chart-v4">
+              <div class="panel-head"><div><span class="eyebrow">PANORAMA DE 432 FAMILIAS</span><h3>Cada categoría se compara contra la misma base</h3><p>Las categorías no son totalmente excluyentes; por eso se muestran como barras independientes y no como una torta de 100%.</p></div><div class="mode-switch" id="housingMode"><button class="active" data-mode="pct">%</button><button data-mode="count">N.º</button></div></div>
+              <div class="housing-scale-v4" aria-hidden="true"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+              <div id="housingBars" class="housing-bars housing-bars-v4"></div>
+            </article>
+            <article class="panel housing-action-card">
+              <div class="panel-head"><div><span class="eyebrow">LECTURA OPERATIVA</span><h3>De la marca censal a la acción</h3></div></div>
+              <div id="housingActionMatrix" class="housing-action-matrix"></div>
+            </article>
           </div>
+
+          <div class="housing-alert-grid">
+            <article class="housing-alert-card orange"><span>40</span><div><b>Familias sin clasificación</b><p>No pueden priorizarse adecuadamente hasta completar revisión de campo y categoría.</p></div></article>
+            <article class="housing-alert-card violet"><span>9</span><div><b>Registros con marcas múltiples</b><p>Requieren resolver el conflicto y conservar evidencia de la corrección.</p></div></article>
+            <article class="housing-alert-card blue"><span>2</span><div><b>Evacuadas fuera de residencia</b><p>Debe completarse lugar de acogida, composición familiar, fecha y necesidades sectoriales.</p></div></article>
+          </div>
+
+          <div class="housing-detail-layout">
+            <article class="panel housing-meaning-panel"><div class="panel-head"><div><span class="eyebrow">QUÉ SIGNIFICA CADA MARCA</span><h3>Interpretación técnica, sin ambigüedades</h3></div></div><div id="housingInterpretation" class="housing-interpretation-v4"></div></article>
+            <article class="housing-photo-story">
+              <img src="assets/iglesia-afectada.jpg" alt="Daño visible asociado al evento sísmico" />
+              <div class="housing-photo-overlay"><span class="eyebrow">VERIFICACIÓN EN CAMPO</span><h3>La observación visible no reemplaza la evaluación técnica.</h3><p id="priorityHousingNarrative"></p></div>
+            </article>
+          </div>
+
+          <article class="housing-rule-band"><div class="housing-rule-icon">!</div><div><span>REGLA DE LECTURA</span><strong>“Habitable”, “averiada”, “no habitable” y “destruida” son marcas del censo.</strong><p>La seguridad estructural debe validarse con inspección y soportes técnicos. El informe es preliminar operativo.</p></div></article>
         </section>
 
         <!-- POBLACION -->
@@ -263,7 +320,10 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script src="data/report-data.js"></script>
+  <script src="data/map-data.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="app.js"></script>
+  <script src="map.js"></script>
   <script src="experience.js"></script>
 </body>
 </html>

@@ -46,3 +46,11 @@ No requiere Node.js, npm, compilación, base de datos ni frameworks externos.
 - `assets/visual-*.png`: informe visual.
 
 > La “tasa prioritaria” mostrada en el explorador territorial es una métrica calculada por la micropágina para exploración y no una clasificación oficial del informe.
+
+## V4 — mapa territorial y panel de vivienda
+
+- El módulo **Territorio** incorpora un mapa Leaflet/OpenStreetMap con las 25 localizaciones del consolidado, buscador, leyenda, sincronización con filtros, popups y ficha territorial.
+- Los puntos con referencia cartográfica abierta verificable se diferencian visualmente de las **referencias aproximadas**. Estas últimas son sólo una ayuda de navegación y deben reemplazarse por georreferenciación oficial cuando el Municipio disponga de ella.
+- El módulo **Vivienda** fue reestructurado para evitar una lectura errónea: cada barra usa directamente el denominador común de 432 familias (escala 0–100%), porque las categorías del censo no son totalmente excluyentes.
+- El banner de **Resumen** se rediseñó como portada editorial/técnica e incorpora fotografía, sello SITREP, métricas clave, fecha del evento y corte analítico.
+- Para cargar el mapa base y las fuentes web se requiere conexión a Internet en la primera visita. El resto del micrositio y sus activos principales quedan disponibles mediante el service worker.
