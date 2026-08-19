@@ -1,62 +1,55 @@
 <!doctype html>
-<html lang="es" data-theme="dark">
+<html lang="es" data-theme="light">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#052f57" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#066f9f" />
   <meta name="description" content="Micrositio interactivo del informe técnico consolidado RUFE y censo de familias afectadas por el sismo del 10 de agosto de 2026 en San Pedro, Valle del Cauca." />
-  <title>Emergencia Sísmica · San Pedro</title>
+  <title>Emergencia Sísmica · San Pedro · Informe interactivo</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="icon" href="assets/logo-san-pedro.png" />
+  <link rel="icon" href="assets/logo-san-pedro.jpg" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
       <div class="brand-block">
-        <div class="brand-logo-wrap"><img src="assets/logo-san-pedro.png" alt="Alcaldía Municipal de San Pedro" class="brand-logo" /></div>
-        <div class="brand-copy">
-          <span class="brand-overline">Alcaldía Municipal</span>
-          <strong>SAN PEDRO</strong>
-          <span>Valle del Cauca</span>
-        </div>
+        <div class="brand-logo-wrap"><img src="assets/logo-san-pedro.jpg" alt="Escudo de la Alcaldía Municipal de San Pedro" class="brand-logo" /></div>
+        <div class="brand-copy"><span>ALCALDÍA MUNICIPAL</span><strong>SAN PEDRO</strong><small>Valle del Cauca</small></div>
       </div>
-
-      <div class="report-badge">
-        <span class="pulse-dot"></span>
-        <div>
-          <small>Informe técnico consolidado</small>
-          <strong>Emergencia sísmica</strong>
-        </div>
-      </div>
-
-      <nav class="main-nav" aria-label="Navegación principal">
-        <button class="nav-item active" data-route="resumen"><span class="nav-icon">⌂</span><span>Resumen ejecutivo</span><kbd>1</kbd></button>
-        <button class="nav-item" data-route="territorio"><span class="nav-icon">◎</span><span>Explorador territorial</span><kbd>2</kbd></button>
-        <button class="nav-item" data-route="vivienda"><span class="nav-icon">⌂</span><span>Vivienda y afectación</span><kbd>3</kbd></button>
-        <button class="nav-item" data-route="poblacion"><span class="nav-icon">◉</span><span>Caracterización poblacional</span><kbd>4</kbd></button>
-        <button class="nav-item" data-route="calidad"><span class="nav-icon">✓</span><span>Calidad y depuración</span><kbd>5</kbd></button>
-        <button class="nav-item" data-route="metodologia"><span class="nav-icon">↻</span><span>Metodología</span><kbd>6</kbd></button>
-        <button class="nav-item" data-route="prioridades"><span class="nav-icon">!</span><span>Prioridades de respuesta</span><kbd>7</kbd></button>
-        <button class="nav-item" data-route="fuentes"><span class="nav-icon">i</span><span>Fuentes y limitaciones</span><kbd>8</kbd></button>
+      <div class="event-card"><span class="event-dot"></span><div><small>Informe técnico consolidado</small><strong>Emergencia sísmica</strong><span>Corte 18 · AGO · 2026</span></div></div>
+      <nav class="main-nav" aria-label="Secciones del informe">
+        <button class="nav-item active" data-route="resumen"><span class="nav-no">01</span><span><b>Resumen ejecutivo</b><small>Panorama y avance</small></span></button>
+        <button class="nav-item" data-route="territorio"><span class="nav-no">02</span><span><b>Territorio</b><small>25 sectores y filtros</small></span></button>
+        <button class="nav-item" data-route="vivienda"><span class="nav-no">03</span><span><b>Vivienda</b><small>Estado y prioridad</small></span></button>
+        <button class="nav-item" data-route="poblacion"><span class="nav-no">04</span><span><b>Población</b><small>Sexo, edad y ubicación</small></span></button>
+        <button class="nav-item" data-route="calidad"><span class="nav-no">05</span><span><b>Calidad del dato</b><small>Brechas y depuración</small></span></button>
+        <button class="nav-item" data-route="metodologia"><span class="nav-no">06</span><span><b>Metodología</b><small>Flujo y reglas</small></span></button>
+        <button class="nav-item" data-route="normativa"><span class="nav-no">07</span><span><b>Marco normativo</b><small>Ley 1523 · RUFE · RUD</small></span></button>
+        <button class="nav-item" data-route="prioridades"><span class="nav-no">08</span><span><b>Prioridades</b><small>Matriz y conclusiones</small></span></button>
+        <button class="nav-item" data-route="visual"><span class="nav-no">09</span><span><b>Informe visual</b><small>8 piezas gráficas</small></span></button>
+        <button class="nav-item" data-route="documento"><span class="nav-no">10</span><span><b>Documento completo</b><small>PDF · 20 páginas</small></span></button>
       </nav>
-
-      <div class="sidebar-meta">
+      <div class="sidebar-footer">
         <div><span>Evento</span><strong>10 AGO 2026</strong></div>
-        <div><span>Corte</span><strong>18 AGO 2026</strong></div>
+        <div><span>Municipio</span><strong>SAN PEDRO</strong></div>
       </div>
     </aside>
 
     <main class="workspace">
       <header class="topbar">
-        <button class="icon-btn menu-btn" id="menuBtn" aria-label="Abrir menú">☰</button>
-        <div class="breadcrumb">
-          <span>Emergencia Sísmica</span><i>/</i><strong id="routeLabel">Resumen ejecutivo</strong>
+        <button class="icon-btn menu-btn" id="menuBtn" aria-label="Abrir navegación">☰</button>
+        <div class="breadcrumb"><span>Emergencia sísmica</span><i>›</i><strong id="routeLabel">Resumen ejecutivo</strong></div>
+        <div class="global-search-wrap">
+          <span class="search-icon">⌕</span>
+          <input id="globalSearch" type="search" autocomplete="off" placeholder="Buscar sectores, datos, capítulos, hallazgos…" aria-label="Buscar en todo el informe" />
+          <button id="clearGlobalSearch" class="clear-search" type="button" aria-label="Limpiar búsqueda">×</button>
+          <div id="globalSearchResults" class="search-results" hidden></div>
         </div>
         <div class="topbar-actions">
-          <button class="search-trigger" id="searchTrigger"><span>⌕</span><span>Buscar en el informe</span><kbd>Ctrl K</kbd></button>
-          <button class="icon-btn" id="themeToggle" title="Cambiar tema" aria-label="Cambiar tema">☼</button>
-          <button class="icon-btn" id="printBtn" title="Imprimir / guardar PDF" aria-label="Imprimir">⎙</button>
+          <a class="top-link" href="assets/informe-consolidado-18-agosto-2026.pdf" target="_blank" rel="noopener">PDF</a>
+          <button class="icon-btn" id="themeToggle" title="Cambiar tema" aria-label="Cambiar tema">◐</button>
+          <button class="icon-btn" id="printBtn" title="Imprimir vista" aria-label="Imprimir">⎙</button>
         </div>
       </header>
 
@@ -65,195 +58,179 @@
         <section class="view active" id="view-resumen" data-view="resumen">
           <div class="hero-card">
             <div class="hero-copy">
-              <span class="eyebrow">INFORME TÉCNICO CONSOLIDADO · CORTE 18/08/2026</span>
-              <h1>Emergencia <em>sísmica</em><br/>San Pedro, Valle del Cauca</h1>
-              <p>Lectura interactiva del avance del diligenciamiento RUFE y del censo de familias afectadas por el sismo del 10 de agosto de 2026.</p>
+              <div class="hero-kicker"><span class="live-dot"></span> CORTE CONSOLIDADO · 18 DE AGOSTO DE 2026</div>
+              <h1>Emergencia <span>sísmica</span><br>San Pedro, Valle del Cauca</h1>
+              <p>Centro interactivo de información del avance del diligenciamiento RUFE y del censo de familias afectadas por el sismo del 10 de agosto de 2026.</p>
               <div class="hero-actions">
-                <button class="primary-btn" data-route-jump="territorio">Explorar territorios <span>→</span></button>
-                <button class="secondary-btn" id="copySummaryBtn">Copiar resumen ejecutivo</button>
+                <button class="primary-btn" data-route-jump="territorio">Explorar territorio <b>→</b></button>
+                <button class="ghost-btn" data-route-jump="visual">Ver informe visual</button>
+                <a class="ghost-btn" href="assets/informe-consolidado-18-agosto-2026.pdf" target="_blank">Abrir PDF</a>
               </div>
-              <div class="status-strip"><span class="status-icon">!</span><span>Información preliminar y operativa. No sustituye evaluación estructural ni validación oficial del RUD.</span></div>
+              <div class="hero-warning"><b>Información preliminar.</b> Las marcas del censo orientan la respuesta, pero no sustituyen la evaluación técnica estructural ni la validación oficial del RUD.</div>
             </div>
-            <div class="hero-visual">
-              <img src="assets/iglesia-afectada.jpeg" alt="Iglesia afectada por el sismo" class="hero-image hero-main" />
-              <img src="assets/alcaldia.jpeg" alt="Alcaldía Municipal de San Pedro" class="hero-image hero-small" />
-              <div class="hero-date-card"><small>Evento</small><strong>10·08·2026</strong><small>Corte</small><strong>18·08·2026</strong></div>
+            <div class="hero-media">
+              <img src="assets/iglesia-afectada.jpg" alt="Torre de iglesia afectada por el sismo" class="hero-photo main" />
+              <img src="assets/alcaldia.jpg" alt="Edificio de la Alcaldía Municipal de San Pedro" class="hero-photo secondary" />
+              <div class="hero-stamp"><span>EVENTO</span><strong>10 · 08 · 2026</strong><span>CORTE</span><strong>18 · 08 · 2026</strong></div>
             </div>
           </div>
 
-          <div class="section-heading">
-            <div><span class="eyebrow">PANORAMA GENERAL</span><h2>Indicadores de avance</h2></div>
-            <span class="section-note">Base de 432 familias con registro nominal</span>
+          <div class="quick-strip">
+            <button data-route-jump="vivienda"><span class="quick-icon red">!</span><b>92</b><small>casos iniciales de verificación prioritaria</small></button>
+            <button data-route-jump="calidad"><span class="quick-icon amber">✓</span><b>90,7%</b><small>familias con estado del inmueble</small></button>
+            <button data-route-jump="poblacion"><span class="quick-icon violet">●</span><b>462</b><small>personas con enfoque diferencial por edad</small></button>
+            <button data-route-jump="territorio"><span class="quick-icon cyan">◎</span><b>25</b><small>territorios o sectores analizados</small></button>
           </div>
+
+          <div class="section-heading"><div><span class="eyebrow">PANORAMA GENERAL</span><h2>Indicadores del corte</h2></div><span class="section-note">Base nominal · 432 familias</span></div>
           <div class="kpi-grid" id="summaryKpis"></div>
 
           <div class="dashboard-grid two-one">
-            <article class="panel" id="completenessPanel">
-              <div class="panel-head"><div><span class="eyebrow">CALIDAD DE CAPTURA</span><h3>Completitud de campos críticos</h3></div><span class="metric-chip good">avance verificable</span></div>
+            <article class="panel">
+              <div class="panel-head"><div><span class="eyebrow">COMPLETITUD</span><h3>Campos críticos del registro</h3></div><span class="chip success">avance verificable</span></div>
               <div id="completenessBars" class="metric-bars"></div>
             </article>
-            <article class="panel accent-panel">
-              <div class="panel-head"><div><span class="eyebrow">LECTURA CLAVE</span><h3>Qué significa este corte</h3></div></div>
-              <p class="big-quote">“El avance es sustancial, pero el censo aún requiere validación, depuración y cierre documentado por el CMGRD.”</p>
-              <div class="mini-stat-row"><div><strong>40</strong><span>familias sin estado</span></div><div><strong>9</strong><span>marcas múltiples</span></div><div><strong>111</strong><span>núcleos vacíos</span></div></div>
+            <article class="panel signal-panel">
+              <div class="panel-head"><div><span class="eyebrow">SEMÁFORO TÉCNICO</span><h3>Estado del consolidado</h3></div></div>
+              <div id="componentMiniStatus" class="status-stack"></div>
             </article>
           </div>
 
           <div class="dashboard-grid equal">
-            <article class="panel insight-card redline">
-              <span class="insight-icon">!</span><div><span class="eyebrow">ATENCIÓN PRIORITARIA</span><h3>92 registros de vivienda</h3><p>90 “no habitables” y 2 “destruidas” conforman el universo inicial de verificación prioritaria.</p><button class="text-link" data-route-jump="vivienda">Ver afectación de vivienda →</button></div>
-            </article>
-            <article class="panel insight-card teal-line">
-              <span class="insight-icon">◎</span><div><span class="eyebrow">CONCENTRACIÓN TERRITORIAL</span><h3>Centro lidera el volumen</h3><p>74 familias registradas. La concentración de registros no equivale a intensidad sísmica ni severidad del daño.</p><button class="text-link" data-route-jump="territorio">Abrir explorador →</button></div>
-            </article>
-            <article class="panel insight-card purple-line">
-              <span class="insight-icon">◉</span><div><span class="eyebrow">ENFOQUE DIFERENCIAL</span><h3>462 personas priorizables por edad</h3><p>179 menores de edad y 283 personas de 60 años o más requieren una lectura diferenciada de necesidades.</p><button class="text-link" data-route-jump="poblacion">Ver población →</button></div>
-            </article>
+            <article class="panel story-card"><div class="story-accent red"></div><span class="story-number">92</span><h3>Viviendas de mayor prioridad</h3><p>90 marcas “no habitable” y 2 “destruida” constituyen el primer universo de verificación en campo.</p><button class="text-link" data-route-jump="vivienda">Analizar vivienda →</button></article>
+            <article class="panel story-card"><div class="story-accent cyan"></div><span class="story-number">74</span><h3>Centro concentra más registros</h3><p>Es el sector con mayor volumen nominal; el volumen del censo no equivale por sí mismo a intensidad sísmica.</p><button class="text-link" data-route-jump="territorio">Abrir ranking →</button></article>
+            <article class="panel story-card"><div class="story-accent violet"></div><span class="story-number">111</span><h3>Núcleos vacíos por depurar</h3><p>Contarlos como familias produciría una sobreestimación del tamaño real del censo.</p><button class="text-link" data-route-jump="calidad">Revisar brechas →</button></article>
           </div>
+
+          <article class="panel executive-text-panel">
+            <div class="panel-head"><div><span class="eyebrow">RESUMEN EJECUTIVO</span><h3>Lectura completa del informe</h3></div><button class="compact-btn" id="copyExecutive">Copiar resumen</button></div>
+            <div id="executiveSummaryText" class="rich-text columns-2"></div>
+          </article>
         </section>
 
         <!-- TERRITORIO -->
         <section class="view" id="view-territorio" data-view="territorio">
-          <div class="page-title-row">
-            <div><span class="eyebrow">EXPLORADOR TERRITORIAL</span><h1>Segmenta, compara y prioriza sectores</h1><p>Filtra los 25 territorios del censo por volumen de familias, casos de mayor prioridad y brechas de información.</p></div>
-            <div class="title-actions"><button class="secondary-btn" id="exportCsvBtn">Exportar CSV filtrado</button><button class="secondary-btn" id="resetFiltersBtn">Restablecer</button></div>
-          </div>
-
-          <div class="explorer-layout">
-            <aside class="filter-panel panel">
-              <div class="panel-head"><div><span class="eyebrow">SEGMENTACIÓN</span><h3>Filtros</h3></div><span id="filteredCount" class="count-badge">25</span></div>
-              <label class="field"><span>Buscar sector</span><input type="search" id="sectorSearch" placeholder="Ej. Centro, La Puente…" /></label>
-              <label class="field"><span>Ordenar por</span><select id="sortBy"><option value="families-desc">Familias · mayor a menor</option><option value="priority-desc">Casos prioritarios · mayor a menor</option><option value="rate-desc">Tasa prioritaria calculada</option><option value="people-desc">Personas · mayor a menor</option><option value="name-asc">Nombre A–Z</option></select></label>
-              <label class="range-field"><div><span>Mínimo de familias</span><strong id="minFamiliesValue">0</strong></div><input type="range" id="minFamilies" min="0" max="74" value="0" /></label>
-              <label class="range-field"><div><span>Mínimo de casos prioritarios</span><strong id="minPriorityValue">0</strong></div><input type="range" id="minPriority" min="0" max="21" value="0" /></label>
-              <div class="filter-checks">
-                <label><input type="checkbox" id="onlyPriority" /><span>Solo con casos prioritarios</span></label>
-                <label><input type="checkbox" id="onlyDestroyed" /><span>Con vivienda destruida</span></label>
-                <label><input type="checkbox" id="onlyEmpty" /><span>Con núcleos vacíos</span></label>
-                <label><input type="checkbox" id="onlyNoState" /><span>Con registros sin estado</span></label>
-              </div>
-              <div class="filter-help">La <strong>tasa prioritaria</strong> es un indicador exploratorio calculado como (no habitable + destruida) / familias nominales.</div>
-            </aside>
-
-            <div class="explorer-main">
-              <div class="dashboard-grid equal compact-gap">
-                <article class="panel stat-hero"><span>Familias filtradas</span><strong id="filteredFamilies">432</strong><small>de 432 nominales</small></article>
-                <article class="panel stat-hero"><span>Personas filtradas</span><strong id="filteredPeople">1.024</strong><small>registros nominales</small></article>
-                <article class="panel stat-hero danger"><span>Casos prioritarios</span><strong id="filteredPriority">92</strong><small>no habitable + destruida</small></article>
-                <article class="panel stat-hero"><span>Núcleos vacíos</span><strong id="filteredEmpty">111</strong><small>en sectores filtrados</small></article>
-              </div>
-              <article class="panel">
-                <div class="panel-head"><div><span class="eyebrow">RANKING DINÁMICO</span><h3 id="territoryChartTitle">Familias con registro nominal</h3></div><div class="segmented" id="chartMetricSwitch"><button data-metric="families" class="active">Familias</button><button data-metric="priority">Prioridad</button><button data-metric="rate">Tasa</button></div></div>
-                <div id="territoryChart" class="territory-chart"></div>
-              </article>
+          <div class="page-title-row"><div><span class="eyebrow">EXPLORADOR TERRITORIAL</span><h1>25 sectores. Una lectura filtrable.</h1><p>Busca, segmenta, ordena y compara familias, personas, casos prioritarios y brechas por territorio.</p></div><div class="title-actions"><button class="secondary-btn" id="exportCsvBtn">Exportar CSV</button><button class="secondary-btn" id="resetFiltersBtn">Limpiar filtros</button></div></div>
+          <div class="filter-toolbar panel">
+            <label class="field grow"><span>Buscar sector</span><input id="sectorSearch" type="search" placeholder="Centro, La Puente, Todosantos…" /></label>
+            <label class="field"><span>Ordenar</span><select id="sortBy"><option value="families-desc">Familias ↓</option><option value="priority-desc">Prioridad ↓</option><option value="rate-desc">Tasa prioritaria ↓</option><option value="people-desc">Personas ↓</option><option value="name-asc">Nombre A–Z</option></select></label>
+            <label class="range-field"><span>Familias mín. <b id="minFamiliesValue">0</b></span><input id="minFamilies" type="range" min="0" max="74" value="0" /></label>
+            <label class="range-field"><span>Prioridad mín. <b id="minPriorityValue">0</b></span><input id="minPriority" type="range" min="0" max="21" value="0" /></label>
+            <div class="toggle-group">
+              <label><input type="checkbox" id="onlyCritical" /><span>Con casos prioritarios</span></label>
+              <label><input type="checkbox" id="onlyEmpty" /><span>Con núcleos vacíos</span></label>
+              <label><input type="checkbox" id="onlyNoState" /><span>Con registros sin estado</span></label>
             </div>
           </div>
-
-          <article class="panel table-panel">
-            <div class="panel-head"><div><span class="eyebrow">MATRIZ TERRITORIAL</span><h3>Detalle de los sectores</h3></div><span class="section-note">Selecciona hasta 4 sectores para comparar</span></div>
-            <div class="table-wrap"><table id="territoryTable"><thead><tr><th></th><th>Sector</th><th>Familias</th><th>Personas</th><th>No hab.</th><th>Destr.</th><th>Prioridad</th><th>Tasa*</th><th>Sin estado*</th><th>Vacíos</th><th></th></tr></thead><tbody></tbody></table></div>
-            <div class="table-footnote">* Indicador calculado para comparación. “Sin estado” debe interpretarse junto con núcleos vacíos, tal como advierte el informe.</div>
-          </article>
-
-          <article class="compare-panel panel" id="comparePanel" hidden>
-            <div class="panel-head"><div><span class="eyebrow">COMPARADOR</span><h3>Sectores seleccionados</h3></div><button class="text-link" id="clearCompareBtn">Limpiar selección</button></div>
-            <div id="compareGrid" class="compare-grid"></div>
-          </article>
+          <div class="territory-summary" id="territorySummary"></div>
+          <div class="territory-layout">
+            <article class="panel territory-chart-panel"><div class="panel-head"><div><span class="eyebrow">RANKING DINÁMICO</span><h3>Concentración territorial</h3></div><span class="chip" id="filteredCount">25 sectores</span></div><div id="territoryRanking" class="territory-ranking"></div></article>
+            <article class="panel compare-panel"><div class="panel-head"><div><span class="eyebrow">COMPARADOR</span><h3>Hasta 4 sectores</h3></div><button id="clearCompare" class="compact-btn">Vaciar</button></div><div id="compareArea" class="compare-area"></div></article>
+          </div>
+          <article class="panel table-panel"><div class="panel-head"><div><span class="eyebrow">BASE TERRITORIAL COMPLETA</span><h3>Detalle de los 25 sectores</h3></div><small>Haz clic en un sector para abrir su ficha</small></div><div class="table-scroll"><table class="data-table"><thead><tr><th>Sector</th><th>Familias</th><th>Personas</th><th>No hab.</th><th>Destr.</th><th>Prioridad</th><th>Tasa*</th><th>Sin estado</th><th>Núcleos vacíos</th></tr></thead><tbody id="territoryTableBody"></tbody></table></div><p class="footnote">* La tasa prioritaria es una métrica exploratoria calculada por la micropágina: (no habitable + destruida) / familias nominales. No constituye una clasificación oficial del informe.</p></article>
+          <article class="panel narrative-band"><strong>Lectura territorial:</strong><span id="territorialReading"></span></article>
         </section>
 
         <!-- VIVIENDA -->
         <section class="view" id="view-vivienda" data-view="vivienda">
-          <div class="page-title-row">
-            <div><span class="eyebrow">CLASIFICACIÓN REGISTRADA DE LA VIVIENDA</span><h1>Afectación declarada y lectura prioritaria</h1><p>Las categorías corresponden a marcas del censo y no reemplazan la evaluación técnica estructural.</p></div>
+          <div class="page-title-row"><div><span class="eyebrow">VIVIENDA Y AFECTACIÓN</span><h1>Clasificación registrada del inmueble</h1><p>Lectura censal de 432 familias. Las categorías no son totalmente excluyentes.</p></div><div class="mode-switch" id="housingMode"><button class="active" data-mode="pct">%</button><button data-mode="count">N.º</button></div></div>
+          <div class="housing-grid">
+            <article class="panel housing-chart-card"><div class="panel-head"><div><span class="eyebrow">DISTRIBUCIÓN</span><h3>Marcas de estado registradas</h3></div></div><div id="housingBars" class="housing-bars"></div></article>
+            <article class="panel housing-priority-card"><div class="priority-ring"><strong>92</strong><span>no habitable + destruida</span></div><div class="priority-list"><div><span>Evacuadas fuera de residencia</span><b>2</b></div><div><span>Sin clasificación</span><b>40</b></div><div><span>Marcas múltiples</span><b>9</b></div></div><p>Primer universo de verificación prioritaria; no equivale a dictamen estructural.</p></article>
           </div>
           <div class="dashboard-grid two-one">
-            <article class="panel housing-panel">
-              <div class="panel-head"><div><span class="eyebrow">DISTRIBUCIÓN</span><h3>Estado registrado sobre 432 familias</h3></div><div class="segmented" id="housingMode"><button class="active" data-mode="pct">%</button><button data-mode="count">N</button></div></div>
-              <div class="housing-viz"><div class="donut housing-donut" id="housingDonut"><div class="donut-center"><strong>432</strong><span>familias</span></div></div><div id="housingLegend" class="housing-legend"></div></div>
-            </article>
-            <article class="panel priority-card">
-              <span class="eyebrow">LECTURA PRIORITARIA</span>
-              <div class="priority-big"><strong>92</strong><span>No habitable + destruida</span></div>
-              <div class="priority-list"><div><span>Evacuadas fuera de residencia</span><strong>2</strong></div><div><span>Sin clasificación</span><strong>40</strong></div><div><span>Marcas múltiples</span><strong>9</strong></div></div>
-              <div class="warning-box"><strong>Verificación técnica</strong><p>La marca censal orienta la focalización, pero no constituye certificación de habitabilidad o seguridad estructural.</p></div>
-            </article>
-          </div>
-          <div class="photo-story">
-            <img src="assets/iglesia-afectada.jpeg" alt="Daños visibles en edificación" />
-            <div class="photo-overlay"><span class="eyebrow">CONTEXTO VISUAL</span><h3>La afectación visible exige validación, documentación y trazabilidad</h3><p>El informe recomienda priorizar “no habitable” y “destruida” por riesgo para la vida, presencia de población diferencial, exposición a réplicas o amenazas concatenadas, condición de alojamiento y redes de apoyo.</p></div>
+            <article class="panel"><div class="panel-head"><div><span class="eyebrow">INTERPRETACIÓN TÉCNICA</span><h3>Cómo leer cada marca</h3></div></div><div id="housingInterpretation" class="check-list"></div></article>
+            <article class="panel photo-card"><img src="assets/iglesia-afectada.jpg" alt="Daños visibles en torre de iglesia" /><div><span class="eyebrow">VERIFICACIÓN EN CAMPO</span><h3>La marca censal orienta, no certifica.</h3><p id="priorityHousingNarrative"></p></div></article>
           </div>
         </section>
 
         <!-- POBLACION -->
         <section class="view" id="view-poblacion" data-view="poblacion">
-          <div class="page-title-row"><div><span class="eyebrow">CARACTERIZACIÓN POBLACIONAL</span><h1>Perfil demográfico de la población registrada</h1><p>1.024 registros nominales de personas, con lectura por sexo y ciclo de vida.</p></div></div>
-          <div class="dashboard-grid equal">
-            <article class="panel demographic-kpi pink"><span>Mujeres</span><strong>566</strong><small>55,3%</small></article>
-            <article class="panel demographic-kpi blue"><span>Hombres</span><strong>450</strong><small>43,9%</small></article>
-            <article class="panel demographic-kpi orange"><span>Niñas, niños y adolescentes</span><strong>179</strong><small>17,5%</small></article>
-            <article class="panel demographic-kpi green"><span>60 años o más</span><strong>283</strong><small>27,6%</small></article>
-          </div>
+          <div class="page-title-row"><div><span class="eyebrow">CARACTERIZACIÓN POBLACIONAL</span><h1>Personas registradas y enfoque diferencial</h1><p>Distribución por sexo, ciclo de vida y ubicación declarada de las familias.</p></div></div>
+          <div class="demographic-grid" id="demographicKpis"></div>
           <div class="dashboard-grid two-one">
-            <article class="panel"><div class="panel-head"><div><span class="eyebrow">CICLO DE VIDA</span><h3>Distribución por grupos de edad</h3></div></div><div id="ageChart" class="age-chart"></div></article>
-            <article class="panel"><div class="panel-head"><div><span class="eyebrow">UBICACIÓN DECLARADA</span><h3>Urbana / rural</h3></div></div><div id="locationChart" class="ring-stat"></div><div class="data-note">Entre las 432 familias nominales: 225 rural, 129 urbana y 78 sin dato homologable. Los 111 núcleos vacíos se mantienen separados.</div></article>
+            <article class="panel"><div class="panel-head"><div><span class="eyebrow">CICLO DE VIDA</span><h3>Distribución de las 1.024 personas registradas</h3></div></div><div id="ageChart" class="age-chart"></div></article>
+            <article class="panel"><div class="panel-head"><div><span class="eyebrow">SEXO REGISTRADO</span><h3>Distribución nominal</h3></div></div><div id="sexChart" class="donut-layout"></div></article>
           </div>
-          <article class="panel differential-panel"><div class="differential-icon">◉</div><div><span class="eyebrow">ENFOQUE DIFERENCIAL</span><h3>La edad modifica la forma de priorizar la respuesta</h3><p>La presencia de 179 menores de edad y 283 personas de 60 años o más debe orientar alojamiento, asistencia humanitaria, salud, acompañamiento y programación de verificaciones.</p></div></article>
+          <div class="dashboard-grid equal-2">
+            <article class="panel"><div class="panel-head"><div><span class="eyebrow">UBICACIÓN DECLARADA</span><h3>Urbana, rural y sin dato homologable</h3></div></div><div id="locationChart" class="location-chart"></div></article>
+            <article class="panel focus-card"><span class="focus-number">462</span><h3>Personas con enfoque diferencial por edad</h3><p><b>179</b> niñas, niños y adolescentes y <b>283</b> personas de 60 años o más. Estos grupos deben considerarse en alojamiento, ayuda humanitaria, salud, redes de apoyo y programación de visitas.</p></article>
+          </div>
         </section>
 
         <!-- CALIDAD -->
         <section class="view" id="view-calidad" data-view="calidad">
-          <div class="page-title-row"><div><span class="eyebrow">CALIDAD Y DEPURACIÓN</span><h1>Brechas de información antes del cierre oficial</h1><p>Cada hallazgo tiene un riesgo para la decisión y un tratamiento recomendado por el informe.</p></div><label class="inline-search"><span>⌕</span><input type="search" id="qualitySearch" placeholder="Filtrar hallazgos…" /></label></div>
-          <div class="quality-grid" id="qualityGrid"></div>
-          <article class="panel quality-principles"><div><span class="eyebrow">PRINCIPIOS DE ASEGURAMIENTO</span><h3>Reglas mínimas para una base trazable</h3></div><div class="principle-grid" id="qualityPrinciples"></div></article>
+          <div class="page-title-row"><div><span class="eyebrow">CALIDAD Y DEPURACIÓN</span><h1>Brechas que condicionan el cierre oficial</h1><p>Identifica inconsistencias, su riesgo para la decisión y el tratamiento recomendado.</p></div><label class="inline-search"><span>⌕</span><input id="qualitySearch" type="search" placeholder="Filtrar hallazgos…" /></label></div>
+          <div class="quality-topline" id="qualityTopline"></div>
+          <div id="qualityGrid" class="quality-grid"></div>
+          <div class="dashboard-grid two-one">
+            <article class="panel"><div class="panel-head"><div><span class="eyebrow">ESTADO POR COMPONENTE</span><h3>Avance verificable y estado técnico</h3></div></div><div id="componentStatusTable" class="component-status-table"></div></article>
+            <article class="panel"><div class="panel-head"><div><span class="eyebrow">ASEGURAMIENTO DE CALIDAD</span><h3>Reglas mínimas</h3></div></div><div id="qualityPrinciples" class="check-list compact"></div></article>
+          </div>
         </section>
 
         <!-- METODOLOGIA -->
         <section class="view" id="view-metodologia" data-view="metodologia">
-          <div class="page-title-row"><div><span class="eyebrow">METODOLOGÍA DE CONSOLIDACIÓN</span><h1>Del RUFE territorial al corte oficial</h1><p>Flujo técnico recomendado para control de calidad, depuración, validación y seguimiento.</p></div></div>
-          <div class="method-layout">
-            <article class="panel timeline-panel"><div id="methodTimeline" class="method-timeline"></div></article>
-            <article class="panel"><div class="panel-head"><div><span class="eyebrow">REGLAS APLICADAS</span><h3>Criterios utilizados en la consolidación</h3></div></div><ol id="appliedRules" class="rules-list"></ol></article>
+          <div class="page-title-row"><div><span class="eyebrow">METODOLOGÍA DE CONSOLIDACIÓN</span><h1>De la captura territorial al corte oficial</h1><p>Flujo técnico, reglas de depuración, objeto y alcance del informe.</p></div></div>
+          <div class="method-flow" id="methodTimeline"></div>
+          <div class="dashboard-grid two-one">
+            <article class="panel"><div class="panel-head"><div><span class="eyebrow">REGLAS APLICADAS</span><h3>Decisiones de consolidación</h3></div></div><ol id="appliedRules" class="number-list"></ol></article>
+            <article class="panel objective-card"><span class="eyebrow">OBJETO DEL INFORME</span><h3>Qué busca consolidar</h3><p id="objectiveText"></p></article>
           </div>
-          <article class="panel methodology-callout"><strong>Regla de lectura:</strong><span>Las categorías del inmueble se conservaron tal como fueron marcadas, sin imponer una jerarquía no contenida en la fuente.</span></article>
+          <div class="dashboard-grid equal-2">
+            <article class="panel"><div class="panel-head"><div><span class="eyebrow">ALCANCE</span><h3>Qué incluye el análisis</h3></div></div><div id="scopeList" class="check-list"></div></article>
+            <article class="panel"><div class="panel-head"><div><span class="eyebrow">LIMITACIONES TÉCNICAS</span><h3>Qué no debe inferirse</h3></div></div><div id="methodLimitations" class="warning-list"></div></article>
+          </div>
+        </section>
+
+        <!-- NORMATIVA -->
+        <section class="view" id="view-normativa" data-view="normativa">
+          <div class="page-title-row"><div><span class="eyebrow">CONTEXTO Y MARCO NORMATIVO</span><h1>Gobernanza, validación y trazabilidad</h1><p>Contexto del evento, aplicación de la Ley 1523 de 2012 y relación RUFE–RUD.</p></div></div>
+          <div class="context-hero panel"><div><span class="eyebrow">CONTEXTO DEL EVENTO</span><h3>Sismo del 10 de agosto de 2026</h3><p id="eventContext"></p></div><div class="context-stat"><small>Magnitud reportada</small><strong>7,4</strong><span>Epicentro: San José del Palmar, Chocó</span></div></div>
+          <article class="panel table-panel"><div class="panel-head"><div><span class="eyebrow">LEY 1523 DE 2012</span><h3>Aplicación al consolidado RUFE</h3></div></div><div class="table-scroll"><table class="data-table normative-table"><thead><tr><th>Eje normativo</th><th>Aplicación al consolidado</th></tr></thead><tbody id="regulatoryTable"></tbody></table></div></article>
+          <div class="dashboard-grid equal-2">
+            <article class="panel info-card"><span class="eyebrow">RUFE</span><h3>Registro operativo de emergencia</h3><p id="rufeRudText"></p></article>
+            <article class="panel info-card accent"><span class="eyebrow">VALIDACIÓN INSTITUCIONAL</span><h3>El censo no equivale al RUD definitivo</h3><p>La consolidación oficial requiere coordinación territorial, soportes, control de calidad, validación del CMGRD y las condiciones administrativas aplicables para el cargue y cierre.</p></article>
+          </div>
         </section>
 
         <!-- PRIORIDADES -->
         <section class="view" id="view-prioridades" data-view="prioridades">
-          <div class="page-title-row"><div><span class="eyebrow">PRIORIDADES DE RESPUESTA</span><h1>Acciones recomendadas a partir del censo</h1><p>Ruta propuesta para convertir la información censal en verificación, atención y cierre trazable.</p></div></div>
-          <div class="priority-actions" id="priorityActions"></div>
-          <article class="panel matrix-panel"><div class="panel-head"><div><span class="eyebrow">MATRIZ DE PRIORIZACIÓN PROPUESTA</span><h3>Niveles, criterios verificables y acción</h3></div></div><div id="priorityMatrix" class="matrix-grid"></div></article>
-          <div class="next-milestone"><span>✓</span><div><strong>Siguiente hito</strong><p>Sesión documentada del CMGRD que apruebe reglas de depuración, distribuya verificaciones y adopte un corte oficial trazable.</p></div></div>
+          <div class="page-title-row"><div><span class="eyebrow">PRIORIDADES DE RESPUESTA</span><h1>Del dato a la acción institucional</h1><p>Acciones recomendadas, matriz de priorización y conclusiones del corte.</p></div></div>
+          <div id="priorityActions" class="priority-actions"></div>
+          <div class="section-heading"><div><span class="eyebrow">MATRIZ PROPUESTA</span><h2>Priorización operacional</h2></div></div>
+          <div id="priorityMatrix" class="priority-matrix"></div>
+          <article class="panel next-step"><div class="next-icon">✓</div><div><span class="eyebrow">SIGUIENTE HITO</span><h3>Sesión documentada del CMGRD</h3><p>Aprobar reglas de depuración, distribuir verificaciones y adoptar un corte oficial trazable.</p></div></article>
+          <article class="panel"><div class="panel-head"><div><span class="eyebrow">CONCLUSIONES</span><h3>Siete conclusiones del informe</h3></div></div><div id="conclusionsList" class="conclusion-grid"></div></article>
         </section>
 
-        <!-- FUENTES -->
-        <section class="view" id="view-fuentes" data-view="fuentes">
-          <div class="page-title-row"><div><span class="eyebrow">FUENTES, ALCANCE Y LIMITACIONES</span><h1>Cómo debe interpretarse esta micropágina</h1><p>El sitio visualiza el contenido del informe técnico consolidado y preserva sus advertencias metodológicas.</p></div></div>
-          <div class="dashboard-grid two-one">
-            <article class="panel"><span class="eyebrow">DOCUMENTO BASE</span><h3>Informe técnico consolidado</h3><div class="source-card"><img src="assets/logo-san-pedro.png" alt="Logo institucional"/><div><strong>Avance del diligenciamiento RUFE y censo de familias afectadas</strong><span>Sismo del 10 de agosto de 2026</span><span>Corte analítico: 18 de agosto de 2026</span><span>Municipio: San Pedro, Valle del Cauca</span></div></div><div class="source-note">Esta micropágina no modifica las cifras, categorías ni advertencias técnicas del documento fuente.</div></article>
-            <article class="panel"><span class="eyebrow">CARÁCTER</span><h3>Preliminar operativo</h3><p class="big-quote small">No sustituye evaluación estructural, acto administrativo ni validación oficial del RUD.</p></article>
+        <!-- VISUAL -->
+        <section class="view" id="view-visual" data-view="visual">
+          <div class="page-title-row"><div><span class="eyebrow">INFORME VISUAL</span><h1>8 piezas gráficas del consolidado</h1><p>Selecciona una pieza para verla en gran formato. La galería no bloquea la navegación.</p></div><div class="title-actions"><a class="secondary-btn link-btn" href="assets/informe-consolidado-18-agosto-2026.pdf" target="_blank">Documento fuente</a></div></div>
+          <div class="visual-layout">
+            <aside id="visualThumbs" class="visual-thumbs"></aside>
+            <article class="panel visual-stage"><div class="visual-stage-head"><div><span class="eyebrow" id="visualCategory">PRESENTACIÓN</span><h3 id="visualTitle">Portada — Emergencia sísmica</h3></div><a id="visualOpenLink" class="compact-btn link-btn" href="assets/visual-01-portada.png" target="_blank">Abrir imagen</a></div><img id="visualMainImage" src="assets/visual-01-portada.png" alt="Pieza visual del informe" /></article>
           </div>
-          <article class="panel"><div class="panel-head"><div><span class="eyebrow">LIMITACIONES TÉCNICAS</span><h3>Aspectos que condicionan la lectura</h3></div></div><div id="limitationsList" class="limitations-list"></div></article>
-          <article class="panel"><div class="panel-head"><div><span class="eyebrow">NOTA SOBRE INDICADORES DERIVADOS</span><h3>Cálculos interactivos de la micropágina</h3></div></div><p>La “tasa prioritaria” del explorador territorial es un cálculo auxiliar de interfaz: <strong>(no habitable + destruida) / familias nominales</strong>. No aparece como nivel oficial de riesgo en el informe y no debe sustituir la matriz de priorización propuesta ni la evaluación técnica en campo.</p></article>
+        </section>
+
+        <!-- DOCUMENTO -->
+        <section class="view" id="view-documento" data-view="documento">
+          <div class="page-title-row"><div><span class="eyebrow">DOCUMENTO COMPLETO</span><h1>Informe técnico consolidado · 20 páginas</h1><p>Consulta el PDF original y navega por el índice temático sin salir de la micropágina.</p></div><div class="title-actions"><a class="primary-btn link-btn" href="assets/informe-consolidado-18-agosto-2026.pdf" download>Descargar PDF</a></div></div>
+          <div class="document-layout">
+            <aside class="panel document-index"><div class="panel-head"><div><span class="eyebrow">ÍNDICE</span><h3>20 páginas</h3></div></div><label class="inline-search full"><span>⌕</span><input id="pageIndexSearch" type="search" placeholder="Buscar tema en el documento…" /></label><div id="pageIndex" class="page-index"></div></aside>
+            <article class="pdf-panel"><iframe id="pdfFrame" title="Informe técnico consolidado" src="about:blank" data-src="assets/informe-consolidado-18-agosto-2026.pdf#page=1&view=FitH"></iframe></article>
+          </div>
+          <div class="dashboard-grid equal-2">
+            <article class="panel"><div class="panel-head"><div><span class="eyebrow">ANEXO A</span><h3>Ficha de indicadores consolidados</h3></div></div><div class="table-scroll"><table class="data-table"><thead><tr><th>Dimensión</th><th>Indicador</th><th>Valor</th></tr></thead><tbody id="annexTable"></tbody></table></div></article>
+            <article class="panel"><div class="panel-head"><div><span class="eyebrow">CONTROL DOCUMENTAL</span><h3>Responsables y aprobación</h3></div></div><div id="documentControl" class="signature-stack"></div><div class="contact-box" id="contactBox"></div></article>
+          </div>
         </section>
       </div>
     </main>
   </div>
 
-  <div class="command-overlay" id="commandOverlay" hidden>
-    <div class="command-modal">
-      <div class="command-input-wrap"><span>⌕</span><input id="commandInput" type="search" placeholder="Busca una sección, territorio o hallazgo…" autocomplete="off" /><kbd>ESC</kbd></div>
-      <div class="command-results" id="commandResults"></div>
-      <div class="command-footer"><span>↑↓ navegar</span><span>↵ abrir</span><span>Ctrl K buscar</span></div>
-    </div>
-  </div>
-
-  <aside class="drawer" id="sectorDrawer" aria-hidden="true">
-    <div class="drawer-head"><div><span class="eyebrow">FICHA TERRITORIAL</span><h2 id="drawerTitle">Sector</h2></div><button class="icon-btn" id="drawerClose">×</button></div>
-    <div id="drawerBody" class="drawer-body"></div>
-  </aside>
-  <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
-
-  <div class="toast" id="toast" hidden></div>
+  <aside id="sectorDrawer" class="sector-drawer" aria-hidden="true"><button id="drawerClose" class="drawer-close" aria-label="Cerrar ficha">×</button><div id="drawerContent"></div></aside>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script src="data/report-data.js"></script>
   <script src="app.js"></script>

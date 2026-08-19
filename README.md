@@ -1,54 +1,42 @@
-# Emergencia Sísmica · San Pedro — Micropágina interactiva
+# Emergencia Sísmica · San Pedro — Micrositio interactivo v2
 
-Micrositio estático, sin dependencias y compatible con **GitHub Pages**. Visualiza el Informe técnico consolidado del avance RUFE y censo de familias afectadas por el sismo del 10 de agosto de 2026, con corte al 18 de agosto de 2026.
+Micrositio estático para GitHub Pages basado en el **Informe Técnico Consolidado — Avance del diligenciamiento RUFE y censo de familias afectadas**, corte **18 de agosto de 2026**.
 
-## Funcionalidades
+## Qué contiene
 
-- Navegación SPA por hash, sin framework y sin proceso de build.
-- Explorador territorial con búsqueda, filtros, ordenamiento y segmentación.
-- Comparador de hasta 4 sectores.
-- Ficha lateral por territorio.
-- Exportación CSV de la vista filtrada.
-- Indicadores, barras, anillos y gráficas construidas en HTML/CSS/JS puro.
-- Módulos de vivienda, población, calidad, metodología, prioridades y fuentes.
-- Buscador global / paleta de comandos con `Ctrl + K`.
-- Atajos `1` a `8` para navegación.
-- Tema claro/oscuro.
-- Impresión / guardar como PDF desde el navegador.
-- PWA básica con service worker para navegación offline después de la primera carga.
-- Responsive para escritorio, tablet y móvil.
-
-## Estructura
-
-```text
-san-pedro-sismo-microsite/
-├── index.html
-├── styles.css
-├── app.js
-├── manifest.json
-├── service-worker.js
-├── 404.html
-├── data/
-│   └── report-data.js
-└── assets/
-    ├── logo-san-pedro.png
-    ├── iglesia-afectada.jpeg
-    └── alcaldia.jpeg
-```
+- Resumen ejecutivo y KPIs.
+- Completitud de campos críticos y estado por componente.
+- Explorador territorial de los **25 sectores**, con búsqueda, rangos, filtros, ordenamiento, tabla, ranking, comparador y exportación CSV.
+- Clasificación registrada de vivienda y lectura prioritaria.
+- Caracterización poblacional por sexo, ciclo de vida y ubicación declarada.
+- Calidad y depuración de datos con los nueve hallazgos del informe.
+- Objeto, alcance, limitaciones, metodología y reglas aplicadas.
+- Contexto del evento, Ley 1523 de 2012, RUFE y RUD.
+- Prioridades, matriz de priorización y conclusiones.
+- Galería de 8 piezas visuales institucionales.
+- PDF original de 20 páginas integrado con índice navegable.
+- Anexo de indicadores y control documental.
+- Buscador global **no modal**: nunca bloquea la página.
+- Tema claro/oscuro, responsive, impresión, PWA y cache offline progresivo.
 
 ## Publicar en GitHub Pages
 
-1. Crea un repositorio nuevo en GitHub, por ejemplo `emergencia-sismica-san-pedro`.
-2. Sube **todo el contenido de esta carpeta a la raíz del repositorio**.
-3. En GitHub ve a **Settings → Pages**.
-4. En **Build and deployment**, elige **Deploy from a branch**.
+1. Crea un repositorio nuevo en GitHub.
+2. Sube **todo el contenido de esta carpeta** a la raíz del repositorio.
+3. En GitHub abre `Settings` → `Pages`.
+4. En `Build and deployment`, selecciona `Deploy from a branch`.
 5. Selecciona la rama `main` y la carpeta `/ (root)`.
-6. Guarda. GitHub publicará el sitio en la URL de Pages del repositorio.
+6. Guarda. GitHub publicará la URL del micrositio.
 
-No requiere npm, Node, React, Vite ni CDN externos.
+No requiere Node.js, npm, compilación, base de datos ni frameworks externos.
 
-## Fuente y precisión
+## Archivos principales
 
-Las cifras y textos del sitio se derivan del informe técnico consolidado suministrado. La micropágina mantiene la advertencia de que la información es preliminar y no sustituye evaluación estructural ni validación oficial del RUD.
+- `index.html`: estructura y módulos.
+- `styles.css`: diseño visual responsive.
+- `app.js`: navegación, filtros, búsqueda, comparación, exportación y visualizaciones.
+- `data/report-data.js`: datos estructurados del informe.
+- `assets/informe-consolidado-18-agosto-2026.pdf`: documento fuente.
+- `assets/visual-*.png`: informe visual.
 
-La **tasa prioritaria** del explorador territorial es un cálculo auxiliar de interfaz: `(no habitable + destruida) / familias nominales`. Se presenta explícitamente como indicador exploratorio y no como nivel oficial de riesgo.
+> La “tasa prioritaria” mostrada en el explorador territorial es una métrica calculada por la micropágina para exploración y no una clasificación oficial del informe.

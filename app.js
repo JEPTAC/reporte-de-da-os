@@ -1,317 +1,297 @@
 (() => {
   'use strict';
-
   const D = window.REPORT_DATA;
-  const $ = (sel, root=document) => root.querySelector(sel);
-  const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
-  const fmt = n => Number(n).toLocaleString('es-CO');
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+  const fmt = n => new Intl.NumberFormat('es-CO').format(n);
   const pct = n => `${Number(n).toFixed(1).replace('.', ',')}%`;
-  const esc = s => String(s).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c]));
-
+  const esc = s => String(s).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const colors = {green:'#2e9d58',orange:'#f27b16',red:'#e53d48',darkred:'#8f1826',blue:'#1269d3',gray:'#93a5b3',violet:'#6946c8',teal:'#009c8c',magenta:'#c62e72',amber:'#ffb51b',cyan:'#08a7c7'};
   const routeNames = {
-    resumen:'Resumen ejecutivo', territorio:'Explorador territorial', vivienda:'Vivienda y afectación',
-    poblacion:'Caracterización poblacional', calidad:'Calidad y depuración', metodologia:'Metodología',
-    prioridades:'Prioridades de respuesta', fuentes:'Fuentes y limitaciones'
+    resumen:'Resumen ejecutivo', territorio:'Territorio', vivienda:'Vivienda', poblacion:'Población', calidad:'Calidad del dato', metodologia:'Metodología', normativa:'Marco normativo', prioridades:'Prioridades', visual:'Informe visual', documento:'Documento completo'
   };
-
-  let currentRoute = 'resumen';
-  let territoryMetric = 'families';
-  let selectedSectors = new Set();
-  let filteredTerritories = [...D.territories];
-
-  const colors = {
-    green:'#29945b', orange:'#f2a31e', red:'#d8393f', darkred:'#8d1e27', blue:'#0b6fc2', gray:'#9aa8b6',
-    teal:'#0a918b', purple:'#6347b8', cyan:'#08a9c5', pink:'#cf2f72'
-  };
+  let activeRoute='resumen';
+  let selectedSectors=new Set();
+  let filteredTerritories=[...D.territories];
+  let currentVisual=0;
+  let toastTimer;
 
   function toast(msg){
-    const el = $('#toast');
-    el.textContent = msg; el.hidden = false;
-    clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, 2400);
+    const el=$('#toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),2600);
   }
 
-  function setRoute(route, updateHash=true){
-    if (!routeNames[route]) route = 'resumen';
-    currentRoute = route;
-    $$('.view').forEach(v => v.classList.toggle('active', v.dataset.view === route));
-    $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.route === route));
-    $('#routeLabel').textContent = routeNames[route];
-    if (updateHash) history.replaceState(null, '', `#${route}`);
-    window.scrollTo({top:0, behavior:'smooth'});
+  function setRoute(route, {scroll=true}={}){
+    if(!routeNames[route]) return;
+    activeRoute=route;
+    $$('.view').forEach(v=>v.classList.toggle('active',v.dataset.view===route));
+    $$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.route===route));
+    $('#routeLabel').textContent=routeNames[route];
     $('#sidebar').classList.remove('open');
+    if(scroll) window.scrollTo({top:0,behavior:'smooth'});
+    history.replaceState(null,'',`#${route}`);
+    if(route==='documento'){ const f=$('#pdfFrame'); if(f && (f.src.endsWith('about:blank') || f.getAttribute('src')==='about:blank')) f.src=f.dataset.src; }
   }
 
   function initNavigation(){
-    $$('.nav-item').forEach(btn => btn.addEventListener('click', () => setRoute(btn.dataset.route)));
-    $$('[data-route-jump]').forEach(btn => btn.addEventListener('click', () => setRoute(btn.dataset.routeJump)));
-    window.addEventListener('hashchange', () => setRoute(location.hash.slice(1), false));
-    const start = location.hash.slice(1) || 'resumen'; setRoute(start, false);
-    $('#menuBtn').addEventListener('click', () => $('#sidebar').classList.toggle('open'));
+    $$('.nav-item').forEach(b=>b.addEventListener('click',()=>setRoute(b.dataset.route)));
+    $$('[data-route-jump]').forEach(b=>b.addEventListener('click',()=>setRoute(b.dataset.routeJump)));
+    $('#menuBtn').addEventListener('click',()=>$('#sidebar').classList.toggle('open'));
+    const hash=location.hash.replace('#',''); if(routeNames[hash]) setRoute(hash,{scroll:false});
   }
 
   function renderSummary(){
-    const kpis = [
-      ['Familias con registro nominal', D.kpis.families, 'Núcleos con ≥1 persona', '#29945b'],
-      ['Registros nominales', D.kpis.nominalPeople, 'Personas registradas', '#0b6fc2'],
-      ['Personas únicas estimadas', D.kpis.uniquePeopleEstimated, 'Cifra técnica provisional', '#0a918b'],
-      ['Territorios / sectores', D.kpis.territories, 'Hojas territoriales únicas', '#6347b8'],
-      ['Núcleos preenumerados vacíos', D.kpis.emptyPreEnumerated, 'Requieren depuración', '#f2a31e']
+    const kpis=[
+      ['432','Familias con registro nominal','100% familias nominadas','#2e9d58'],
+      ['1.024','Registros nominales de personas','Base operativa','#1269d3'],
+      ['1.001','Personas únicas estimadas','Cifra técnica provisional','#08a7c7'],
+      ['25','Territorios / sectores','Hojas territoriales únicas','#6946c8'],
+      ['392','Familias con estado','90,7% de completitud','#009c8c'],
+      ['111','Núcleos preenumerados vacíos','Requieren depuración','#f27b16']
     ];
-    $('#summaryKpis').innerHTML = kpis.map(([label,val,small,color]) => `
-      <article class="kpi-card" style="--kpi-color:${color}">
-        <div class="kpi-top"><span class="kpi-label">${esc(label)}</span><span aria-hidden="true">●</span></div>
-        <strong>${fmt(val)}</strong><small>${esc(small)}</small>
-      </article>`).join('');
-    $('#completenessBars').innerHTML = D.completeness.map(x => `
-      <div class="metric-row"><label>${esc(x.label)}</label><div class="track"><div class="fill" style="width:${x.value}%"></div></div><strong>${pct(x.value)}</strong></div>`).join('');
+    $('#summaryKpis').innerHTML=kpis.map(([v,l,s,c])=>`<article class="kpi-card" style="--tone:${c}"><span>${esc(l)}</span><strong>${v}</strong><small>${esc(s)}</small></article>`).join('');
+    $('#completenessBars').innerHTML=D.completeness.map(x=>`<div class="metric-row"><label>${esc(x.label)}<small style="display:block;color:var(--muted);font-size:8px">${fmt(x.numerator)} / ${fmt(x.denominator)} ${esc(x.basis)}</small></label><div class="bar-track"><div class="bar-fill" style="width:${x.value}%"></div></div><strong>${pct(x.value)}</strong></div>`).join('');
+    $('#componentMiniStatus').innerHTML=D.componentStatus.slice(0,5).map(x=>`<div class="status-row"><i class="status-dot" style="--tone:${statusColor(x.tone)}"></i><div><b>${esc(x.component)}</b><small>${esc(x.progress)}</small></div><small>${esc(x.status.split(';')[0])}</small></div>`).join('');
+    $('#executiveSummaryText').innerHTML=D.executiveSummary.map(p=>`<p>${esc(p)}</p>`).join('');
   }
+  function statusColor(t){ return ({amber:colors.amber,blue:colors.blue,violet:colors.violet,red:colors.red,teal:colors.teal})[t]||colors.cyan; }
 
-  function getTerritoryFilters(){
+  function priorityCount(t){return t.noHab+t.destroyed}
+  function priorityRate(t){return t.families ? priorityCount(t)/t.families*100 : 0}
+
+  function territoryState(){
     return {
-      q: $('#sectorSearch').value.trim().toLowerCase(),
-      sort: $('#sortBy').value,
-      minFamilies: +$('#minFamilies').value,
-      minPriority: +$('#minPriority').value,
-      onlyPriority: $('#onlyPriority').checked,
-      onlyDestroyed: $('#onlyDestroyed').checked,
-      onlyEmpty: $('#onlyEmpty').checked,
-      onlyNoState: $('#onlyNoState').checked
+      q:$('#sectorSearch').value.trim().toLowerCase(), sort:$('#sortBy').value,
+      minFamilies:+$('#minFamilies').value, minPriority:+$('#minPriority').value,
+      onlyCritical:$('#onlyCritical').checked, onlyEmpty:$('#onlyEmpty').checked, onlyNoState:$('#onlyNoState').checked
     };
   }
-
-  function priorityCount(t){ return t.noHab + t.destroyed; }
-  function priorityRate(t){ return t.families ? (priorityCount(t) / t.families * 100) : 0; }
-
-  function applyTerritoryFilters(){
-    const f = getTerritoryFilters();
-    let arr = D.territories.filter(t => {
-      const p = priorityCount(t);
-      return (!f.q || t.sector.toLowerCase().includes(f.q)) &&
-        t.families >= f.minFamilies && p >= f.minPriority &&
-        (!f.onlyPriority || p > 0) && (!f.onlyDestroyed || t.destroyed > 0) &&
-        (!f.onlyEmpty || t.empty > 0) && (!f.onlyNoState || t.noState > 0);
+  function filterTerritories(){
+    const s=territoryState();
+    filteredTerritories=D.territories.filter(t=>{
+      if(s.q && !t.sector.toLowerCase().includes(s.q)) return false;
+      if(t.families<s.minFamilies || priorityCount(t)<s.minPriority) return false;
+      if(s.onlyCritical && priorityCount(t)===0) return false;
+      if(s.onlyEmpty && t.empty===0) return false;
+      if(s.onlyNoState && t.noState===0) return false;
+      return true;
     });
-    const sorters = {
-      'families-desc': (a,b)=>b.families-a.families,
-      'priority-desc': (a,b)=>priorityCount(b)-priorityCount(a),
-      'rate-desc': (a,b)=>priorityRate(b)-priorityRate(a),
-      'people-desc': (a,b)=>b.people-a.people,
-      'name-asc': (a,b)=>a.sector.localeCompare(b.sector,'es')
+    const sorters={
+      'families-desc':(a,b)=>b.families-a.families,
+      'priority-desc':(a,b)=>priorityCount(b)-priorityCount(a)||b.families-a.families,
+      'rate-desc':(a,b)=>priorityRate(b)-priorityRate(a),
+      'people-desc':(a,b)=>b.people-a.people,
+      'name-asc':(a,b)=>a.sector.localeCompare(b.sector,'es')
     };
-    arr.sort(sorters[f.sort] || sorters['families-desc']);
-    filteredTerritories = arr;
+    filteredTerritories.sort(sorters[s.sort]);
     renderTerritoryExplorer();
   }
 
   function renderTerritoryExplorer(){
-    const arr = filteredTerritories;
-    $('#filteredCount').textContent = arr.length;
-    $('#filteredFamilies').textContent = fmt(arr.reduce((s,t)=>s+t.families,0));
-    $('#filteredPeople').textContent = fmt(arr.reduce((s,t)=>s+t.people,0));
-    $('#filteredPriority').textContent = fmt(arr.reduce((s,t)=>s+priorityCount(t),0));
-    $('#filteredEmpty').textContent = fmt(arr.reduce((s,t)=>s+t.empty,0));
-
-    const values = arr.map(t => territoryMetric === 'families' ? t.families : territoryMetric === 'priority' ? priorityCount(t) : priorityRate(t));
-    const max = Math.max(...values, 1);
-    const titles = {families:'Familias con registro nominal', priority:'Casos de mayor prioridad (no habitable + destruida)', rate:'Tasa prioritaria calculada'};
-    $('#territoryChartTitle').textContent = titles[territoryMetric];
-    $('#territoryChart').innerHTML = arr.length ? arr.map(t => {
-      const value = territoryMetric === 'families' ? t.families : territoryMetric === 'priority' ? priorityCount(t) : priorityRate(t);
-      const label = territoryMetric === 'rate' ? pct(value) : fmt(value);
-      return `<div class="bar-row"><button data-open-sector="${esc(t.sector)}" title="Abrir ficha de ${esc(t.sector)}">${esc(t.sector)}</button><div class="bar-bg"><div class="bar-fill ${territoryMetric}" style="width:${Math.max(2,value/max*100)}%"></div></div><span class="bar-value">${label}</span></div>`;
-    }).join('') : `<div class="data-note">No hay sectores que coincidan con los filtros actuales.</div>`;
-
-    $('#territoryTable tbody').innerHTML = arr.map(t => {
-      const p = priorityCount(t), r = priorityRate(t);
-      return `<tr>
-        <td><input class="compare-check" type="checkbox" data-compare-sector="${esc(t.sector)}" ${selectedSectors.has(t.sector)?'checked':''} aria-label="Comparar ${esc(t.sector)}"></td>
-        <td>${esc(t.sector)}</td><td>${fmt(t.families)}</td><td>${fmt(t.people)}</td><td>${fmt(t.noHab)}</td><td>${fmt(t.destroyed)}</td>
-        <td class="priority-num">${fmt(p)}</td><td class="rate-pill">${pct(r)}</td><td>${fmt(t.noState)}</td><td>${fmt(t.empty)}</td>
-        <td><button class="row-action" data-open-sector="${esc(t.sector)}">Ver ficha</button></td></tr>`;
-    }).join('');
+    const arr=filteredTerritories;
+    const maxVal=Math.max(1,...arr.map(t=>t.families));
+    $('#filteredCount').textContent=`${arr.length} sector${arr.length===1?'':'es'}`;
+    const totalFamilies=arr.reduce((s,t)=>s+t.families,0), totalPeople=arr.reduce((s,t)=>s+t.people,0), totalPriority=arr.reduce((s,t)=>s+priorityCount(t),0);
+    const avgRate=totalFamilies?totalPriority/totalFamilies*100:0;
+    $('#territorySummary').innerHTML=[
+      [arr.length,'Sectores visibles',colors.cyan],[totalFamilies,'Familias visibles',colors.green],[totalPeople,'Personas visibles',colors.blue],[pct(avgRate),'Tasa prioritaria agregada*',colors.red]
+    ].map(([v,l,c])=>`<div class="territory-summary-card" style="--tone:${c}"><strong>${typeof v==='number'?fmt(v):v}</strong><span>${l}</span></div>`).join('');
+    $('#territoryRanking').innerHTML=arr.length?arr.map(t=>`<button class="rank-row" data-sector="${esc(t.sector)}"><span class="rank-name">${esc(t.sector)}</span><span class="rank-bar"><i style="width:${t.families/maxVal*100}%"></i></span><strong>${fmt(t.families)}</strong></button>`).join(''):`<div class="compare-empty">No hay sectores que cumplan los filtros actuales.</div>`;
+    $('#territoryTableBody').innerHTML=arr.map(t=>`<tr data-sector="${esc(t.sector)}"><td>${esc(t.sector)}</td><td>${fmt(t.families)}</td><td>${fmt(t.people)}</td><td>${fmt(t.noHab)}</td><td>${fmt(t.destroyed)}</td><td class="priority-cell">${fmt(priorityCount(t))}</td><td>${pct(priorityRate(t))}</td><td>${fmt(t.noState)}</td><td>${fmt(t.empty)}</td></tr>`).join('');
+    $('#territorialReading').textContent=D.territorialReading;
+    $$('[data-sector]').forEach(el=>el.addEventListener('click',()=>openSectorDrawer(el.dataset.sector)));
     renderCompare();
-  }
-
-  function initTerritoryControls(){
-    ['sectorSearch','sortBy','minFamilies','minPriority','onlyPriority','onlyDestroyed','onlyEmpty','onlyNoState'].forEach(id => {
-      $(`#${id}`).addEventListener(id.includes('Search') ? 'input' : 'change', () => {
-        $('#minFamiliesValue').textContent = $('#minFamilies').value;
-        $('#minPriorityValue').textContent = $('#minPriority').value;
-        applyTerritoryFilters();
-      });
-    });
-    $('#minFamilies').addEventListener('input', () => { $('#minFamiliesValue').textContent = $('#minFamilies').value; applyTerritoryFilters(); });
-    $('#minPriority').addEventListener('input', () => { $('#minPriorityValue').textContent = $('#minPriority').value; applyTerritoryFilters(); });
-    $('#resetFiltersBtn').addEventListener('click', () => {
-      $('#sectorSearch').value=''; $('#sortBy').value='families-desc'; $('#minFamilies').value=0; $('#minPriority').value=0;
-      ['onlyPriority','onlyDestroyed','onlyEmpty','onlyNoState'].forEach(id => $(`#${id}`).checked=false);
-      $('#minFamiliesValue').textContent='0'; $('#minPriorityValue').textContent='0'; applyTerritoryFilters();
-    });
-    $$('#chartMetricSwitch button').forEach(btn => btn.addEventListener('click', () => {
-      territoryMetric = btn.dataset.metric; $$('#chartMetricSwitch button').forEach(b=>b.classList.toggle('active',b===btn)); renderTerritoryExplorer();
-    }));
-    $('#territoryChart').addEventListener('click', e => { const b=e.target.closest('[data-open-sector]'); if(b) openSectorDrawer(b.dataset.openSector); });
-    $('#territoryTable').addEventListener('click', e => {
-      const open=e.target.closest('[data-open-sector]'); if(open) openSectorDrawer(open.dataset.openSector);
-      const cb=e.target.closest('[data-compare-sector]'); if(cb){
-        const s=cb.dataset.compareSector;
-        if(cb.checked){
-          if(selectedSectors.size>=4){cb.checked=false; toast('Puedes comparar hasta 4 sectores.'); return;}
-          selectedSectors.add(s);
-        } else selectedSectors.delete(s);
-        renderCompare();
-      }
-    });
-    $('#clearCompareBtn').addEventListener('click', () => { selectedSectors.clear(); renderTerritoryExplorer(); });
-    $('#exportCsvBtn').addEventListener('click', exportTerritoryCsv);
-  }
-
-  function renderCompare(){
-    const panel=$('#comparePanel');
-    if(!selectedSectors.size){panel.hidden=true; return;}
-    panel.hidden=false;
-    const list=[...selectedSectors].map(s=>D.territories.find(t=>t.sector===s)).filter(Boolean);
-    $('#compareGrid').innerHTML=list.map(t=>`<div class="compare-card"><h4>${esc(t.sector)}</h4><div class="compare-stats">
-      <div><strong>${fmt(t.families)}</strong><span>familias</span></div><div><strong>${fmt(t.people)}</strong><span>personas</span></div>
-      <div><strong>${fmt(priorityCount(t))}</strong><span>prioridad</span></div><div><strong>${pct(priorityRate(t))}</strong><span>tasa calc.</span></div>
-    </div></div>`).join('');
   }
 
   function openSectorDrawer(name){
     const t=D.territories.find(x=>x.sector===name); if(!t) return;
-    $('#drawerTitle').textContent=t.sector;
-    const p=priorityCount(t), r=priorityRate(t);
-    $('#drawerBody').innerHTML=`
-      <div class="drawer-hero">
-        <div class="drawer-stat"><strong>${fmt(t.families)}</strong><span>familias nominales</span></div>
-        <div class="drawer-stat"><strong>${fmt(t.people)}</strong><span>personas</span></div>
-        <div class="drawer-stat"><strong style="color:var(--red)">${fmt(p)}</strong><span>casos prioritarios</span></div>
-        <div class="drawer-stat"><strong style="color:var(--purple)">${pct(r)}</strong><span>tasa calculada*</span></div>
-      </div>
-      <div class="drawer-section"><h4>Detalle de afectación</h4>
-        <div class="priority-list"><div><span>No habitable</span><strong>${fmt(t.noHab)}</strong></div><div><span>Destruida</span><strong>${fmt(t.destroyed)}</strong></div><div><span>Sin estado*</span><strong>${fmt(t.noState)}</strong></div><div><span>Núcleos vacíos</span><strong>${fmt(t.empty)}</strong></div></div>
-      </div>
-      <div class="drawer-section"><h4>Lectura exploratoria</h4><div class="warning-box"><p>${p>0?`El sector registra ${fmt(p)} caso(s) en las categorías “no habitable” o “destruida”.`:'No registra casos en las categorías “no habitable” o “destruida” en este corte.'} La priorización final requiere validación técnica y aplicación de los criterios del informe.</p></div></div>
-      <div class="drawer-section"><button class="primary-btn" id="drawerCompareBtn">${selectedSectors.has(t.sector)?'Quitar de comparación':'Agregar a comparación'}</button></div>
-      <div class="data-note">*La tasa prioritaria es un cálculo de interfaz. “Sin estado” debe interpretarse junto con núcleos vacíos.</div>`;
-    $('#sectorDrawer').classList.add('open'); $('#sectorDrawer').setAttribute('aria-hidden','false'); $('#drawerBackdrop').hidden=false;
-    $('#drawerCompareBtn').addEventListener('click',()=>{
-      if(selectedSectors.has(t.sector)) selectedSectors.delete(t.sector);
-      else if(selectedSectors.size<4) selectedSectors.add(t.sector); else return toast('Puedes comparar hasta 4 sectores.');
-      renderTerritoryExplorer(); openSectorDrawer(t.sector);
-    });
+    const drawer=$('#sectorDrawer');
+    $('#drawerContent').innerHTML=`<div class="drawer-title"><span class="eyebrow">FICHA TERRITORIAL</span><h2>${esc(t.sector)}</h2><small>Lectura del consolidado al 18 de agosto de 2026</small></div><div class="drawer-grid">
+      ${drawerMetric(t.families,'Familias nominales',colors.green)}${drawerMetric(t.people,'Personas',colors.blue)}${drawerMetric(priorityCount(t),'Casos prioritarios',colors.red)}${drawerMetric(pct(priorityRate(t)),'Tasa prioritaria*',colors.red)}${drawerMetric(t.noState,'Sin estado',colors.amber)}${drawerMetric(t.empty,'Núcleos vacíos',colors.violet)}
+      ${drawerMetric(t.noHab,'No habitables',colors.red)}${drawerMetric(t.destroyed,'Destruidas',colors.darkred)}
+    </div><div class="drawer-note"><b>Lectura exploratoria:</b> ${territoryInterpretation(t)}</div><button class="primary-btn" id="drawerCompareBtn" style="margin-top:14px;width:100%;justify-content:center">${selectedSectors.has(t.sector)?'Quitar del comparador':'Añadir al comparador'}</button><p class="footnote">* Métrica calculada por esta micropágina; no constituye clasificación oficial.</p>`;
+    $('#drawerCompareBtn').addEventListener('click',()=>toggleCompare(t.sector));
+    drawer.classList.add('open'); drawer.setAttribute('aria-hidden','false');
+  }
+  function drawerMetric(v,l,c){return `<div class="drawer-metric" style="--tone:${c}"><strong>${typeof v==='number'?fmt(v):v}</strong><span>${esc(l)}</span></div>`}
+  function territoryInterpretation(t){
+    if(priorityRate(t)>=50) return 'Presenta una proporción elevada de casos prioritarios frente a sus familias nominales. Conviene revisar primero la trazabilidad y la verificación de campo.';
+    if(t.empty>=10) return 'Presenta un volumen relevante de núcleos preenumerados vacíos; la depuración es clave para evitar sobreestimación territorial.';
+    if(t.noState>=10) return 'Tiene una brecha importante de registros sin estado del inmueble, lo que limita la priorización de seguridad habitacional.';
+    return 'Su lectura debe combinar volumen censal, casos prioritarios y calidad del dato. El volumen de registros no equivale por sí mismo a severidad sísmica.';
+  }
+  function closeDrawer(){ $('#sectorDrawer').classList.remove('open'); $('#sectorDrawer').setAttribute('aria-hidden','true'); }
+  function toggleCompare(name){
+    if(selectedSectors.has(name)) selectedSectors.delete(name); else if(selectedSectors.size<4) selectedSectors.add(name); else return toast('El comparador admite hasta 4 sectores.');
+    renderCompare(); openSectorDrawer(name);
+  }
+  function renderCompare(){
+    const host=$('#compareArea');
+    if(!selectedSectors.size){host.innerHTML='<div class="compare-empty">Selecciona sectores desde el ranking, la tabla o una ficha territorial para compararlos.</div>';return;}
+    host.innerHTML=[...selectedSectors].map(name=>{const t=D.territories.find(x=>x.sector===name);return `<div class="compare-card"><div class="compare-card-head"><b>${esc(t.sector)}</b><button class="compare-remove" data-remove-compare="${esc(t.sector)}">×</button></div><div class="compare-metrics"><div><strong>${fmt(t.families)}</strong><span>familias</span></div><div><strong>${fmt(t.people)}</strong><span>personas</span></div><div><strong>${fmt(priorityCount(t))}</strong><span>prioridad</span></div><div><strong>${pct(priorityRate(t))}</strong><span>tasa*</span></div></div></div>`}).join('');
+    $$('[data-remove-compare]').forEach(b=>b.addEventListener('click',()=>{selectedSectors.delete(b.dataset.removeCompare);renderCompare();}));
   }
 
-  function closeDrawer(){ $('#sectorDrawer').classList.remove('open'); $('#sectorDrawer').setAttribute('aria-hidden','true'); $('#drawerBackdrop').hidden=true; }
-
-  function exportTerritoryCsv(){
+  function initTerritoryControls(){
+    ['sectorSearch','sortBy','minFamilies','minPriority','onlyCritical','onlyEmpty','onlyNoState'].forEach(id=>$('#'+id).addEventListener(id==='sectorSearch'?'input':'change',()=>{
+      $('#minFamiliesValue').textContent=$('#minFamilies').value; $('#minPriorityValue').textContent=$('#minPriority').value; filterTerritories();
+    }));
+    $('#minFamilies').addEventListener('input',()=>{$('#minFamiliesValue').textContent=$('#minFamilies').value;filterTerritories()});
+    $('#minPriority').addEventListener('input',()=>{$('#minPriorityValue').textContent=$('#minPriority').value;filterTerritories()});
+    $('#resetFiltersBtn').addEventListener('click',()=>{
+      $('#sectorSearch').value='';$('#sortBy').value='families-desc';$('#minFamilies').value=0;$('#minPriority').value=0;$('#onlyCritical').checked=false;$('#onlyEmpty').checked=false;$('#onlyNoState').checked=false;$('#minFamiliesValue').textContent='0';$('#minPriorityValue').textContent='0';filterTerritories();
+    });
+    $('#clearCompare').addEventListener('click',()=>{selectedSectors.clear();renderCompare()});
+    $('#exportCsvBtn').addEventListener('click',exportCsv);
+  }
+  function exportCsv(){
     const headers=['Sector','Familias','Personas','No habitable','Destruida','Prioridad','Tasa prioritaria calculada','Sin estado','Núcleos vacíos'];
     const rows=filteredTerritories.map(t=>[t.sector,t.families,t.people,t.noHab,t.destroyed,priorityCount(t),priorityRate(t).toFixed(2),t.noState,t.empty]);
     const csv=[headers,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
-    const blob=new Blob([`\ufeff${csv}`],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob); a.download='san-pedro-sectores-filtrados-18-08-2026.csv'; a.click(); URL.revokeObjectURL(a.href); toast('CSV generado con los filtros actuales.');
+    const blob=new Blob([`\ufeff${csv}`],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='san-pedro-sectores-filtrados-18-08-2026.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),500); toast('CSV generado con los filtros actuales.');
   }
 
-  function renderHousing(){
-    const classified=392, unclassified=40;
-    $('#housingDonut').style.background=`conic-gradient(${colors.teal} 0 ${classified/432*100}%, ${colors.gray} ${classified/432*100}% 100%)`;
-    $('#housingDonut .donut-center').innerHTML=`<strong>${pct(classified/432*100)}</strong><span>con estado registrado</span>`;
-    const legend=$('#housingLegend');
-    function draw(mode='pct'){
-      legend.innerHTML=D.housing.map(h=>`<div class="legend-row"><i class="legend-dot" style="background:${colors[h.tone]||h.tone}"></i><strong>${esc(h.label)}</strong><span>${mode==='pct'?pct(h.pct):fmt(h.count)}</span><span>${mode==='pct'?fmt(h.count):pct(h.pct)}</span></div>`).join('') + `<div class="data-note">Las marcas de estado no son totalmente excluyentes: nueve familias tienen más de una marca; por ello los porcentajes de categorías no deben interpretarse como partes de un único total.</div>`;
-    }
-    draw();
-    $$('#housingMode button').forEach(btn=>btn.addEventListener('click',()=>{ $$('#housingMode button').forEach(b=>b.classList.toggle('active',b===btn)); draw(btn.dataset.mode); }));
+  function renderHousing(mode='pct'){
+    const max=Math.max(...D.housing.map(x=>x.count));
+    $('#housingBars').innerHTML=D.housing.map(x=>`<div class="housing-row" style="--tone:${colors[x.tone]||colors.gray}"><div class="housing-label"><i class="housing-dot"></i>${esc(x.label)}</div><div class="housing-track"><div class="housing-fill" style="width:${x.count/max*100}%"></div></div><div class="housing-value">${mode==='pct'?pct(x.pct):fmt(x.count)}</div></div>`).join('');
+    $('#housingInterpretation').innerHTML=D.housingInterpretation.map(x=>`<div class="check-item"><i>✓</i><p>${esc(x)}</p></div>`).join('');
+    $('#priorityHousingNarrative').textContent=D.priorityHousingNarrative;
   }
+  function initHousingMode(){ $$('#housingMode button').forEach(b=>b.addEventListener('click',()=>{$$('#housingMode button').forEach(x=>x.classList.toggle('active',x===b));renderHousing(b.dataset.mode)})); }
 
   function renderPopulation(){
+    const cards=[
+      ['566','Mujeres','55,3%',colors.magenta],['450','Hombres','43,9%',colors.blue],['179','Niñas, niños y adolescentes','17,5%',colors.orange],['283','Personas de 60 años o más','27,6%',colors.green],['39','Fechas de nacimiento inválidas/ausentes','3,8%',colors.violet]
+    ];
+    $('#demographicKpis').innerHTML=cards.map(([v,l,p,c])=>`<article class="demo-card" style="--tone:${c}"><small>${esc(l)}</small><strong>${v}</strong><span>${p}</span></article>`).join('');
     const max=Math.max(...D.lifeCycle.map(x=>x.count));
-    $('#ageChart').innerHTML=D.lifeCycle.map((x,i)=>`<div class="age-col"><span class="age-value">${fmt(x.count)}<br><small>${pct(x.pct)}</small></span><div class="age-bar-wrap"><div class="age-bar" style="height:${Math.max(3,x.count/max*100)}%;filter:hue-rotate(${i*13}deg)"></div></div><span class="age-label">${esc(x.label)}</span></div>`).join('');
-    const total=D.locationDeclared.reduce((s,x)=>s+x.count,0), a=D.locationDeclared;
-    const p1=a[0].count/total*100, p2=p1+a[1].count/total*100;
-    $('#locationChart').innerHTML=`<div class="ring-wrap"><div class="ring" style="background:conic-gradient(${colors.green} 0 ${p1}%, ${colors.blue} ${p1}% ${p2}%, ${colors.gray} ${p2}% 100%)"><div class="ring-center"><strong>${fmt(total)}</strong><span>familias</span></div></div><div class="ring-legend">${a.map((x,i)=>`<div><i style="background:${[colors.green,colors.blue,colors.gray][i]}"></i><span>${esc(x.label)} · <strong>${fmt(x.count)}</strong></span></div>`).join('')}</div></div>`;
+    $('#ageChart').innerHTML=D.lifeCycle.map((x,i)=>`<div class="age-col"><span class="age-value">${fmt(x.count)}<br><small>${pct(x.pct)}</small></span><div class="age-bar-wrap"><div class="age-bar" style="height:${Math.max(3,x.count/max*100)}%;filter:hue-rotate(${i*15}deg)"></div></div><span class="age-label">${esc(x.label)}</span></div>`).join('');
+    let stops=[],acc=0; D.sexDistribution.forEach((x,i)=>{const c=[colors.magenta,colors.blue,colors.gray][i];stops.push(`${c} ${acc}% ${acc+x.pct}%`);acc+=x.pct;});
+    $('#sexChart').innerHTML=`<div class="donut" style="background:conic-gradient(${stops.join(',')})"><div class="donut-center"><strong>1.024</strong><span>personas registradas</span></div></div><div class="legend-stack">${D.sexDistribution.map((x,i)=>`<div><i style="background:${[colors.magenta,colors.blue,colors.gray][i]}"></i><span>${esc(x.label)}</span><b>${fmt(x.count)} · ${pct(x.pct)}</b></div>`).join('')}</div>`;
+    const maxLoc=Math.max(...D.locationDeclared.map(x=>x.count));
+    $('#locationChart').innerHTML=D.locationDeclared.map(x=>`<div class="location-row" style="--tone:${colors[x.tone]||colors.gray}"><span>${esc(x.label)}</span><div class="location-track"><i style="width:${x.count/maxLoc*100}%"></i></div><b>${fmt(x.count)}</b></div>`).join('')+`<p class="footnote">Los 111 núcleos vacíos se mantienen separados y no se incluyen en esta distribución.</p>`;
   }
 
   function renderQuality(query=''){
     const q=query.trim().toLowerCase();
     const arr=D.qualityIssues.filter(x=>!q||`${x.label} ${x.risk} ${x.treatment}`.toLowerCase().includes(q));
-    $('#qualityGrid').innerHTML=arr.length?arr.map(x=>`<article class="quality-card"><span class="quality-count">${fmt(x.count)}</span><h3>${esc(x.label)}</h3><div class="quality-block"><span>Riesgo para la decisión</span><p>${esc(x.risk)}</p></div><div class="quality-block"><span>Tratamiento recomendado</span><p>${esc(x.treatment)}</p></div></article>`).join(''):`<div class="data-note">No hay hallazgos que coincidan con la búsqueda.</div>`;
-  }
-
-  function renderQualityPrinciples(){
-    const rules=[
-      'Identificador interno único por familia, independiente del consecutivo de cada hoja.',
-      'Documento almacenado como texto para preservar ceros y evitar notación científica.',
-      'Catálogos controlados para sexo, parentesco, pertenencia étnica, tenencia, ubicación y estado del inmueble.',
-      'Fechas en formato AAAA-MM-DD y validación contra la fecha del evento.',
-      'Una sola categoría principal de habitabilidad, con campos separados para observaciones, evacuación y urgencia.',
-      'Registro de quién captura, quién verifica, fecha de visita, soporte y motivo de cada modificación.',
-      'Copia maestra protegida, versiones fechadas y bitácora de cambios.'
-    ];
-    $('#qualityPrinciples').innerHTML=rules.map(r=>`<div class="principle"><b>✓</b><span>${esc(r)}</span></div>`).join('');
+    $('#qualityTopline').innerHTML=[
+      [111,'Núcleos vacíos',colors.orange],[23,'Grupos de documentos repetidos',colors.red],[40,'Familias sin estado',colors.red],[189,'Sin zona homologable',colors.violet]
+    ].map(([v,l,c])=>`<div class="quality-top-card" style="--tone:${c}"><strong>${fmt(v)}</strong><span>${esc(l)}</span></div>`).join('');
+    $('#qualityGrid').innerHTML=arr.length?arr.map(x=>`<article class="quality-card"><span class="quality-count">${fmt(x.count)}</span><h3>${esc(x.label)}</h3><div class="quality-block"><span>Riesgo para la decisión</span><p>${esc(x.risk)}</p></div><div class="quality-block"><span>Tratamiento recomendado</span><p>${esc(x.treatment)}</p></div></article>`).join(''):'<div class="panel">No hay hallazgos que coincidan con el filtro.</div>';
+    $('#componentStatusTable').innerHTML=D.componentStatus.map(x=>`<div class="component-row" style="--tone:${statusColor(x.tone)}"><b>${esc(x.component)}</b><span>${esc(x.progress)}</span><span>${esc(x.status)}</span><i></i></div>`).join('');
+    $('#qualityPrinciples').innerHTML=D.qualityAssuranceRules.map(x=>`<div class="check-item"><i>✓</i><p>${esc(x)}</p></div>`).join('');
   }
 
   function renderMethodology(){
-    $('#methodTimeline').innerHTML=D.methodology.map(s=>`<div class="method-step"><div class="method-num">${s.step}</div><div><strong>${esc(s.title)}</strong><span>${esc(s.detail)}</span></div></div>`).join('');
-    $('#appliedRules').innerHTML=D.appliedRules.map(r=>`<li>${esc(r)}</li>`).join('');
+    $('#methodTimeline').innerHTML=D.methodology.map(s=>`<div class="method-step"><div class="method-num">${s.step}</div><strong>${esc(s.title)}</strong><span>${esc(s.detail)}</span></div>`).join('');
+    $('#appliedRules').innerHTML=D.appliedRules.map(x=>`<li>${esc(x)}</li>`).join('');
+    $('#objectiveText').textContent=D.objective;
+    $('#scopeList').innerHTML=D.scope.map(x=>`<div class="check-item"><i>✓</i><p>${esc(x)}</p></div>`).join('');
+    $('#methodLimitations').innerHTML=D.limitations.map(x=>`<div class="warning-item"><i>!</i><p>${esc(x)}</p></div>`).join('');
+  }
+
+  function renderNormative(){
+    $('#eventContext').textContent=D.eventContext;
+    $('#regulatoryTable').innerHTML=D.regulatoryFramework.map(x=>`<tr><td>${esc(x.axis)}</td><td>${esc(x.application)}</td></tr>`).join('');
+    $('#rufeRudText').textContent=D.rufeRud;
   }
 
   function renderPriorities(){
     $('#priorityActions').innerHTML=D.priorities.map((p,i)=>`<article class="priority-action"><div class="action-num">${i+1}</div><p>${esc(p)}</p></article>`).join('');
-    const matrixColors=['#d8393f','#ef7b1a','#e4ad15','#29945b'];
-    $('#priorityMatrix').innerHTML=D.prioritizationMatrix.map((m,i)=>`<div class="matrix-card" style="--matrix-color:${matrixColors[i]}"><div class="matrix-level">${esc(m.level)}</div><div class="matrix-body"><span>Criterios verificables</span><p>${esc(m.criteria)}</p><span>Acción</span><p>${esc(m.action)}</p></div></div>`).join('');
+    const cs=[colors.red,colors.orange,'#e4ad15',colors.green];
+    $('#priorityMatrix').innerHTML=D.prioritizationMatrix.map((m,i)=>`<article class="matrix-card" style="--matrix-color:${cs[i]}"><div class="matrix-level">${esc(m.level)}</div><div class="matrix-body"><span>Criterios verificables</span><p>${esc(m.criteria)}</p><span>Acción</span><p>${esc(m.action)}</p></div></article>`).join('');
+    $('#conclusionsList').innerHTML=D.conclusions.map((x,i)=>`<div class="conclusion-item"><b>${i+1}</b><p>${esc(x)}</p></div>`).join('');
   }
 
-  function renderSources(){
-    $('#limitationsList').innerHTML=D.limitations.map(x=>`<div class="limitation"><span>!</span><div>${esc(x)}</div></div>`).join('');
+  function renderVisualGallery(){
+    const host=$('#visualThumbs');
+    host.innerHTML=D.visualReports.map((v,i)=>`<button class="visual-thumb ${i===currentVisual?'active':''}" data-visual-index="${i}"><img loading="lazy" src="${esc(v.src)}" alt="Miniatura ${esc(v.title)}"><span><b>${esc(v.title)}</b><small>${esc(v.category)}</small></span></button>`).join('');
+    $$('[data-visual-index]').forEach(b=>b.addEventListener('click',()=>selectVisual(+b.dataset.visualIndex)));
+    selectVisual(currentVisual,false);
+  }
+  function selectVisual(i, rerender=true){
+    currentVisual=i; const v=D.visualReports[i];
+    $('#visualMainImage').src=v.src; $('#visualMainImage').alt=v.title; $('#visualTitle').textContent=v.title; $('#visualCategory').textContent=v.category; $('#visualOpenLink').href=v.src;
+    if(rerender) $$('.visual-thumb').forEach((b,idx)=>b.classList.toggle('active',idx===i));
   }
 
-  function initSearch(){
-    const overlay=$('#commandOverlay'), input=$('#commandInput'), results=$('#commandResults');
-    let active=0, current=[];
-    const entries=[
-      ...Object.entries(routeNames).map(([route,label])=>({type:'Sección',label,route})),
-      ...D.territories.map(t=>({type:'Territorio',label:t.sector,route:'territorio',sector:t.sector})),
-      ...D.qualityIssues.map(q=>({type:'Hallazgo',label:q.label,route:'calidad'}))
-    ];
-    function open(){ overlay.hidden=false; input.value=''; active=0; render(''); setTimeout(()=>input.focus(),20); }
-    function close(){ overlay.hidden=true; }
-    function render(q){
-      const s=q.trim().toLowerCase(); current=entries.filter(x=>!s||`${x.label} ${x.type}`.toLowerCase().includes(s)).slice(0,16);
-      if(active>=current.length) active=0;
-      results.innerHTML=current.map((x,i)=>`<button class="command-item ${i===active?'active':''}" data-cmd-index="${i}"><span>${esc(x.label)}</span><small>${esc(x.type)}</small></button>`).join('') || `<div class="data-note">Sin resultados.</div>`;
+  function renderDocument(){
+    renderPageIndex('');
+    $('#annexTable').innerHTML=D.annexIndicators.map(x=>`<tr><td>${esc(x.dimension)}</td><td>${esc(x.indicator)}</td><td><b>${esc(x.value)}</b></td></tr>`).join('');
+    $('#documentControl').innerHTML=D.documentControl.finalSignatures.map(x=>`<div class="signature-item"><span>${esc(x.role)}</span><b>${esc(x.name)}</b><small>${esc(x.title)}</small></div>`).join('');
+    $('#contactBox').innerHTML=`<b>Alcaldía Municipal de San Pedro</b><br>${esc(D.meta.address)} · Tel. ${esc(D.meta.phone)}<br>${esc(D.meta.website)} · ${esc(D.meta.email)} · Código postal ${esc(D.meta.postalCode)}<br><small>Documento: ${esc(D.meta.documentCode)} · Proceso: ${esc(D.meta.process)} · Versión ${esc(D.meta.documentVersion)}</small>`;
+  }
+  function renderPageIndex(query){
+    const q=query.trim().toLowerCase(); const arr=D.pageIndex.filter(x=>!q||`${x.title} ${x.tags}`.toLowerCase().includes(q));
+    $('#pageIndex').innerHTML=arr.map(x=>`<button class="page-link" data-page="${x.page}"><b>${String(x.page).padStart(2,'0')}</b><span>${esc(x.title)}</span></button>`).join('') || '<div class="footnote">Sin coincidencias.</div>';
+    $$('[data-page]').forEach(b=>b.addEventListener('click',()=>{
+      const page=+b.dataset.page; $('#pdfFrame').src=`assets/informe-consolidado-18-agosto-2026.pdf#page=${page}&view=FitH`; $$('.page-link').forEach(x=>x.classList.toggle('active',x===b));
+    }));
+  }
+
+  function buildSearchEntries(){
+    const entries=[];
+    Object.entries(routeNames).forEach(([route,label])=>entries.push({label,type:'Sección',route,meta:'Navegación principal'}));
+    D.territories.forEach(t=>entries.push({label:t.sector,type:'Territorio',route:'territorio',sector:t.sector,meta:`${t.families} familias · ${priorityCount(t)} prioridad`}));
+    D.qualityIssues.forEach(q=>entries.push({label:q.label,type:'Hallazgo',route:'calidad',meta:`${q.count} registros`}));
+    D.housing.forEach(h=>entries.push({label:h.label,type:'Vivienda',route:'vivienda',meta:`${h.count} · ${pct(h.pct)}`}));
+    D.pageIndex.forEach(p=>entries.push({label:p.title,type:`Página ${p.page}`,route:'documento',page:p.page,meta:p.tags}));
+    D.annexIndicators.forEach(a=>entries.push({label:a.indicator,type:'Indicador',route:'documento',meta:`${a.dimension} · ${a.value}`}));
+    D.visualReports.forEach((v,i)=>entries.push({label:v.title,type:'Informe visual',route:'visual',visual:i,meta:v.category}));
+    D.regulatoryFramework.forEach(r=>entries.push({label:r.axis,type:'Normativa',route:'normativa',meta:r.application.slice(0,80)+'…'}));
+    return entries;
+  }
+
+  function initGlobalSearch(){
+    const wrap=$('.global-search-wrap'), input=$('#globalSearch'), results=$('#globalSearchResults'), clear=$('#clearGlobalSearch');
+    const entries=buildSearchEntries(); let current=[]; let active=0;
+    function render(){
+      const q=input.value.trim().toLowerCase(); wrap.classList.toggle('has-value',!!q);
+      if(!q){results.hidden=true;results.innerHTML='';current=[];return;}
+      const terms=q.split(/\s+/).filter(Boolean);
+      current=entries.filter(e=>terms.every(t=>`${e.label} ${e.type} ${e.meta||''}`.toLowerCase().includes(t))).slice(0,12); active=0;
+      results.innerHTML=current.length?current.map((e,i)=>`<button class="search-result ${i===active?'active':''}" data-search-index="${i}"><span><b>${esc(e.label)}</b><small>${esc(e.meta||'')}</small></span><span class="result-type">${esc(e.type)}</span></button>`).join(''):`<div style="padding:16px;color:var(--muted);font-size:12px">No se encontraron coincidencias.</div>`;
+      results.hidden=false;
     }
-    function choose(i){ const x=current[i]; if(!x) return; close(); setRoute(x.route); if(x.sector) setTimeout(()=>openSectorDrawer(x.sector),180); }
-    $('#searchTrigger').addEventListener('click',open); input.addEventListener('input',()=>{active=0;render(input.value)}); results.addEventListener('click',e=>{const b=e.target.closest('[data-cmd-index]');if(b)choose(+b.dataset.cmdIndex)});
-    overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
+    function choose(i){
+      const e=current[i]; if(!e) return; setRoute(e.route); results.hidden=true; input.blur();
+      if(e.sector) setTimeout(()=>openSectorDrawer(e.sector),140);
+      if(e.page) setTimeout(()=>{ $('#pdfFrame').src=`assets/informe-consolidado-18-agosto-2026.pdf#page=${e.page}&view=FitH`; },140);
+      if(Number.isInteger(e.visual)) setTimeout(()=>selectVisual(e.visual),140);
+    }
+    input.addEventListener('input',render);
+    input.addEventListener('focus',()=>{if(input.value.trim())render()});
+    clear.addEventListener('click',()=>{input.value='';render();input.focus()});
+    results.addEventListener('click',e=>{const b=e.target.closest('[data-search-index]');if(b)choose(+b.dataset.searchIndex)});
+    document.addEventListener('click',e=>{if(!wrap.contains(e.target))results.hidden=true});
     document.addEventListener('keydown',e=>{
-      if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault(); overlay.hidden?open():close(); return;}
-      if(!overlay.hidden){ if(e.key==='Escape')close(); if(e.key==='ArrowDown'){e.preventDefault();active=Math.min(active+1,current.length-1);render(input.value)} if(e.key==='ArrowUp'){e.preventDefault();active=Math.max(active-1,0);render(input.value)} if(e.key==='Enter'){e.preventDefault();choose(active)} return; }
-      if(!['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName) && /^[1-8]$/.test(e.key)){ setRoute(Object.keys(routeNames)[+e.key-1]); }
+      if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();input.focus();input.select();return;}
+      if(document.activeElement===input && !results.hidden){
+        if(e.key==='Escape'){results.hidden=true;input.blur();}
+        if(e.key==='ArrowDown'){e.preventDefault();active=Math.min(active+1,current.length-1);updateActive()}
+        if(e.key==='ArrowUp'){e.preventDefault();active=Math.max(active-1,0);updateActive()}
+        if(e.key==='Enter'){e.preventDefault();choose(active)}
+      }
     });
+    function updateActive(){ $$('.search-result',results).forEach((x,i)=>x.classList.toggle('active',i===active)); const el=$$('.search-result',results)[active]; if(el)el.scrollIntoView({block:'nearest'}); }
   }
 
   function initUtilities(){
-    $('#themeToggle').addEventListener('click',()=>{
-      const html=document.documentElement; const next=html.dataset.theme==='dark'?'light':'dark'; html.dataset.theme=next; localStorage.setItem('sp-theme',next);
-    });
-    const saved=localStorage.getItem('sp-theme'); if(saved) document.documentElement.dataset.theme=saved;
+    const saved=localStorage.getItem('sp-theme-v2'); if(saved)document.documentElement.dataset.theme=saved;
+    $('#themeToggle').addEventListener('click',()=>{const next=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=next;localStorage.setItem('sp-theme-v2',next)});
     $('#printBtn').addEventListener('click',()=>window.print());
-    $('#copySummaryBtn').addEventListener('click',async()=>{
-      const text=`Emergencia sísmica — San Pedro, Valle del Cauca. Corte 18 de agosto de 2026: ${fmt(D.kpis.families)} familias con registro nominal, ${fmt(D.kpis.nominalPeople)} registros nominales de personas, ${fmt(D.kpis.uniquePeopleEstimated)} personas únicas estimadas y ${D.kpis.territories} territorios/sectores. Se registran 90 marcas “no habitable” y 2 “destruida”. La información es preliminar y requiere validación, depuración y cierre documentado.`;
-      try{await navigator.clipboard.writeText(text);toast('Resumen copiado al portapapeles.')}catch{toast('No fue posible copiar automáticamente.');}
-    });
-    $('#drawerClose').addEventListener('click',closeDrawer); $('#drawerBackdrop').addEventListener('click',closeDrawer);
+    $('#drawerClose').addEventListener('click',closeDrawer);
+    $('#qualitySearch').addEventListener('input',e=>renderQuality(e.target.value));
+    $('#pageIndexSearch').addEventListener('input',e=>renderPageIndex(e.target.value));
+    $('#copyExecutive').addEventListener('click',async()=>{const text=D.executiveSummary.join('\n\n');try{await navigator.clipboard.writeText(text);toast('Resumen ejecutivo copiado.')}catch{toast('No se pudo copiar automáticamente.')}});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer()});
   }
-
-  function initQualitySearch(){ $('#qualitySearch').addEventListener('input',e=>renderQuality(e.target.value)); }
 
   function initServiceWorker(){ if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{})); }
 
   function boot(){
-    renderSummary(); renderHousing(); renderPopulation(); renderQuality(); renderQualityPrinciples(); renderMethodology(); renderPriorities(); renderSources();
-    renderTerritoryExplorer(); initNavigation(); initTerritoryControls(); initQualitySearch(); initSearch(); initUtilities(); initServiceWorker();
+    renderSummary(); renderHousing(); renderPopulation(); renderQuality(); renderMethodology(); renderNormative(); renderPriorities(); renderVisualGallery(); renderDocument(); renderTerritoryExplorer();
+    initNavigation(); initTerritoryControls(); initHousingMode(); initGlobalSearch(); initUtilities(); initServiceWorker();
   }
-
   boot();
 })();

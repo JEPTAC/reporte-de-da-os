@@ -1,11 +1,9 @@
 {
-  "name": "Emergencia Sísmica · San Pedro",
-  "short_name": "Sismo San Pedro",
-  "start_url": "./index.html#resumen",
-  "display": "standalone",
-  "background_color": "#071d31",
-  "theme_color": "#052f57",
-  "icons": [
-    {"src":"assets/logo-san-pedro.png","sizes":"any","type":"image/png","purpose":"any maskable"}
-  ]
+  "name":"Emergencia Sísmica · San Pedro",
+  "short_name":"Sismo San Pedro",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#eef6fb",
+  "theme_color":"#066f9f",
+  "icons":[{"src":"assets/logo-san-pedro.jpg","sizes":"any","type":"image/jpeg"}]
 }
