@@ -1,4 +1,4 @@
-# Emergencia Sísmica · San Pedro — Micrositio interactivo v2
+# Emergencia Sísmica · San Pedro — Micrositio interactivo v3 — experiencia inmersiva
 
 Micrositio estático para GitHub Pages basado en el **Informe Técnico Consolidado — Avance del diligenciamiento RUFE y censo de familias afectadas**, corte **18 de agosto de 2026**.
 
@@ -17,6 +17,11 @@ Micrositio estático para GitHub Pages basado en el **Informe Técnico Consolida
 - PDF original de 20 páginas integrado con índice navegable.
 - Anexo de indicadores y control documental.
 - Buscador global **no modal**: nunca bloquea la página.
+- Modo audiencia / pantalla completa para presentaciones.
+- Scrollytelling fotográfico con capítulos activados por desplazamiento.
+- Gráfico de dispersión territorial interactivo (familias × tasa prioritaria exploratoria).
+- Animaciones de entrada, barras, contadores, seismógrafo, transición entre vistas y revelado por scroll.
+- Sistema tipográfico combinado: Century Gothic (o equivalentes), Archivo Black, Cormorant Garamond, Allura e IBM Plex Mono.
 - Tema claro/oscuro, responsive, impresión, PWA y cache offline progresivo.
 
 ## Publicar en GitHub Pages
@@ -35,6 +40,7 @@ No requiere Node.js, npm, compilación, base de datos ni frameworks externos.
 - `index.html`: estructura y módulos.
 - `styles.css`: diseño visual responsive.
 - `app.js`: navegación, filtros, búsqueda, comparación, exportación y visualizaciones.
+- `experience.js`: scrollytelling, modo audiencia, animaciones, gráfico territorial y microinteracciones.
 - `data/report-data.js`: datos estructurados del informe.
 - `assets/informe-consolidado-18-agosto-2026.pdf`: documento fuente.
 - `assets/visual-*.png`: informe visual.

@@ -3,19 +3,24 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#066f9f" />
+  <meta name="theme-color" content="#0b5ee8" />
   <meta name="description" content="Micrositio interactivo del informe técnico consolidado RUFE y censo de familias afectadas por el sismo del 10 de agosto de 2026 en San Pedro, Valle del Cauca." />
   <title>Emergencia Sísmica · San Pedro · Informe interactivo</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="assets/logo-san-pedro.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Allura&family=Archivo+Black&family=Cormorant+Garamond:ital,wght@0,600;1,600;1,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+  <div class="ambient-field" aria-hidden="true"><i class="orb orb-a"></i><i class="orb orb-b"></i><i class="orb orb-c"></i><span class="grid-noise"></span></div>
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
       <div class="brand-block">
         <div class="brand-logo-wrap"><img src="assets/logo-san-pedro.jpg" alt="Escudo de la Alcaldía Municipal de San Pedro" class="brand-logo" /></div>
-        <div class="brand-copy"><span>ALCALDÍA MUNICIPAL</span><strong>SAN PEDRO</strong><small>Valle del Cauca</small></div>
+        <div class="brand-copy"><span>ALCALDÍA MUNICIPAL</span><strong>SAN PEDRO</strong><small>Valle del Cauca</small><em>informe vivo</em></div>
       </div>
       <div class="event-card"><span class="event-dot"></span><div><small>Informe técnico consolidado</small><strong>Emergencia sísmica</strong><span>Corte 18 · AGO · 2026</span></div></div>
       <nav class="main-nav" aria-label="Secciones del informe">
@@ -47,6 +52,7 @@
           <div id="globalSearchResults" class="search-results" hidden></div>
         </div>
         <div class="topbar-actions">
+          <button class="audience-btn" id="audienceMode" title="Modo audiencia" aria-label="Activar modo audiencia"><span>◉</span> Modo audiencia</button>
           <a class="top-link" href="assets/informe-consolidado-18-agosto-2026.pdf" target="_blank" rel="noopener">PDF</a>
           <button class="icon-btn" id="themeToggle" title="Cambiar tema" aria-label="Cambiar tema">◐</button>
           <button class="icon-btn" id="printBtn" title="Imprimir vista" aria-label="Imprimir">⎙</button>
@@ -59,7 +65,8 @@
           <div class="hero-card">
             <div class="hero-copy">
               <div class="hero-kicker"><span class="live-dot"></span> CORTE CONSOLIDADO · 18 DE AGOSTO DE 2026</div>
-              <h1>Emergencia <span>sísmica</span><br>San Pedro, Valle del Cauca</h1>
+              <div class="hero-script">Datos que orientan la respuesta</div>
+              <h1><span class="display-heavy">Emergencia</span> <span class="display-editorial">sísmica</span><br><span class="display-city">San Pedro</span><small>Valle del Cauca</small></h1>
               <p>Centro interactivo de información del avance del diligenciamiento RUFE y del censo de familias afectadas por el sismo del 10 de agosto de 2026.</p>
               <div class="hero-actions">
                 <button class="primary-btn" data-route-jump="territorio">Explorar territorio <b>→</b></button>
@@ -72,8 +79,27 @@
               <img src="assets/iglesia-afectada.jpg" alt="Torre de iglesia afectada por el sismo" class="hero-photo main" />
               <img src="assets/alcaldia.jpg" alt="Edificio de la Alcaldía Municipal de San Pedro" class="hero-photo secondary" />
               <div class="hero-stamp"><span>EVENTO</span><strong>10 · 08 · 2026</strong><span>CORTE</span><strong>18 · 08 · 2026</strong></div>
+              <svg class="seismo-line" viewBox="0 0 900 150" preserveAspectRatio="none" aria-hidden="true"><path d="M0,82 L90,82 L112,76 L124,89 L138,66 L151,93 L165,44 L178,106 L192,14 L206,128 L220,72 L235,88 L252,80 L285,82 L338,82 L351,77 L360,88 L371,68 L382,99 L394,40 L407,116 L419,18 L433,129 L447,70 L461,91 L478,80 L520,82 L900,82"/></svg>
             </div>
           </div>
+
+          <section class="immersive-story" id="immersiveStory" aria-label="Historia interactiva del corte">
+            <div class="story-visual-shell">
+              <div class="story-visual" id="storyVisual">
+                <div class="story-photo story-photo-a"></div>
+                <div class="story-photo story-photo-b"></div>
+                <div class="story-veil"></div>
+                <div class="story-caption"><span id="storyChapter">CAPÍTULO 01</span><strong id="storyMetric">432</strong><h2 id="storyHeadline">familias con registro nominal</h2><p id="storyBody">El censo consolida información nominal de hogares distribuidos en 25 territorios o sectores.</p></div>
+                <div class="story-index"><i></i><i></i><i></i><i></i></div>
+              </div>
+            </div>
+            <div class="story-steps">
+              <article class="story-step is-active" data-story-step="0"><span>01 · ALCANCE</span><h3>El registro ya tiene una escala territorial clara.</h3><p>432 familias nominadas y 1.024 registros de personas permiten leer la emergencia por población y territorio.</p></article>
+              <article class="story-step" data-story-step="1"><span>02 · PRIORIDAD</span><h3>La vivienda define el primer frente operativo.</h3><p>90 marcas “no habitable” y 2 “destruida” conforman el universo inicial de verificación prioritaria.</p></article>
+              <article class="story-step" data-story-step="2"><span>03 · PERSONAS</span><h3>La respuesta debe considerar el enfoque diferencial.</h3><p>179 menores de edad y 283 personas de 60 años o más requieren atención sensible a edad, apoyo y alojamiento.</p></article>
+              <article class="story-step" data-story-step="3"><span>04 · CALIDAD</span><h3>El cierre depende tanto del dato como de la visita.</h3><p>111 núcleos vacíos, 23 grupos de documentos repetidos y 40 familias sin estado aún exigen depuración y validación.</p></article>
+            </div>
+          </section>
 
           <div class="quick-strip">
             <button data-route-jump="vivienda"><span class="quick-icon red">!</span><b>92</b><small>casos iniciales de verificación prioritaria</small></button>
@@ -123,6 +149,10 @@
             </div>
           </div>
           <div class="territory-summary" id="territorySummary"></div>
+          <article class="panel territory-lab">
+            <div class="panel-head"><div><span class="eyebrow">LABORATORIO VISUAL</span><h3>Volumen censal × prioridad</h3></div><div class="chart-key"><span><i class="key-blue"></i> sector</span><span><i class="key-red"></i> mayor tasa prioritaria</span></div></div>
+            <div class="bubble-chart-wrap"><svg id="territoryBubblePlot" class="bubble-chart" viewBox="0 0 1000 420" role="img" aria-label="Dispersión de familias y tasa prioritaria por sector"></svg><div id="bubbleTooltip" class="chart-tooltip" hidden></div></div>
+          </article>
           <div class="territory-layout">
             <article class="panel territory-chart-panel"><div class="panel-head"><div><span class="eyebrow">RANKING DINÁMICO</span><h3>Concentración territorial</h3></div><span class="chip" id="filteredCount">25 sectores</span></div><div id="territoryRanking" class="territory-ranking"></div></article>
             <article class="panel compare-panel"><div class="panel-head"><div><span class="eyebrow">COMPARADOR</span><h3>Hasta 4 sectores</h3></div><button id="clearCompare" class="compact-btn">Vaciar</button></div><div id="compareArea" class="compare-area"></div></article>
@@ -234,5 +264,6 @@
 
   <script src="data/report-data.js"></script>
   <script src="app.js"></script>
+  <script src="experience.js"></script>
 </body>
 </html>

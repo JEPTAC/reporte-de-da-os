@@ -3,7 +3,7 @@
   "short_name":"Sismo San Pedro",
   "start_url":"./",
   "display":"standalone",
-  "background_color":"#eef6fb",
-  "theme_color":"#066f9f",
+  "background_color":"#f4faff",
+  "theme_color":"#0b5ee8",
   "icons":[{"src":"assets/logo-san-pedro.jpg","sizes":"any","type":"image/jpeg"}]
 }

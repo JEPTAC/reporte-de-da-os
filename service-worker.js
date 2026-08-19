@@ -1,5 +1,5 @@
-const CACHE='san-pedro-sismo-v2-20260819';
-const CORE=['./','./index.html','./styles.css','./app.js','./data/report-data.js','./manifest.json','./assets/logo-san-pedro.jpg','./assets/iglesia-afectada.jpg','./assets/alcaldia.jpg'];
+const CACHE='san-pedro-sismo-v3-20260819';
+const CORE=['./','./index.html','./styles.css','./app.js','./experience.js','./data/report-data.js','./manifest.json','./assets/logo-san-pedro.jpg','./assets/iglesia-afectada.jpg','./assets/alcaldia.jpg'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
