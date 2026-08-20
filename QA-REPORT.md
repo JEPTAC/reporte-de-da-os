@@ -14,7 +14,7 @@
 - ✅ **Informe imprimible: IDs únicos**
 - ✅ **Informe imprimible: imágenes con alt** — 2
 - ✅ **Informe imprimible: referencias locales existentes**
-- ✅ **CSS principal: llaves balanceadas** — 1084/1084
+- ✅ **CSS principal: llaves balanceadas** — 977/977
 - ✅ **CSS informe: llaves balanceadas** — 135/135
 - ✅ **Banner: “Emergencia” azul**
 - ✅ **Estado contingencia visible**

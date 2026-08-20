@@ -9,7 +9,37 @@
 <title>Portal RUFE | San Pedro, Valle del Cauca</title>
 <link href="manifest.json" rel="manifest"/>
 <link href="assets/logo-san-pedro.jpg" rel="icon"/>
-<link href="styles.css?v=admin-all-text-readable-20260820-1714" rel="stylesheet"/>
+<link href="styles.css?v=admin-force-readable-20260820-1722" rel="stylesheet"/>
+
+<style id="admin-force-readable-inline">
+/* RESPALDO INLINE: solo Centro de administración y publicación */
+html body section#view-administracion,
+html body section#view-administracion *{
+  text-rendering:geometricPrecision;
+}
+html body section#view-administracion #adminTabs.admin-tabs{
+  display:flex !important; flex-wrap:wrap !important; gap:18px !important; padding:20px !important; min-height:108px !important; overflow:visible !important; align-items:center !important;
+}
+html body section#view-administracion #adminTabs.admin-tabs button[data-admin-tab]{
+  font-size:28px !important; line-height:1.12 !important; font-weight:950 !important; min-height:70px !important; padding:18px 28px !important; border-radius:22px !important; white-space:normal !important; text-align:center !important;
+}
+html body section#view-administracion .admin-section-head h3{font-size:42px !important; line-height:1.08 !important;}
+html body section#view-administracion .admin-section-head p{font-size:18px !important; line-height:1.55 !important;}
+html body section#view-administracion .eyebrow{font-size:17px !important; line-height:1.35 !important;}
+html body section#view-administracion .field label{font-size:18px !important; line-height:1.3 !important; font-weight:950 !important;}
+html body section#view-administracion .field input,
+html body section#view-administracion .field select,
+html body section#view-administracion .field textarea{font-size:20px !important; line-height:1.45 !important; min-height:60px !important; padding:15px 18px !important; border-radius:16px !important;}
+html body section#view-administracion .btn,
+html body section#view-administracion button.btn{font-size:22px !important; line-height:1.2 !important; min-height:58px !important; padding:16px 26px !important;}
+html body section#view-administracion details summary{font-size:22px !important; line-height:1.35 !important;}
+@media (max-width:900px){
+  html body section#view-administracion #adminTabs.admin-tabs button[data-admin-tab]{font-size:23px !important; min-height:62px !important;}
+  html body section#view-administracion .admin-section-head h3{font-size:34px !important;}
+  html body section#view-administracion .field label{font-size:17px !important;}
+  html body section#view-administracion .field input, html body section#view-administracion .field select, html body section#view-administracion .field textarea{font-size:18px !important;}
+}
+</style>
 </head>
 <body>
 <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -351,7 +381,7 @@
 <script src="firebase-config.js"></script>
 <script src="map.js"></script>
 <script src="firebase-service.js" type="module"></script>
-<script src="app.js" type="module"></script>
+<script src="app.js?v=admin-force-readable-20260820-1722" type="module"></script>
 <script src="experience.js" type="module"></script>
 </body>
 </html>
