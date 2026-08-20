@@ -401,3 +401,50 @@ body{font-size:17px;line-height:1.65}
     font-size:clamp(18px,4.8vw,22px) !important;
   }
 }
+
+/* =========================================================
+   AJUSTE FINAL PUNTUAL: títulos navegables admin MUY GRANDES
+   Alcance cerrado: únicamente la barra #adminTabs dentro de administración.
+   ========================================================= */
+#view-administracion #adminTabs,
+#view-administracion nav.admin-tabs,
+section#view-administracion #adminTabs{
+  gap:18px !important;
+  padding:18px !important;
+  min-height:92px !important;
+  align-items:center !important;
+  overflow-x:auto !important;
+}
+#view-administracion #adminTabs button,
+#view-administracion nav.admin-tabs button,
+section#view-administracion #adminTabs button{
+  min-height:70px !important;
+  padding:22px 34px !important;
+  border-radius:22px !important;
+  font-size:clamp(30px,2.15vw,36px) !important;
+  line-height:1.08 !important;
+  font-weight:950 !important;
+  letter-spacing:-.015em !important;
+  white-space:nowrap !important;
+}
+#view-administracion #adminTabs button.active,
+#view-administracion nav.admin-tabs button.active,
+section#view-administracion #adminTabs button.active{
+  box-shadow:0 18px 38px rgba(5,41,82,.24) !important;
+}
+@media (max-width:760px){
+  #view-administracion #adminTabs,
+  #view-administracion nav.admin-tabs,
+  section#view-administracion #adminTabs{
+    gap:12px !important;
+    padding:14px !important;
+    min-height:78px !important;
+  }
+  #view-administracion #adminTabs button,
+  #view-administracion nav.admin-tabs button,
+  section#view-administracion #adminTabs button{
+    min-height:62px !important;
+    padding:18px 26px !important;
+    font-size:clamp(24px,6.2vw,30px) !important;
+  }
+}
