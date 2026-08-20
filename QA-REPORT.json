@@ -23,7 +23,7 @@
     {
       "name": "Portal: imágenes con alt",
       "ok": true,
-      "detail": "5"
+      "detail": "13"
     },
     {
       "name": "Portal: referencias locales existentes",
@@ -58,7 +58,7 @@
     {
       "name": "CSS principal: llaves balanceadas",
       "ok": true,
-      "detail": "765/765"
+      "detail": "1025/1025"
     },
     {
       "name": "CSS informe: llaves balanceadas",

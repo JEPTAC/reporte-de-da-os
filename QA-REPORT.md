@@ -7,14 +7,14 @@
 - ✅ **Portal: idioma español** — es
 - ✅ **Portal: landmark main único** — 1
 - ✅ **Portal: IDs únicos**
-- ✅ **Portal: imágenes con alt** — 5
+- ✅ **Portal: imágenes con alt** — 13
 - ✅ **Portal: referencias locales existentes**
 - ✅ **Informe imprimible: idioma español** — es
 - ✅ **Informe imprimible: landmark main único** — 1
 - ✅ **Informe imprimible: IDs únicos**
 - ✅ **Informe imprimible: imágenes con alt** — 2
 - ✅ **Informe imprimible: referencias locales existentes**
-- ✅ **CSS principal: llaves balanceadas** — 765/765
+- ✅ **CSS principal: llaves balanceadas** — 1025/1025
 - ✅ **CSS informe: llaves balanceadas** — 135/135
 - ✅ **Banner: “Emergencia” azul**
 - ✅ **Estado contingencia visible**

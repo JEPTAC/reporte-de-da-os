@@ -448,3 +448,83 @@ section#view-administracion #adminTabs button.active{
     font-size:clamp(24px,6.2vw,30px) !important;
   }
 }
+
+/* =========================================================
+   CORRECCIÓN REAL PUNTUAL — títulos navegables del panel admin
+   Objetivo: que los tabs del panel administrador sean legibles.
+   Alcance visual: solo #adminTabs / botones con data-admin-tab.
+   ========================================================= */
+#adminWorkspace #adminTabs.admin-tabs,
+section#view-administracion #adminTabs.admin-tabs,
+#adminTabs.admin-tabs{
+  display:flex !important;
+  flex-wrap:wrap !important;
+  align-items:center !important;
+  gap:16px !important;
+  padding:20px 22px !important;
+  min-height:118px !important;
+  overflow:visible !important;
+  border-radius:24px !important;
+}
+#adminWorkspace #adminTabs.admin-tabs button[data-admin-tab],
+section#view-administracion #adminTabs.admin-tabs button[data-admin-tab],
+#adminTabs.admin-tabs button[data-admin-tab]{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  min-height:72px !important;
+  padding:22px 30px !important;
+  border-radius:22px !important;
+  font-size:clamp(28px,1.9vw,34px) !important;
+  line-height:1.05 !important;
+  font-weight:950 !important;
+  letter-spacing:-.02em !important;
+  white-space:normal !important;
+  text-align:center !important;
+}
+#adminWorkspace #adminTabs.admin-tabs button[data-admin-tab="workflow"],
+section#view-administracion #adminTabs.admin-tabs button[data-admin-tab="workflow"],
+#adminTabs.admin-tabs button[data-admin-tab="workflow"]{
+  min-width:360px !important;
+}
+#adminWorkspace #adminTabs.admin-tabs button[data-admin-tab="content"],
+section#view-administracion #adminTabs.admin-tabs button[data-admin-tab="content"],
+#adminTabs.admin-tabs button[data-admin-tab="content"]{
+  min-width:300px !important;
+}
+#adminWorkspace #adminTabs.admin-tabs button[data-admin-tab]:hover,
+section#view-administracion #adminTabs.admin-tabs button[data-admin-tab]:hover,
+#adminTabs.admin-tabs button[data-admin-tab]:hover{
+  transform:translateY(-3px) !important;
+  box-shadow:0 16px 34px rgba(5,41,82,.18) !important;
+}
+#adminWorkspace #adminTabs.admin-tabs button[data-admin-tab].active,
+section#view-administracion #adminTabs.admin-tabs button[data-admin-tab].active,
+#adminTabs.admin-tabs button[data-admin-tab].active{
+  box-shadow:0 18px 40px rgba(5,41,82,.26) !important;
+}
+@media (max-width:900px){
+  #adminWorkspace #adminTabs.admin-tabs,
+  section#view-administracion #adminTabs.admin-tabs,
+  #adminTabs.admin-tabs{
+    gap:12px !important;
+    padding:16px !important;
+    min-height:104px !important;
+  }
+  #adminWorkspace #adminTabs.admin-tabs button[data-admin-tab],
+  section#view-administracion #adminTabs.admin-tabs button[data-admin-tab],
+  #adminTabs.admin-tabs button[data-admin-tab]{
+    min-height:66px !important;
+    padding:18px 24px !important;
+    font-size:clamp(24px,5.5vw,30px) !important;
+  }
+  #adminWorkspace #adminTabs.admin-tabs button[data-admin-tab="workflow"],
+  section#view-administracion #adminTabs.admin-tabs button[data-admin-tab="workflow"],
+  #adminTabs.admin-tabs button[data-admin-tab="workflow"],
+  #adminWorkspace #adminTabs.admin-tabs button[data-admin-tab="content"],
+  section#view-administracion #adminTabs.admin-tabs button[data-admin-tab="content"],
+  #adminTabs.admin-tabs button[data-admin-tab="content"]{
+    min-width:0 !important;
+  }
+}
+
