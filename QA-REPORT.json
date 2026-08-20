@@ -1,0 +1,422 @@
+{
+  "summary": {
+    "passed": 82,
+    "failed": 0,
+    "total": 82
+  },
+  "checks": [
+    {
+      "name": "Portal: idioma español",
+      "ok": true,
+      "detail": "es"
+    },
+    {
+      "name": "Portal: landmark main único",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "Portal: IDs únicos",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Portal: imágenes con alt",
+      "ok": true,
+      "detail": "4"
+    },
+    {
+      "name": "Portal: referencias locales existentes",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Informe imprimible: idioma español",
+      "ok": true,
+      "detail": "es"
+    },
+    {
+      "name": "Informe imprimible: landmark main único",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "Informe imprimible: IDs únicos",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Informe imprimible: imágenes con alt",
+      "ok": true,
+      "detail": "2"
+    },
+    {
+      "name": "Informe imprimible: referencias locales existentes",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "CSS principal: llaves balanceadas",
+      "ok": true,
+      "detail": "605/605"
+    },
+    {
+      "name": "CSS informe: llaves balanceadas",
+      "ok": true,
+      "detail": "135/135"
+    },
+    {
+      "name": "Banner: “Emergencia” azul",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Estado contingencia visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Sin Leaflet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Sin unpkg",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mapa OSM sin CDN JavaScript",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mapa: zoom, pan y selección",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "JavaScript válido: app.js",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "JavaScript válido: map.js",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "JavaScript válido: firebase-service.js",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "JavaScript válido: firebase-config.js",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "JavaScript válido: report-print.js",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "JavaScript válido: service-worker.js",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "JavaScript válido: data/report-data.js",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "JavaScript válido: data/map-data.js",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "JavaScript válido: functions/index.js",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Datos: 25 territorios",
+      "ok": true,
+      "detail": "25"
+    },
+    {
+      "name": "Mapa: 25 referencias",
+      "ok": true,
+      "detail": "25"
+    },
+    {
+      "name": "Mapa: todos los sectores referenciados",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mapa: coordenadas válidas",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Totales territoriales",
+      "ok": true,
+      "detail": "{'families': 432, 'people': 1024, 'noHab': 90, 'destroyed': 2, 'noStateRaw': 151, 'empty': 111, 'nominalNoState': 40}"
+    },
+    {
+      "name": "Ciclo de vida suma 1.024",
+      "ok": true,
+      "detail": "1024"
+    },
+    {
+      "name": "Sexo suma 1.024",
+      "ok": true,
+      "detail": "1024"
+    },
+    {
+      "name": "Ubicación suma 432",
+      "ok": true,
+      "detail": "432"
+    },
+    {
+      "name": "Vivienda: valores fuente",
+      "ok": true,
+      "detail": "{'Habitable': 251, 'Averiada': 56, 'No habitable': 90, 'Destruida': 2, 'Evacuada fuera de residencia': 2, 'Sin clasificación registrada': 40}"
+    },
+    {
+      "name": "Índice PDF: 20 páginas",
+      "ok": true,
+      "detail": "20"
+    },
+    {
+      "name": "Galería: 8 piezas visuales",
+      "ok": true,
+      "detail": "8"
+    },
+    {
+      "name": "Calidad: 9 brechas",
+      "ok": true,
+      "detail": "9"
+    },
+    {
+      "name": "Firebase: proyecto correcto",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Firebase: Web App configurada",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Firebase: bucket configurado",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Firebase: roles RUFE definidos",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Firebase: listeners internos desmontables",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Firebase: importación CSV robusta",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Cloud Function presente: adminCreateRufeUser",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Cloud Function presente: adminManageRufeUser",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Cloud Function presente: validateRufeDraft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Cloud Function presente: submitRufeForReview",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Cloud Function presente: reviewRufeDraft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Cloud Function presente: publishRufeSnapshot",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Cloud Function presente: adminManageRufeMedia",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Workflow: editar invalida aprobación",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Workflow: validar antes de revisión",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Workflow: validar antes de aprobación",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Workflow: publicar exige revisión aprobada",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Workflow: control territorial",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Publicación: snapshot público separado",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Publicación: copias versionadas de archivos",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Auditoría: colección separada",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Seguridad: rufePublished solo lectura pública",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Seguridad: borradores requieren rol",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Seguridad: archivos públicos solo Admin SDK",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Seguridad: límite upload 40 MB",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "PWA: navegación network-first",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "PWA: servicios externos fuera del caché",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "PWA: iconos 192/512",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "PWA: iconos existen",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Informe automático: vista imprimible incluida",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Informe automático: consume snapshot público",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Informe automático: exporta JSON",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Informe automático: impresión PDF",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Histórico: snapshot público completo por corte",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Histórico: reglas permiten lectura pública",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Histórico: informe permite seleccionar release",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Usuarios: Super Admin puede eliminar cuentas",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Usuarios: protección contra autoeliminación",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Compatibilidad: hash resumen redirige a inicio",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Despliegue: reemplazo limpio documentado",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Despliegue: funciones usan paquete único",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Documentación: seguridad y modelo de datos",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Documentación: sin referencia a carpeta intermedia",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "notes": [
+    "QA automatizado estático y de consistencia de datos. La ejecución de navegador headless no está disponible en este entorno por política del runtime; debe completarse un smoke test en GitHub Pages después del despliegue."
+  ]
+}

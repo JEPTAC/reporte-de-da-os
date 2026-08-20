@@ -1,0 +1,93 @@
+// PORTAL RUFE · SAN PEDRO
+// Fragmento para FUSIONAR dentro de: match /databases/{database}/documents { ... }
+// No reemplaza las reglas de otras micropáginas del proyecto rendicion-de-cuentas-6aceb.
+
+function rufeSignedIn() { return request.auth != null; }
+function rufeUidProfileExists() { return rufeSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
+function rufeLegacyProfileExists() {
+  return rufeSignedIn() && request.auth.token.email is string
+    && exists(/databases/$(database)/documents/users/$(request.auth.token.email));
+}
+function rufeProfileData() {
+  return rufeUidProfileExists()
+    ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data
+    : get(/databases/$(database)/documents/users/$(request.auth.token.email)).data;
+}
+function rufeHasProfile() { return rufeUidProfileExists() || (!rufeUidProfileExists() && rufeLegacyProfileExists()); }
+function rufeActive() { return rufeHasProfile() && rufeProfileData().active == true; }
+function rufeSuper() {
+  return rufeActive() && rufeProfileData().role in [
+    'super_admin','super-admin','super admin','superadmin','Super Admin','super administrador','administrador principal'
+  ];
+}
+function rufeAdmin() { return rufeActive() && (rufeSuper() || rufeProfileData().role in ['admin','administrador']); }
+function rufeValidator() { return rufeActive() && (rufeAdmin() || rufeProfileData().role in ['validator','validador']); }
+function rufeEditor() { return rufeActive() && (rufeAdmin() || rufeProfileData().role == 'editor'); }
+function rufeInternal() { return rufeEditor() || rufeValidator(); }
+
+match /rufePublished/{eventId} {
+  allow read: if true;
+  allow write: if false; // Cloud Functions / Admin SDK
+
+  // Cada corte conserva un snapshot público completo e inmutable para consulta histórica.
+  match /releases/{releaseId} {
+    allow read: if true;
+    allow write: if false; // Cloud Functions / Admin SDK
+  }
+}
+
+match /rufeEvents/{eventId} {
+  allow read: if rufeInternal();
+  allow create, update: if rufeAdmin();
+  allow delete: if rufeSuper();
+
+  match /drafts/{docId} {
+    allow read: if rufeInternal();
+    allow create, update: if rufeEditor();
+    allow delete: if rufeSuper();
+  }
+  match /territories/{territoryId} {
+    allow read: if rufeInternal();
+    allow create, update: if rufeEditor();
+    allow delete: if rufeSuper();
+  }
+  match /workflow/{docId} {
+    allow read: if rufeInternal();
+    allow create: if rufeSuper();
+    allow update: if rufeEditor()
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'revision','reviewStatus','approvedRevision','updatedAt','updatedBy'
+      ])
+      && request.resource.data.reviewStatus == 'changes'
+      && request.resource.data.approvedRevision == null;
+    allow delete: if false;
+  }
+  match /media/{mediaId} {
+    allow read: if rufeInternal();
+    allow create, update, delete: if rufeSuper();
+  }
+  match /releases/{releaseId} {
+    allow read: if rufeValidator();
+    allow write: if false;
+  }
+  match /editorActivity/{activityId} {
+    allow read: if rufeValidator();
+    allow create: if rufeEditor() && request.resource.data.uid == request.auth.uid;
+    allow update, delete: if false;
+  }
+}
+
+// IMPORTANTE: fusionar con las reglas existentes de /users si otros portales usan esta colección.
+match /users/{userId} {
+  allow read: if rufeSignedIn() && (
+    userId == request.auth.uid
+    || (request.auth.token.email is string && userId == request.auth.token.email)
+    || rufeSuper()
+  );
+  allow create, update, delete: if false; // Admin SDK
+}
+
+match /rufeAudit/{logId} {
+  allow read: if rufeSuper();
+  allow write: if false;
+}

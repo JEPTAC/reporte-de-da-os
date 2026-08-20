@@ -1,0 +1,88 @@
+# QA — Portal RUFE V6 final
+
+**Resultado automatizado:** 82/82 controles aprobados.
+
+> Alcance: sintaxis, estructura, referencias, consistencia matemática, seguridad declarativa, PWA y arquitectura Firebase. El runtime bloquea la navegación de Chromium headless; por eso el checklist de despliegue incluye un smoke test manual en GitHub Pages.
+
+- ✅ **Portal: idioma español** — es
+- ✅ **Portal: landmark main único** — 1
+- ✅ **Portal: IDs únicos**
+- ✅ **Portal: imágenes con alt** — 4
+- ✅ **Portal: referencias locales existentes**
+- ✅ **Informe imprimible: idioma español** — es
+- ✅ **Informe imprimible: landmark main único** — 1
+- ✅ **Informe imprimible: IDs únicos**
+- ✅ **Informe imprimible: imágenes con alt** — 2
+- ✅ **Informe imprimible: referencias locales existentes**
+- ✅ **CSS principal: llaves balanceadas** — 605/605
+- ✅ **CSS informe: llaves balanceadas** — 135/135
+- ✅ **Banner: “Emergencia” azul**
+- ✅ **Estado contingencia visible**
+- ✅ **Sin Leaflet**
+- ✅ **Sin unpkg**
+- ✅ **Mapa OSM sin CDN JavaScript**
+- ✅ **Mapa: zoom, pan y selección**
+- ✅ **JavaScript válido: app.js**
+- ✅ **JavaScript válido: map.js**
+- ✅ **JavaScript válido: firebase-service.js**
+- ✅ **JavaScript válido: firebase-config.js**
+- ✅ **JavaScript válido: report-print.js**
+- ✅ **JavaScript válido: service-worker.js**
+- ✅ **JavaScript válido: data/report-data.js**
+- ✅ **JavaScript válido: data/map-data.js**
+- ✅ **JavaScript válido: functions/index.js**
+- ✅ **Datos: 25 territorios** — 25
+- ✅ **Mapa: 25 referencias** — 25
+- ✅ **Mapa: todos los sectores referenciados**
+- ✅ **Mapa: coordenadas válidas**
+- ✅ **Totales territoriales** — {'families': 432, 'people': 1024, 'noHab': 90, 'destroyed': 2, 'noStateRaw': 151, 'empty': 111, 'nominalNoState': 40}
+- ✅ **Ciclo de vida suma 1.024** — 1024
+- ✅ **Sexo suma 1.024** — 1024
+- ✅ **Ubicación suma 432** — 432
+- ✅ **Vivienda: valores fuente** — {'Habitable': 251, 'Averiada': 56, 'No habitable': 90, 'Destruida': 2, 'Evacuada fuera de residencia': 2, 'Sin clasificación registrada': 40}
+- ✅ **Índice PDF: 20 páginas** — 20
+- ✅ **Galería: 8 piezas visuales** — 8
+- ✅ **Calidad: 9 brechas** — 9
+- ✅ **Firebase: proyecto correcto**
+- ✅ **Firebase: Web App configurada**
+- ✅ **Firebase: bucket configurado**
+- ✅ **Firebase: roles RUFE definidos**
+- ✅ **Firebase: listeners internos desmontables**
+- ✅ **Firebase: importación CSV robusta**
+- ✅ **Cloud Function presente: adminCreateRufeUser**
+- ✅ **Cloud Function presente: adminManageRufeUser**
+- ✅ **Cloud Function presente: validateRufeDraft**
+- ✅ **Cloud Function presente: submitRufeForReview**
+- ✅ **Cloud Function presente: reviewRufeDraft**
+- ✅ **Cloud Function presente: publishRufeSnapshot**
+- ✅ **Cloud Function presente: adminManageRufeMedia**
+- ✅ **Workflow: editar invalida aprobación**
+- ✅ **Workflow: validar antes de revisión**
+- ✅ **Workflow: validar antes de aprobación**
+- ✅ **Workflow: publicar exige revisión aprobada**
+- ✅ **Workflow: control territorial**
+- ✅ **Publicación: snapshot público separado**
+- ✅ **Publicación: copias versionadas de archivos**
+- ✅ **Auditoría: colección separada**
+- ✅ **Seguridad: rufePublished solo lectura pública**
+- ✅ **Seguridad: borradores requieren rol**
+- ✅ **Seguridad: archivos públicos solo Admin SDK**
+- ✅ **Seguridad: límite upload 40 MB**
+- ✅ **PWA: navegación network-first**
+- ✅ **PWA: servicios externos fuera del caché**
+- ✅ **PWA: iconos 192/512**
+- ✅ **PWA: iconos existen**
+- ✅ **Informe automático: vista imprimible incluida**
+- ✅ **Informe automático: consume snapshot público**
+- ✅ **Informe automático: exporta JSON**
+- ✅ **Informe automático: impresión PDF**
+- ✅ **Histórico: snapshot público completo por corte**
+- ✅ **Histórico: reglas permiten lectura pública**
+- ✅ **Histórico: informe permite seleccionar release**
+- ✅ **Usuarios: Super Admin puede eliminar cuentas**
+- ✅ **Usuarios: protección contra autoeliminación**
+- ✅ **Compatibilidad: hash resumen redirige a inicio**
+- ✅ **Despliegue: reemplazo limpio documentado**
+- ✅ **Despliegue: funciones usan paquete único**
+- ✅ **Documentación: seguridad y modelo de datos**
+- ✅ **Documentación: sin referencia a carpeta intermedia**

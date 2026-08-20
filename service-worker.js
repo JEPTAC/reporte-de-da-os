@@ -1,18 +1,16 @@
-const CACHE='san-pedro-sismo-v4-2-20260820';
+const CACHE='rufe-san-pedro-v6-final-20260820';
 const CORE=[
-  './','./index.html','./styles.css','./app.js','./experience.js','./map.js',
-  './data/report-data.js','./data/map-data.js','./manifest.json',
-  './assets/logo-san-pedro.jpg','./assets/iglesia-afectada.jpg','./assets/alcaldia.jpg',
-  './assets/visual-01-portada.png','./assets/visual-02-panorama.png','./assets/visual-03-vivienda.png','./assets/visual-04-territorio.png',
-  './assets/visual-05-poblacion.png','./assets/visual-06-calidad.png','./assets/visual-07-metodologia.png','./assets/visual-08-prioridades.png'
+  './','./index.html','./report.html','./styles.css','./report-print.css','./app.js','./report-print.js','./map.js',
+  './firebase-config.js','./firebase-service.js','./manifest.json','./data/report-data.js','./data/map-data.js',
+  './assets/logo-san-pedro.jpg','./assets/icon-192.png','./assets/icon-512.png','./assets/alcaldia.jpg','./assets/iglesia-afectada.jpg'
 ];
-self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-self.addEventListener('fetch',e=>{
-  if(e.request.method!=='GET')return;
-  const url=new URL(e.request.url);
-  if(url.origin!==self.location.origin)return; // no interceptar OpenStreetMap, Google Fonts u otros recursos externos
-  e.respondWith(caches.match(e.request).then(hit=>hit||fetch(e.request).then(res=>{
-    const copy=res.clone(); caches.open(CACHE).then(c=>c.put(e.request,copy)); return res;
-  }).catch(()=>e.request.mode==='navigate'?caches.match('./index.html'):undefined)));
+self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));
+self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
+async function networkFirst(request){const cache=await caches.open(CACHE);try{const response=await fetch(request,{cache:'no-store'});if(response&&response.ok)cache.put(request,response.clone());return response}catch(_){return (await cache.match(request))||(await cache.match('./index.html'))}}
+async function staleWhileRevalidate(request){const cache=await caches.open(CACHE),cached=await cache.match(request);const fresh=fetch(request).then(response=>{if(response&&response.ok)cache.put(request,response.clone());return response}).catch(()=>null);return cached||await fresh||Response.error()}
+self.addEventListener('fetch',event=>{
+  if(event.request.method!=='GET')return;const url=new URL(event.request.url);
+  if(url.origin!==self.location.origin)return; // Firebase/Google/OSM no son interceptados.
+  if(event.request.mode==='navigate'||event.request.destination==='document'){event.respondWith(networkFirst(event.request));return}
+  event.respondWith(staleWhileRevalidate(event.request));
 });

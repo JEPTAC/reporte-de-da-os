@@ -1,0 +1,27 @@
+// PORTAL RUFE · SAN PEDRO
+// Fragmento para FUSIONAR dentro de: match /b/{bucket}/o { ... }
+function rufeUidProfileExists() { return request.auth != null && firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)); }
+function rufeLegacyProfileExists() { return request.auth != null && request.auth.token.email is string && firestore.exists(/databases/(default)/documents/users/$(request.auth.token.email)); }
+function rufeProfileData() {
+  return rufeUidProfileExists()
+    ? firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data
+    : firestore.get(/databases/(default)/documents/users/$(request.auth.token.email)).data;
+}
+function rufeHasProfile() { return rufeUidProfileExists() || (!rufeUidProfileExists() && rufeLegacyProfileExists()); }
+function rufeActive() { return rufeHasProfile() && rufeProfileData().active == true; }
+function rufeSuper() { return rufeActive() && rufeProfileData().role in ['super_admin','super-admin','super admin','superadmin','Super Admin','super administrador','administrador principal']; }
+function rufeInternal() { return rufeActive() && rufeProfileData().role in ['editor','validator','validador','admin','administrador','super_admin','super-admin','super admin','superadmin','Super Admin','super administrador','administrador principal']; }
+function rufeAllowedUpload() {
+  return request.resource.size <= 40 * 1024 * 1024
+    && request.resource.contentType != null
+    && request.resource.contentType.matches('application/pdf|image/.*|text/csv|text/plain|application/json|application/zip|application/x-zip-compressed|application/vnd\\..*');
+}
+match /rufe-drafts/{eventId}/{allPaths=**} {
+  allow read: if rufeInternal();
+  allow create, update: if rufeSuper() && rufeAllowedUpload();
+  allow delete: if rufeSuper();
+}
+match /rufe-public/{eventId}/{allPaths=**} {
+  allow read: if true;
+  allow write: if false;
+}
