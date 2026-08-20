@@ -95,10 +95,10 @@ function enableDragScroll(el){
 
 function storyMeta(index,number){
   const items=[
-    {k:'PANORAMA DEL CENSO',title:'familias con registro nominal',text:'Son núcleos familiares que cuentan con al menos una persona identificada en la base consolidada del corte.',link:'#territorio',label:'Explorar dónde están →',img:'assets/alcaldia.jpg'},
-    {k:'VERIFICACIÓN PRIORITARIA',title:'casos iniciales para verificar',text:'Corresponden a marcas censales “no habitable” o “destruida”. Orientan la prioridad, pero no reemplazan una inspección estructural.',link:'#vivienda',label:'Entender la vivienda →',img:'assets/iglesia-afectada.jpg'},
-    {k:'ENFOQUE DIFERENCIAL',title:'personas en grupos de edad priorizados',text:'La suma de menores de edad y personas de 60 años o más ayuda a orientar medidas de asistencia y acompañamiento.',link:'#poblacion',label:'Ver caracterización →',img:'assets/alcaldia.jpg'},
-    {k:'CALIDAD DEL DATO',title:'núcleos preenumerados vacíos',text:'Deben confirmarse como filas de plantilla, completarse o excluirse mediante una depuración documentada para evitar sobreestimaciones.',link:'#calidad',label:'Ver qué falta depurar →',img:'assets/iglesia-afectada.jpg'}
+    {k:'PANORAMA DEL CENSO',title:'familias con registro nominal',text:'Son núcleos familiares que cuentan con al menos una persona identificada en la base consolidada del corte.',link:'#territorio',label:'Explorar dónde están →',img:'assets/photos/photo-04.jpg'},
+    {k:'VERIFICACIÓN PRIORITARIA',title:'casos iniciales para verificar',text:'Corresponden a marcas censales “no habitable” o “destruida”. Orientan la prioridad, pero no reemplazan una inspección estructural.',link:'#vivienda',label:'Entender la vivienda →',img:'assets/photos/photo-11.jpg'},
+    {k:'ENFOQUE DIFERENCIAL',title:'personas en grupos de edad priorizados',text:'La suma de menores de edad y personas de 60 años o más ayuda a orientar medidas de asistencia y acompañamiento.',link:'#poblacion',label:'Ver caracterización →',img:'assets/photos/photo-06.jpg'},
+    {k:'CALIDAD DEL DATO',title:'núcleos preenumerados vacíos',text:'Deben confirmarse como filas de plantilla, completarse o excluirse mediante una depuración documentada para evitar sobreestimaciones.',link:'#calidad',label:'Ver qué falta depurar →',img:'assets/photos/photo-03.jpg'}
   ];
   return {...items[index]||items[0],number};
 }
