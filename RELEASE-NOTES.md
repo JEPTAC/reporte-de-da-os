@@ -1,44 +1,32 @@
-# Release Notes — Portal RUFE V6 Final
+# Release notes — Portal RUFE V6.1 Inmersivo
 
-**Fecha de compilación:** 20 de agosto de 2026  
-**Tipo:** reconstrucción completa / reemplazo limpio
+## Dirección de producto
 
-## Núcleo público
+V6.1 reconstruye la capa pública del portal. El objetivo deja de ser “mostrar un dashboard” y pasa a ser “guiar a la población para entender la información”.
 
-- Navegación editorial reconstruida.
-- Banner institucional con palabra “Emergencia” azul.
-- Buscador global no modal.
-- Mapa propio sin Leaflet/unpkg, con 25 referencias.
-- Territorio con filtros, ranking, tabla, comparación y CSV.
-- Vivienda reestructurada con interpretación técnica y base común.
-- Población, calidad, metodología y fuentes.
-- Evolución de cortes.
-- Centro documental y galería.
-- Vista imprimible/JSON del corte vigente e histórico.
-- PWA con estrategia de caché orientada a evitar HTML obsoleto.
+## Experiencia nueva
 
-## Gestión
+### 1. Inicio narrativo
+El inicio recupera el scrollytelling y lo amplía. El desplazamiento cambia cifra, narrativa, imagen y enlace relacionado para presentar progresivamente familias, vivienda prioritaria, enfoque diferencial y calidad del dato.
 
-- Firebase Auth con usuarios existentes.
-- Roles Editor / Validador / Administrador / Super Admin.
-- Crear, cambiar rol, activar, desactivar, recuperar contraseña y eliminar usuarios.
-- Edición territorial y de contenido.
-- Importación CSV robusta.
-- Carga de archivos.
-- Validación previa a revisión y aprobación.
-- Publicación protegida por revisión aprobada de la misma revisión.
-- Auditoría.
-- Copia versionada de archivos.
-- Snapshot público vigente + snapshot histórico completo por corte.
+### 2. Navegación tipo XMB/PSP
+La barra superior funciona como acceso rápido y la navegación lateral agrupa los contenidos según intención de consulta. En móvil se conserva una barra inferior simplificada.
 
-## Seguridad
+### 3. Menús pasables
+Las rutas ciudadanas y paneles clave utilizan carruseles horizontales con scroll-snap, botones anterior/siguiente y gesto de arrastre.
 
-- Separación de borrador interno y publicación ciudadana.
-- Escritura pública bloqueada.
-- Administración de cuentas mediante Admin SDK/Cloud Functions.
-- Límite de archivos de 40 MB.
-- Modelo ciudadano agregado, sin campos nominales del RUFE.
+### 4. Capítulos internos
+Cada módulo público recibe accesos internos y una explicación breve antes de sus gráficas o tablas.
 
-## QA
+### 5. Sistema tipográfico
+- Lectura institucional: Century Gothic y fallbacks geométricos.
+- Titulares: familias condensadas/anchas disponibles en el sistema.
+- Contraste editorial: serif itálica.
+- Acentos emocionales puntuales: cursiva de sistema.
 
-El paquete incluye una suite automatizada en `qa/run_qa.py`. El reporte final está en `QA-REPORT.md` y `QA-REPORT.json`.
+### 6. Accesibilidad de movimiento
+Todas las animaciones quedan reducidas o desactivadas cuando el dispositivo solicita `prefers-reduced-motion`.
+
+## Backend y administración
+
+No se eliminó la arquitectura V6: Firebase, roles, edición, revisión, publicación, histórico, archivos y auditoría continúan funcionando sobre la misma fuente de datos.

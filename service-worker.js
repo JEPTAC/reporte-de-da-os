@@ -1,6 +1,6 @@
-const CACHE='rufe-san-pedro-v6-final-20260820';
+const CACHE='rufe-san-pedro-v6-1-immersive-20260820';
 const CORE=[
-  './','./index.html','./report.html','./styles.css','./report-print.css','./app.js','./report-print.js','./map.js',
+  './','./index.html','./report.html','./styles.css','./report-print.css','./app.js','./experience.js','./report-print.js','./map.js',
   './firebase-config.js','./firebase-service.js','./manifest.json','./data/report-data.js','./data/map-data.js',
   './assets/logo-san-pedro.jpg','./assets/icon-192.png','./assets/icon-512.png','./assets/alcaldia.jpg','./assets/iglesia-afectada.jpg'
 ];

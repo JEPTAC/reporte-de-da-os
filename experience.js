@@ -1,194 +1,191 @@
-(() => {
-  'use strict';
-  const D = window.REPORT_DATA;
-  const $ = (s, r=document) => r.querySelector(s);
-  const $$ = (s, r=document) => [...r.querySelectorAll(s)];
-  const ns = 'http://www.w3.org/2000/svg';
-  const fmt = n => new Intl.NumberFormat('es-CO').format(n);
-  const pct = n => `${Number(n).toFixed(1).replace('.', ',')}%`;
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 
-  function setMouseGlow(){
-    let raf=0;
-    window.addEventListener('pointermove', e => {
-      if(raf) return;
-      raf=requestAnimationFrame(()=>{
-        document.documentElement.style.setProperty('--mx', `${e.clientX}px`);
-        document.documentElement.style.setProperty('--my', `${e.clientY}px`);
-        raf=0;
-      });
-    }, {passive:true});
-  }
+const prefersReduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let revealObserver=null,storyObserver=null;
 
-  function setScrollProgress(){
-    const bar=$('#scrollProgress'); if(!bar) return;
-    const update=()=>{
-      const max=document.documentElement.scrollHeight-innerHeight;
-      const v=max>0 ? Math.min(100,Math.max(0,scrollY/max*100)) : 0;
-      bar.style.width=`${v}%`;
-    };
-    addEventListener('scroll',update,{passive:true}); addEventListener('resize',update,{passive:true}); update();
+const chapterConfig={
+  territorio:{
+    note:['⌖','Empieza por el mapa','Selecciona un sector para ver su ficha. Después puedes comparar el volumen de registros, revisar prioridad y consultar la tabla completa.'],
+    items:[['Mapa','Ubica tu sector','.map-layout'],['Ranking','Compara concentración','.territory-analytics'],['Base territorial','Revisa todos los sectores','.table-panel'],['Filtros','Segmenta la consulta','.territory-toolbar']]
+  },
+  vivienda:{
+    note:['⌂','Primero entiende la categoría','“Habitable”, “averiada”, “no habitable” y “destruida” son marcas consignadas en el censo. La lectura técnica debe hacerse junto con verificación de campo.'],
+    items:[['Resumen','Universo y prioridad','.housing-lead'],['Clasificación','Lee cada marca','.housing-chart-card'],['Qué significa','Interpretación sencilla','.housing-meaning-grid'],['Brechas','Qué falta resolver','.housing-detail-grid']]
+  },
+  poblacion:{
+    note:['◎','Una lectura sobre personas','La caracterización ayuda a orientar la respuesta según edad, ubicación y condiciones diferenciales; no reemplaza una valoración individual del hogar.'],
+    items:[['Sexo','Distribución registrada','#sexChart'],['Edad','Ciclo de vida','#lifeCycleChart'],['Ubicación','Rural y urbana','#locationChart'],['Enfoque','Grupos diferenciales','#differentialKpis']]
+  },
+  calidad:{
+    note:['✓','Qué tan confiable es el corte','Aquí puedes ver qué campos están completos, qué inconsistencias siguen abiertas y qué tareas de depuración deben resolverse antes de un cierre oficial.'],
+    items:[['Completitud','Campos críticos','.quality-layout'],['Hallazgos','Cola de depuración','#qualityIssues'],['Reglas','Aseguramiento del dato','.rules-panel']]
+  },
+  evolucion:{
+    note:['↻','Cada corte conserva su historia','Una nueva publicación no borra la anterior. El histórico permite verificar cómo evolucionaron las cifras y qué cambió entre versiones.'],
+    items:[['Histórico','Cortes publicados','.timeline-hero'],['Comparar','Diferencias entre cortes','.compare-box'],['Resultados','Variaciones clave','#compareResults']]
+  },
+  metodologia:{
+    note:['→','Cómo se convierte un censo en información pública','El proceso separa captura, control, depuración, validación institucional y publicación para mantener trazabilidad.'],
+    items:[['Flujo','Paso a paso','#methodFlow'],['Objeto','Qué cubre el informe','#objectiveScope'],['Límites','Qué no concluye','#limitationsList'],['Reglas','Cómo se consolidó','#appliedRules']]
+  },
+  informes:{
+    note:['▤','Documentos que respaldan el portal','Consulta el informe técnico, piezas visuales y archivos públicos. Usa la búsqueda o filtra por tipo de documento.'],
+    items:[['Biblioteca','Buscar y filtrar','.document-toolbar'],['Documentos','Archivos publicados','#documentGrid'],['Informe fuente','Documento completo','.pdf-panel']]
+  },
+  actualizaciones:{
+    note:['↻','Qué cambió y cuándo','Las actualizaciones públicas permiten conocer la fecha, versión y nota de cambio de cada publicación, sin sobrescribir la historia del portal.'],
+    items:[['Cambios','Línea de tiempo','#publicTimeline'],['Proceso','Cómo se publica','.updates-layout aside']]
+  },
+  fuentes:{
+    note:['§','Cómo leer el portal con contexto','Esta sección explica el evento, la relación entre RUFE y RUD, el marco normativo, las conclusiones y los responsables del documento.'],
+    items:[['Contexto','Evento y alcance','#eventContext'],['RUFE / RUD','Qué acredita','#rufeRud'],['Normativa','Marco aplicable','#regulatoryFramework'],['Conclusiones','Lectura institucional','#conclusionsList']]
   }
+};
 
-  function initReveal(){
-    const selectors=['.panel','.kpi-card','.quick-strip button','.demo-card','.quality-card','.method-step','.priority-action','.matrix-card','.territory-summary-card'];
-    const nodes=$$(selectors.join(',')).filter(n=>!n.closest('.story-visual'));
-    nodes.forEach(n=>n.classList.add('reveal-node'));
-    if(!('IntersectionObserver' in window)){nodes.forEach(n=>n.classList.add('in-view'));return;}
-    const io=new IntersectionObserver(entries=>entries.forEach(e=>{
-      if(e.isIntersecting){e.target.classList.add('in-view');io.unobserve(e.target)}
-    }),{threshold:.08,rootMargin:'0px 0px -5% 0px'});
-    nodes.forEach(n=>io.observe(n));
-  }
+function setupReadingProgress(){
+  const bar=$('#readingProgress span'); if(!bar)return;
+  const update=()=>{
+    const doc=document.documentElement;
+    const max=Math.max(1,doc.scrollHeight-innerHeight);
+    bar.style.width=`${Math.min(100,scrollY/max*100)}%`;
+    $('#topbar')?.classList.toggle('compact-bar',scrollY>24);
+    if(!prefersReduced){
+      const hero=$('#inicioHero');
+      if(hero && $('#view-inicio')?.classList.contains('active')){
+        const y=Math.min(1,scrollY/Math.max(1,innerHeight));
+        hero.style.setProperty('--hero-scroll',y.toFixed(3));
+      }
+    }
+  };
+  addEventListener('scroll',update,{passive:true}); update();
+}
 
-  function parseDisplayNumber(text){
-    const raw=(text||'').trim();
-    if(!/[0-9]/.test(raw)) return null;
-    const isPct=raw.includes('%');
-    let clean=raw.replace(/[^0-9,.-]/g,'');
-    if(clean.includes('.') && !clean.includes(',')) clean=clean.replace(/\./g,'');
-    clean=clean.replace(',','.');
-    const n=Number(clean);
-    if(!Number.isFinite(n)) return null;
-    return {n,isPct,decimals:isPct&&raw.includes(',')?1:0,raw};
-  }
-  function animateValue(el){
-    if(el.dataset.counted==='1') return;
-    const parsed=parseDisplayNumber(el.textContent); if(!parsed) return;
-    el.dataset.counted='1';
-    const {n,isPct,decimals}=parsed; const dur=850; const start=performance.now();
-    const render=v=>{
-      if(isPct) el.textContent=`${v.toFixed(decimals).replace('.',',')}%`;
-      else el.textContent=fmt(Math.round(v));
-    };
-    render(0);
-    const tick=t=>{
-      const p=Math.min(1,(t-start)/dur); const ease=1-Math.pow(1-p,4); render(n*ease);
-      if(p<1) requestAnimationFrame(tick);
-    }; requestAnimationFrame(tick);
-  }
-  function initCountUps(){
-    const targets=$$('.kpi-card strong,.quick-strip b,.story-number,.focus-number,.demo-card strong,.quality-top-card strong,.territory-summary-card strong');
-    if(!('IntersectionObserver' in window)){targets.forEach(animateValue);return;}
-    const io=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){animateValue(e.target);io.unobserve(e.target)}}),{threshold:.35});
-    targets.forEach(t=>io.observe(t));
-  }
+function setupReveal(){
+  revealObserver?.disconnect();
+  if(prefersReduced){$$('.reveal,.view.active .panel,.view.active .page-hero').forEach(x=>x.classList.add('in-view'));return}
+  revealObserver=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in-view');revealObserver.unobserve(e.target)}}),{threshold:.08,rootMargin:'0px 0px -8% 0px'});
+  $$('.view.active .reveal,.view.active .panel,.view.active .page-hero,.view.active .table-panel,.view.active .housing-chart-card,.view.active .meaning-card,.view.active .doc-card,.view.active .issue-card,.view.active .framework-card').forEach((el,i)=>{
+    el.classList.add('reveal');
+    el.style.transitionDelay=`${Math.min(i%6,5)*45}ms`;
+    revealObserver.observe(el);
+  });
+}
 
-  function initAudienceMode(){
-    const btn=$('#audienceMode'); if(!btn) return;
-    let active=false;
-    const paint=()=>{btn.innerHTML=active?'<span>◉</span> Salir de audiencia':'<span>◉</span> Modo audiencia';btn.setAttribute('aria-pressed',String(active));};
-    btn.addEventListener('click', async()=>{
-      active=!active; document.body.classList.toggle('audience-mode',active); paint();
-      try{
-        if(active && !document.fullscreenElement && document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
-        else if(!active && document.fullscreenElement && document.exitFullscreen) await document.exitFullscreen();
-      }catch{}
-    });
-    document.addEventListener('fullscreenchange',()=>{
-      if(!document.fullscreenElement && active){active=false;document.body.classList.remove('audience-mode');paint()}
-    });
-    paint();
-  }
+function setupCarousels(){
+  $$('[data-carousel-controls]').forEach(ctrl=>{
+    if(ctrl.dataset.bound)return; ctrl.dataset.bound='1';
+    const target=$(`#${ctrl.dataset.carouselControls}`); if(!target)return;
+    $$('button',ctrl).forEach(btn=>btn.addEventListener('click',()=>target.scrollBy({left:Number(btn.dataset.dir||1)*Math.min(target.clientWidth*.78,420),behavior:'smooth'})));
+  });
+  const deck=$('#dashboardDeck');
+  $('[data-deck-prev]')?.addEventListener('click',()=>deck?.scrollBy({left:-Math.min(deck.clientWidth*.82,760),behavior:'smooth'}));
+  $('[data-deck-next]')?.addEventListener('click',()=>deck?.scrollBy({left:Math.min(deck.clientWidth*.82,760),behavior:'smooth'}));
+  $$('.scroll-snap,.xmb-nav,.chapter-rail').forEach(el=>enableDragScroll(el));
+}
 
-  const storyData=[
-    {chapter:'CAPÍTULO 01 · ALCANCE',metric:'432',headline:'familias con registro nominal',body:'El censo consolida información nominal de hogares distribuidos en 25 territorios o sectores.',alt:false},
-    {chapter:'CAPÍTULO 02 · PRIORIDAD',metric:'92',headline:'casos iniciales de verificación prioritaria',body:'90 marcas “no habitable” y 2 “destruida” orientan el primer frente de verificación en campo.',alt:false},
-    {chapter:'CAPÍTULO 03 · PERSONAS',metric:'462',headline:'personas con enfoque diferencial por edad',body:'179 menores de edad y 283 personas de 60 años o más requieren una lectura sensible a edad, apoyo y alojamiento.',alt:true},
-    {chapter:'CAPÍTULO 04 · CALIDAD',metric:'111',headline:'núcleos vacíos aún por depurar',body:'La calidad del registro condiciona el cierre: además hay 23 grupos de documentos repetidos y 40 familias sin estado.',alt:true}
+function enableDragScroll(el){
+  if(!el||el.dataset.dragBound)return; el.dataset.dragBound='1';
+  let down=false,startX=0,startLeft=0,moved=false;
+  el.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;down=true;moved=false;startX=e.clientX;startLeft=el.scrollLeft;el.setPointerCapture?.(e.pointerId)});
+  el.addEventListener('pointermove',e=>{if(!down)return;const dx=e.clientX-startX;if(Math.abs(dx)>5)moved=true;el.scrollLeft=startLeft-dx});
+  el.addEventListener('pointerup',e=>{down=false;if(moved&&e.target.closest('a'))e.preventDefault()});
+  el.addEventListener('pointercancel',()=>down=false);
+}
+
+function storyMeta(index,number){
+  const items=[
+    {k:'PANORAMA DEL CENSO',title:'familias con registro nominal',text:'Son núcleos familiares que cuentan con al menos una persona identificada en la base consolidada del corte.',link:'#territorio',label:'Explorar dónde están →',img:'assets/alcaldia.jpg'},
+    {k:'VERIFICACIÓN PRIORITARIA',title:'casos iniciales para verificar',text:'Corresponden a marcas censales “no habitable” o “destruida”. Orientan la prioridad, pero no reemplazan una inspección estructural.',link:'#vivienda',label:'Entender la vivienda →',img:'assets/iglesia-afectada.jpg'},
+    {k:'ENFOQUE DIFERENCIAL',title:'personas en grupos de edad priorizados',text:'La suma de menores de edad y personas de 60 años o más ayuda a orientar medidas de asistencia y acompañamiento.',link:'#poblacion',label:'Ver caracterización →',img:'assets/alcaldia.jpg'},
+    {k:'CALIDAD DEL DATO',title:'núcleos preenumerados vacíos',text:'Deben confirmarse como filas de plantilla, completarse o excluirse mediante una depuración documentada para evitar sobreestimaciones.',link:'#calidad',label:'Ver qué falta depurar →',img:'assets/iglesia-afectada.jpg'}
   ];
-  function initScrollytelling(){
-    const visual=$('#storyVisual'); const steps=$$('.story-step'); if(!visual||!steps.length) return;
-    const chapter=$('#storyChapter'), metric=$('#storyMetric'), headline=$('#storyHeadline'), body=$('#storyBody'), indices=$$('.story-index i');
-    indices.forEach((i,idx)=>i.classList.toggle('active',idx===0));
-    let current=0;
-    function activate(i){
-      if(i===current && steps[i].classList.contains('is-active')) return;
-      current=i; steps.forEach((s,j)=>s.classList.toggle('is-active',j===i)); indices.forEach((n,j)=>n.classList.toggle('active',j===i));
-      const d=storyData[i]; visual.classList.toggle('alt',d.alt);
-      [chapter,metric,headline,body].forEach(el=>{el.animate([{opacity:.15,transform:'translateY(9px)'},{opacity:1,transform:'none'}],{duration:420,easing:'cubic-bezier(.2,.8,.2,1)'})});
-      chapter.textContent=d.chapter; metric.textContent=d.metric; headline.textContent=d.headline; body.textContent=d.body;
-    }
-    if('IntersectionObserver' in window){
-      const io=new IntersectionObserver(entries=>{
-        entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio).slice(0,1).forEach(e=>activate(+e.target.dataset.storyStep));
-      },{threshold:[.35,.55,.75],rootMargin:'-15% 0px -38% 0px'});
-      steps.forEach(s=>io.observe(s));
-    }
-    steps.forEach(s=>s.addEventListener('click',()=>activate(+s.dataset.storyStep)));
-  }
+  return {...items[index]||items[0],number};
+}
 
-  function svgEl(tag, attrs={}){
-    const el=document.createElementNS(ns,tag); Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,String(v))); return el;
-  }
-  function getFilteredTerritories(){
-    if(!D?.territories) return [];
-    const q=($('#sectorSearch')?.value||'').trim().toLowerCase();
-    const minF=+($('#minFamilies')?.value||0); const minP=+($('#minPriority')?.value||0);
-    const onlyCritical=$('#onlyCritical')?.checked; const onlyEmpty=$('#onlyEmpty')?.checked; const onlyNoState=$('#onlyNoState')?.checked;
-    return D.territories.filter(t=>{
-      const priority=t.noHab+t.destroyed;
-      if(q&&!t.sector.toLowerCase().includes(q))return false;
-      if(t.families<minF||priority<minP)return false;
-      if(onlyCritical&&priority===0)return false;
-      if(onlyEmpty&&t.empty===0)return false;
-      if(onlyNoState&&t.noState===0)return false;
-      return true;
-    });
-  }
-  function renderBubblePlot(){
-    const svg=$('#territoryBubblePlot'); if(!svg) return;
-    const tooltip=$('#bubbleTooltip'); const arr=getFilteredTerritories(); svg.innerHTML='';
-    const W=1000,H=420,m={l:65,r:28,t:30,b:55},iw=W-m.l-m.r,ih=H-m.t-m.b;
-    const maxF=Math.max(75,...arr.map(t=>t.families));
-    const rates=arr.map(t=>t.families?(t.noHab+t.destroyed)/t.families*100:0); const maxRate=Math.max(70,Math.ceil(Math.max(0,...rates)/10)*10);
-    const x=v=>m.l+iw*(v/maxF); const y=v=>m.t+ih*(1-v/maxRate);
-    const xTicks=[0,15,30,45,60,75].filter(v=>v<=maxF); const yTicks=[]; for(let v=0;v<=maxRate;v+=10)yTicks.push(v);
-    yTicks.forEach(v=>{const yy=y(v);svg.appendChild(svgEl('line',{x1:m.l,x2:W-m.r,y1:yy,y2:yy,class:'grid'}));const tx=svgEl('text',{x:m.l-12,y:yy+4,'text-anchor':'end',class:'axis-label'});tx.textContent=`${v}%`;svg.appendChild(tx)});
-    xTicks.forEach(v=>{const xx=x(v);svg.appendChild(svgEl('line',{x1:xx,x2:xx,y1:m.t,y2:H-m.b,class:'grid'}));const tx=svgEl('text',{x:xx,y:H-m.b+25,'text-anchor':'middle',class:'axis-label'});tx.textContent=v;svg.appendChild(tx)});
-    const xt=svgEl('text',{x:m.l+iw/2,y:H-9,'text-anchor':'middle',class:'axis-title'});xt.textContent='Familias nominales registradas';svg.appendChild(xt);
-    const yt=svgEl('text',{x:16,y:m.t+ih/2,transform:`rotate(-90 16 ${m.t+ih/2})`,'text-anchor':'middle',class:'axis-title'});yt.textContent='Tasa prioritaria exploratoria*';svg.appendChild(yt);
-    const topNames=new Set([...arr].sort((a,b)=>b.families-a.families).slice(0,6).map(t=>t.sector));
-    arr.forEach(t=>{
-      const priority=t.noHab+t.destroyed; const rate=t.families?priority/t.families*100:0; const cx=x(t.families),cy=y(rate); const r=Math.max(6,Math.min(22,5+Math.sqrt(t.people)*1.2));
-      const fill=rate>=30?'#ff5d67':rate>=15?'#ffb52e':'#2b86ff'; const circle=svgEl('circle',{cx,cy,r,fill,'fill-opacity':.76,stroke:'#fff','stroke-width':2,class:'bubble','data-sector':t.sector});
-      svg.appendChild(circle);
-      if(topNames.has(t.sector)||rate>=30){const label=svgEl('text',{x:cx+r+6,y:cy+3,class:'bubble-label'});label.textContent=t.sector.length>21?t.sector.slice(0,19)+'…':t.sector;svg.appendChild(label)}
-      const show=e=>{
-        if(!tooltip)return; const rect=svg.getBoundingClientRect(); const px=(e.clientX||rect.left+cx/W*rect.width)-rect.left+12; const py=(e.clientY||rect.top+cy/H*rect.height)-rect.top-12;
-        tooltip.innerHTML=`<b>${t.sector}</b><span>${fmt(t.families)} familias · ${fmt(t.people)} personas<br>${fmt(priority)} casos prioritarios · ${pct(rate)}*</span>`;tooltip.hidden=false;tooltip.style.left=`${Math.min(px,rect.width-235)}px`;tooltip.style.top=`${Math.max(8,py)}px`;
-      };
-      circle.addEventListener('pointerenter',show);circle.addEventListener('pointermove',show);circle.addEventListener('pointerleave',()=>{if(tooltip)tooltip.hidden=true});
-      circle.addEventListener('click',()=>{const sel=CSS.escape?CSS.escape(t.sector):t.sector.replace(/"/g,'\\"');const row=document.querySelector(`.rank-row[data-sector="${sel}"]`);if(row)row.click()});
-    });
-    if(!arr.length){const t=svgEl('text',{x:W/2,y:H/2,'text-anchor':'middle',class:'axis-title'});t.textContent='No hay sectores que coincidan con los filtros actuales.';svg.appendChild(t)}
-  }
-  function initBubblePlot(){
-    renderBubblePlot();
-    ['sectorSearch','sortBy','minFamilies','minPriority','onlyCritical','onlyEmpty','onlyNoState'].forEach(id=>{
-      const el=$('#'+id); if(!el)return; el.addEventListener('input',()=>requestAnimationFrame(renderBubblePlot));el.addEventListener('change',()=>requestAnimationFrame(renderBubblePlot));
-    });
-    $('#resetFiltersBtn')?.addEventListener('click',()=>setTimeout(renderBubblePlot,0));
-    $('#themeToggle')?.addEventListener('click',()=>setTimeout(renderBubblePlot,20));
-  }
+function setupScrolly(){
+  storyObserver?.disconnect();
+  const steps=$$('#storySteps .story-step'); if(!steps.length)return;
+  const activate=index=>{
+    steps.forEach((s,i)=>s.classList.toggle('active',i===index));
+    const number=steps[index]?.querySelector('b')?.textContent?.trim()||'—';
+    const m=storyMeta(index,number);
+    const visual=$('#scrollyVisual');
+    visual?.classList.add('swap');
+    setTimeout(()=>{
+      if($('#scrollyNumber'))$('#scrollyNumber').textContent=m.number;
+      if($('#scrollyKicker'))$('#scrollyKicker').textContent=m.k;
+      if($('#scrollyTitle'))$('#scrollyTitle').textContent=m.title;
+      if($('#scrollyText'))$('#scrollyText').textContent=m.text;
+      if($('#scrollyLink')){$('#scrollyLink').href=m.link;$('#scrollyLink').textContent=m.label}
+      if($('#scrollyImage') && !$('#scrollyImage').src.endsWith(m.img))$('#scrollyImage').src=m.img;
+      if($('#scrollyProgress'))$('#scrollyProgress').style.width=`${(index+1)/steps.length*100}%`;
+      visual?.classList.remove('swap');
+    },prefersReduced?0:170);
+  };
+  activate(0);
+  storyObserver=new IntersectionObserver(entries=>{
+    const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
+    if(visible)activate(steps.indexOf(visible.target));
+  },{threshold:[.3,.5,.7],rootMargin:'-22% 0px -22% 0px'});
+  steps.forEach(step=>storyObserver.observe(step));
+}
 
-  function enhanceSearch(){
-    const wrap=$('.global-search-wrap'),input=$('#globalSearch'),results=$('#globalSearchResults'); if(!wrap||!input||!results)return;
-    input.setAttribute('placeholder','Buscar en el informe — sector, cifra, capítulo, hallazgo…');
-    results.setAttribute('aria-label','Resultados de búsqueda en línea');
-    // Nunca crea overlay ni bloquea el resto de la interfaz.
-    results.addEventListener('wheel',e=>e.stopPropagation(),{passive:true});
-  }
-
-  function initRouteFlourish(){
-    $$('.nav-item').forEach((b,i)=>b.style.setProperty('--nav-index',i));
-    document.addEventListener('click',e=>{
-      const nav=e.target.closest('.nav-item,[data-route-jump]'); if(!nav)return;
-      setTimeout(()=>{window.scrollTo({top:0,behavior:'smooth'});initReveal();initCountUps();},40);
+function addChapterRails(){
+  Object.entries(chapterConfig).forEach(([route,cfg])=>{
+    const view=$(`#view-${route}`); if(!view||view.querySelector('.chapter-rail'))return;
+    const hero=view.querySelector('.page-hero,.admin-hero'); if(!hero)return;
+    const rail=document.createElement('div');rail.className='chapter-rail';rail.setAttribute('aria-label','Accesos dentro de esta sección');
+    cfg.items.forEach(([title,desc,selector],i)=>{
+      const a=document.createElement('a');a.href='javascript:void(0)';a.innerHTML=`<small>0${i+1}</small><b>${title}</b><span>${desc}</span>`;
+      a.addEventListener('click',()=>{const target=view.querySelector(selector)||document.querySelector(selector);target?.scrollIntoView({behavior:prefersReduced?'auto':'smooth',block:'start'})});rail.appendChild(a);
     });
-  }
+    hero.insertAdjacentElement('afterend',rail);
+    const [icon,title,text]=cfg.note;
+    const note=document.createElement('aside');note.className='section-explainer reveal';note.innerHTML=`<i aria-hidden="true">${icon}</i><div><b>${title}</b><p>${text}</p></div>`;
+    rail.insertAdjacentElement('afterend',note);
+  });
+}
 
-  function boot(){
-    setMouseGlow(); setScrollProgress(); initReveal(); initCountUps(); initAudienceMode(); initScrollytelling(); initBubblePlot(); enhanceSearch(); initRouteFlourish();
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
-})();
+
+function setupMobileSheet(){
+  const sheet=$('#mobileSheet'),close=$('#mobileSheetClose'),searchBtn=$('#mobileSearchOpen');if(!sheet)return;
+  close?.addEventListener('click',()=>sheet.hidden=true);
+  $$('#mobileSheet a').forEach(a=>a.addEventListener('click',()=>sheet.hidden=true));
+  searchBtn?.addEventListener('click',()=>{sheet.hidden=true;$('#topbar')?.classList.add('search-open');setTimeout(()=>$('#globalSearch')?.focus(),40)});
+}
+
+function setupFloatingGuide(){
+  const btn=$('#floatingGuideToggle'),panel=$('#floatingGuidePanel');if(!btn||!panel||btn.dataset.bound)return;btn.dataset.bound='1';
+  btn.addEventListener('click',()=>{const open=panel.hidden;panel.hidden=!open;btn.setAttribute('aria-expanded',String(open))});
+  document.addEventListener('click',e=>{if(!e.target.closest('#floatingGuide')){panel.hidden=true;btn.setAttribute('aria-expanded','false')}});
+  $$('a',panel).forEach(a=>a.addEventListener('click',()=>panel.hidden=true));
+}
+
+function updateRouteChrome(){
+  const route=(location.hash||'#inicio').slice(1).split('?')[0]||'inicio';
+  $$('[data-xmb]').forEach(a=>a.classList.toggle('active',a.dataset.xmb===route));
+  setupReveal();
+  requestAnimationFrame(()=>$$('.chapter-rail').forEach(enableDragScroll));
+}
+
+function enhanceDynamicContent(){
+  setupScrolly();
+  setupReveal();
+  // Animate newly rendered value bars only when they enter the viewport.
+  $$('.meter-track span,.housing-track span,.rank-bar i b,.location-row i b').forEach(el=>{el.style.willChange='transform'});
+}
+
+setupReadingProgress();
+addChapterRails();
+setupCarousels();
+setupFloatingGuide();
+setupMobileSheet();
+updateRouteChrome();
+
+window.addEventListener('rufe:render',enhanceDynamicContent);
+window.addEventListener('rufe:route',updateRouteChrome);
+window.addEventListener('hashchange',updateRouteChrome);
+
+// app.js can render from the local fallback before this module executes.
+queueMicrotask(()=>{enhanceDynamicContent();setupCarousels()});

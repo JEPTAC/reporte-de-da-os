@@ -1,18 +1,46 @@
-# Smoke test local — Portal RUFE V6 Final
+# Smoke test de publicación — V6.1
 
-Prueba HTTP local ejecutada sobre el paquete final antes de empaquetar.
+Ejecutar después de publicar en GitHub Pages.
 
-Respuestas `200 OK` verificadas para:
+## Inicio
+- [ ] “Emergencia” aparece en azul y “Sísmica” en blanco.
+- [ ] Las dos fotografías reales cargan.
+- [ ] La línea sísmica se anima.
+- [ ] El carrusel “¿Qué quieres consultar?” se puede desplazar.
+- [ ] El scrollytelling cambia cifra y narrativa al avanzar.
+- [ ] En móvil el título completo cabe sin corte horizontal.
 
-- `/`
-- `/index.html`
-- `/report.html`
-- `/styles.css`
-- `/app.js`
-- `/map.js`
-- `/firebase-service.js`
-- `/data/report-data.js`
-- `/assets/informe-consolidado-18-agosto-2026.pdf`
-- `/manifest.json`
+## Navegación
+- [ ] Barra XMB superior abre Panorama, Mapa, Vivienda, Población e Informes.
+- [ ] Sidebar muestra correctamente la sección activa.
+- [ ] Buscador devuelve resultados sin abrir modal.
+- [ ] Los rieles internos llevan a cada bloque de la sección.
 
-La navegación automática con Chromium headless no puede ejecutarse en este runtime por política del entorno. Debe completarse el smoke test de interfaz indicado en `DEPLOYMENT-CHECKLIST.md` una vez publicado en GitHub Pages.
+## Territorio
+- [ ] El mapa muestra teselas OSM.
+- [ ] Se renderizan 25 marcadores.
+- [ ] Clic en marcador abre ficha del sector.
+- [ ] Zoom +/− y restablecer funcionan.
+- [ ] Los filtros actualizan mapa, ranking y tabla.
+
+## Vivienda y población
+- [ ] Las barras de vivienda muestran las seis marcas del corte.
+- [ ] La advertencia técnica permanece visible.
+- [ ] Sexo, ciclo de vida y ubicación se renderizan.
+
+## Informes
+- [ ] Biblioteca filtra por tipo.
+- [ ] PDF fuente abre en el visor o mediante enlace alterno.
+- [ ] `report.html` genera la vista del corte.
+
+## Firebase
+- [ ] Sin autenticación, la consulta pública funciona.
+- [ ] Si Firebase no responde, aparece “Copia local”.
+- [ ] Super Admin puede iniciar sesión.
+- [ ] Guardar un territorio incrementa revisión.
+- [ ] Validar / aprobar / publicar respeta el workflow.
+
+## Consola
+- [ ] No hay errores CORS de Leaflet/unpkg.
+- [ ] No hay referencias locales 404.
+- [ ] No hay excepciones JavaScript.

@@ -1,6 +1,8 @@
-# Arquitectura — Portal RUFE San Pedro V6 Final
+# Arquitectura — Portal RUFE San Pedro V6.1 Inmersivo
 
 ## 1. Principio de diseño
+
+La capa pública V6.1 se reconstruye bajo el modelo **explicar → explorar → verificar**, manteniendo intacta la arquitectura estructurada de publicación y control de versiones.
 
 El portal deja de tratar el PDF como base maestra. Los datos estructurados son la fuente de trabajo; las gráficas, tablas, mapa y reportes son vistas derivadas.
 

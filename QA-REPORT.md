@@ -1,28 +1,39 @@
-# QA — Portal RUFE V6 final
+# QA — Portal RUFE V6.1 inmersivo
 
-**Resultado automatizado:** 82/82 controles aprobados.
+**Resultado automatizado:** 93/93 controles aprobados.
 
-> Alcance: sintaxis, estructura, referencias, consistencia matemática, seguridad declarativa, PWA y arquitectura Firebase. El runtime bloquea la navegación de Chromium headless; por eso el checklist de despliegue incluye un smoke test manual en GitHub Pages.
+> Alcance: sintaxis, estructura, referencias, consistencia matemática, experiencia inmersiva, seguridad declarativa, PWA y arquitectura Firebase. También se realizó una prueba DOM/render aislada con Chromium; el runtime bloquea navegación HTTP local directa, por lo que el checklist mantiene un smoke test final en GitHub Pages.
 
 - ✅ **Portal: idioma español** — es
 - ✅ **Portal: landmark main único** — 1
 - ✅ **Portal: IDs únicos**
-- ✅ **Portal: imágenes con alt** — 4
+- ✅ **Portal: imágenes con alt** — 5
 - ✅ **Portal: referencias locales existentes**
 - ✅ **Informe imprimible: idioma español** — es
 - ✅ **Informe imprimible: landmark main único** — 1
 - ✅ **Informe imprimible: IDs únicos**
 - ✅ **Informe imprimible: imágenes con alt** — 2
 - ✅ **Informe imprimible: referencias locales existentes**
-- ✅ **CSS principal: llaves balanceadas** — 605/605
+- ✅ **CSS principal: llaves balanceadas** — 765/765
 - ✅ **CSS informe: llaves balanceadas** — 135/135
 - ✅ **Banner: “Emergencia” azul**
 - ✅ **Estado contingencia visible**
+- ✅ **Experiencia: scrollytelling restaurado**
+- ✅ **Experiencia: menú ciudadano pasable**
+- ✅ **Experiencia: navegación XMB/PSP**
+- ✅ **Experiencia: rail interno por capítulo**
+- ✅ **Experiencia: guía flotante no bloqueante**
+- ✅ **Experiencia: buscador no modal**
+- ✅ **Experiencia: respeta movimiento reducido**
+- ✅ **Experiencia: progreso de lectura**
+- ✅ **Experiencia móvil: menú completo no bloqueante**
+- ✅ **Experiencia móvil: búsqueda accesible desde menú**
 - ✅ **Sin Leaflet**
 - ✅ **Sin unpkg**
 - ✅ **Mapa OSM sin CDN JavaScript**
 - ✅ **Mapa: zoom, pan y selección**
 - ✅ **JavaScript válido: app.js**
+- ✅ **JavaScript válido: experience.js**
 - ✅ **JavaScript válido: map.js**
 - ✅ **JavaScript válido: firebase-service.js**
 - ✅ **JavaScript válido: firebase-config.js**

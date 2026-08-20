@@ -1,15 +1,25 @@
 {
-  "name":"Portal RUFE · San Pedro",
-  "short_name":"RUFE San Pedro",
-  "description":"Portal público de información y seguimiento RUFE de San Pedro, Valle del Cauca.",
-  "start_url":"./#inicio",
-  "scope":"./",
-  "display":"standalone",
-  "background_color":"#f5f8fc",
-  "theme_color":"#0a5be8",
-  "lang":"es-CO",
-  "icons":[
-    {"src":"assets/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
-    {"src":"assets/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  "name": "Portal RUFE San Pedro · Experiencia informativa",
+  "short_name": "RUFE San Pedro",
+  "description": "Portal informativo RUFE de San Pedro con mapa, scrollytelling, informes, evolución y administración Firebase.",
+  "start_url": "./#inicio",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f8fc",
+  "theme_color": "#0759d9",
+  "lang": "es-CO",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }

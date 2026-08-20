@@ -41,17 +41,30 @@ report,reportp=html_checks('report.html','Informe imprimible')
 css=(ROOT/'styles.css').read_text('utf-8'); printcss=(ROOT/'report-print.css').read_text('utf-8')
 add('CSS principal: llaves balanceadas',css.count('{')==css.count('}'),f"{css.count('{')}/{css.count('}')}")
 add('CSS informe: llaves balanceadas',printcss.count('{')==printcss.count('}'),f"{printcss.count('{')}/{printcss.count('}')}")
-add('Banner: “Emergencia” azul','class="hero-blue">Emergencia' in index and '.hero-blue{color:var(--blue)!important}' in css)
+add('Banner: “Emergencia” azul','class="hero-blue">Emergencia' in index and '.hero-blue{color:#4fb8ff!important}' in css)
 add('Estado contingencia visible','status-chip.contingency' in css and "label.textContent='Copia local'" in (ROOT/'app.js').read_text('utf-8'))
 
 alltext='\n'.join(x.read_text('utf-8',errors='ignore') for x in ROOT.rglob('*') if x.is_file() and x.suffix.lower() in {'.js','.html','.css'})
+
+experience=(ROOT/'experience.js').read_text('utf-8')
+add('Experiencia: scrollytelling restaurado','scrolly-shell' in index and 'setupScrolly' in experience and 'IntersectionObserver' in experience)
+add('Experiencia: menú ciudadano pasable','citizen-carousel' in index and 'scroll-snap' in index and 'setupCarousels' in experience)
+add('Experiencia: navegación XMB/PSP','xmb-nav' in index and '[data-xmb]' in experience)
+add('Experiencia: rail interno por capítulo','chapterConfig' in experience and 'chapter-rail' in css)
+add('Experiencia: guía flotante no bloqueante','floatingGuide' in index and 'floating-guide-panel' in css)
+add('Experiencia: buscador no modal','id="globalSearch"' in index and '<dialog id="search' not in index)
+add('Experiencia: respeta movimiento reducido','prefers-reduced-motion:reduce' in css and 'prefersReduced' in experience)
+add('Experiencia: progreso de lectura','readingProgress' in index and 'setupReadingProgress' in experience)
+add('Experiencia móvil: menú completo no bloqueante','id="mobileSheet"' in index and 'setupMobileSheet' in experience)
+add('Experiencia móvil: búsqueda accesible desde menú','mobileSearchOpen' in index and 'search-open' in css)
+
 add('Sin Leaflet', 'leaflet' not in alltext.lower())
 add('Sin unpkg', 'unpkg.com' not in alltext.lower())
 mapjs=(ROOT/'map.js').read_text('utf-8')
 add('Mapa OSM sin CDN JavaScript','tile.openstreetmap.org' in mapjs and 'RufeSlippyMap' in mapjs)
 add('Mapa: zoom, pan y selección',all(x in mapjs for x in ['pointerdown','pointermove','wheel','setZoom','select(sector']) )
 
-for f in ['app.js','map.js','firebase-service.js','firebase-config.js','report-print.js','service-worker.js','data/report-data.js','data/map-data.js','functions/index.js']:
+for f in ['app.js','experience.js','map.js','firebase-service.js','firebase-config.js','report-print.js','service-worker.js','data/report-data.js','data/map-data.js','functions/index.js']:
     r=subprocess.run(['node','--check',str(ROOT/f)],capture_output=True,text=True)
     add(f'JavaScript válido: {f}',r.returncode==0,(r.stderr or '').strip())
 
@@ -132,9 +145,9 @@ add('Documentación: sin referencia a carpeta intermedia','san-pedro-rufe-portal
 
 failed=[x for x in checks if not x['ok']]
 summary={'passed':len(checks)-len(failed),'failed':len(failed),'total':len(checks)}
-report_data={'summary':summary,'checks':checks,'notes':['QA automatizado estático y de consistencia de datos. La ejecución de navegador headless no está disponible en este entorno por política del runtime; debe completarse un smoke test en GitHub Pages después del despliegue.']}
+report_data={'summary':summary,'checks':checks,'notes':['QA automatizado estático, consistencia de datos y arquitectura. Se realizó además una prueba DOM/render aislada con Chromium mediante contenido embebido; el runtime bloquea navegación HTTP local directa, por lo que sigue siendo obligatorio un smoke test final en GitHub Pages.']}
 (ROOT/'QA-REPORT.json').write_text(json.dumps(report_data,ensure_ascii=False,indent=2),'utf-8')
-lines=['# QA — Portal RUFE V6 final','',f"**Resultado automatizado:** {summary['passed']}/{summary['total']} controles aprobados.",'',"> Alcance: sintaxis, estructura, referencias, consistencia matemática, seguridad declarativa, PWA y arquitectura Firebase. El runtime bloquea la navegación de Chromium headless; por eso el checklist de despliegue incluye un smoke test manual en GitHub Pages.",'']
+lines=['# QA — Portal RUFE V6.1 inmersivo','',f"**Resultado automatizado:** {summary['passed']}/{summary['total']} controles aprobados.",'',"> Alcance: sintaxis, estructura, referencias, consistencia matemática, experiencia inmersiva, seguridad declarativa, PWA y arquitectura Firebase. También se realizó una prueba DOM/render aislada con Chromium; el runtime bloquea navegación HTTP local directa, por lo que el checklist mantiene un smoke test final en GitHub Pages.",'']
 for c in checks: lines.append(f"- {'✅' if c['ok'] else '❌'} **{c['name']}**"+(f" — {c['detail']}" if c['detail'] else ''))
 (ROOT/'QA-REPORT.md').write_text('\n'.join(lines)+'\n','utf-8')
 print(json.dumps(summary,ensure_ascii=False))

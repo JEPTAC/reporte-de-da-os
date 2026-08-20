@@ -1,10 +1,10 @@
-# Lista de despliegue institucional — Portal RUFE V6 Final
+# Lista de despliegue institucional — Portal RUFE V6.1 Inmersivo
 
 ## A. Reemplazo limpio
 
 - [ ] Crear una copia/branch del portal actual.
 - [ ] Vaciar la carpeta publicada del portal RUFE anterior.
-- [ ] Copiar **todo** el contenido de `portal-rufe-san-pedro-v6-final` a la raíz del repositorio.
+- [ ] Copiar **todo** el contenido de `portal-rufe-san-pedro-v6-1-immersive` a la raíz del repositorio.
 - [ ] No conservar `app.js`, `styles.css`, `map.js`, `firebase-service.js`, service workers ni assets de versiones anteriores.
 - [ ] Confirmar que `.nojekyll` también fue copiado.
 

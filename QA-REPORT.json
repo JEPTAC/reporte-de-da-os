@@ -1,8 +1,8 @@
 {
   "summary": {
-    "passed": 82,
+    "passed": 93,
     "failed": 0,
-    "total": 82
+    "total": 93
   },
   "checks": [
     {
@@ -23,7 +23,7 @@
     {
       "name": "Portal: imágenes con alt",
       "ok": true,
-      "detail": "4"
+      "detail": "5"
     },
     {
       "name": "Portal: referencias locales existentes",
@@ -58,7 +58,7 @@
     {
       "name": "CSS principal: llaves balanceadas",
       "ok": true,
-      "detail": "605/605"
+      "detail": "765/765"
     },
     {
       "name": "CSS informe: llaves balanceadas",
@@ -72,6 +72,56 @@
     },
     {
       "name": "Estado contingencia visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Experiencia: scrollytelling restaurado",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Experiencia: menú ciudadano pasable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Experiencia: navegación XMB/PSP",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Experiencia: rail interno por capítulo",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Experiencia: guía flotante no bloqueante",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Experiencia: buscador no modal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Experiencia: respeta movimiento reducido",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Experiencia: progreso de lectura",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Experiencia móvil: menú completo no bloqueante",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Experiencia móvil: búsqueda accesible desde menú",
       "ok": true,
       "detail": ""
     },
@@ -97,6 +147,11 @@
     },
     {
       "name": "JavaScript válido: app.js",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "JavaScript válido: experience.js",
       "ok": true,
       "detail": ""
     },
@@ -417,6 +472,6 @@
     }
   ],
   "notes": [
-    "QA automatizado estático y de consistencia de datos. La ejecución de navegador headless no está disponible en este entorno por política del runtime; debe completarse un smoke test en GitHub Pages después del despliegue."
+    "QA automatizado estático, consistencia de datos y arquitectura. Se realizó además una prueba DOM/render aislada con Chromium mediante contenido embebido; el runtime bloquea navegación HTTP local directa, por lo que sigue siendo obligatorio un smoke test final en GitHub Pages."
   ]
 }

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#0a5be8">
-  <meta name="description" content="Portal oficial RUFE de San Pedro, Valle del Cauca. Información pública, mapas, indicadores, informes y seguimiento del censo de familias afectadas por el sismo del 10 de agosto de 2026.">
+  <meta name="theme-color" content="#0759d9">
+  <meta name="description" content="Portal oficial RUFE de San Pedro, Valle del Cauca. Información pública, territorial, documental y trazable sobre el censo de familias afectadas por el sismo del 10 de agosto de 2026.">
   <title>Portal RUFE | San Pedro, Valle del Cauca</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="assets/logo-san-pedro.jpg">
@@ -12,23 +12,32 @@
 </head>
 <body>
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <div class="ambient ambient-a" aria-hidden="true"></div>
+  <div class="ambient ambient-b" aria-hidden="true"></div>
+  <div class="reading-progress" id="readingProgress" aria-hidden="true"><span></span></div>
 
   <header class="topbar" id="topbar">
     <a class="brand" href="#inicio" aria-label="Portal RUFE San Pedro - Inicio">
-      <img src="assets/logo-san-pedro.jpg" alt="Escudo de la Alcaldía Municipal de San Pedro">
+      <span class="brand-mark"><img src="assets/logo-san-pedro.jpg" alt="Escudo de la Alcaldía Municipal de San Pedro"></span>
       <span class="brand-copy">
         <strong>RUFE <em>San Pedro</em></strong>
-        <small>Sistema de información de familias afectadas</small>
+        <small>Información pública · Sismo 2026</small>
       </span>
     </a>
 
-    <div class="topbar-center">
-      <div class="search-shell" id="searchShell">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3m2.3-5.2a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg>
-        <input id="globalSearch" type="search" autocomplete="off" placeholder="Buscar territorios, cifras, informes, conceptos…" aria-label="Buscar en el portal">
-        <kbd>Ctrl K</kbd>
-        <div class="search-results" id="searchResults" hidden></div>
-      </div>
+    <nav class="xmb-nav" aria-label="Accesos rápidos">
+      <a href="#inicio" data-xmb="inicio"><i>01</i><span>Panorama</span></a>
+      <a href="#territorio" data-xmb="territorio"><i>02</i><span>Mapa</span></a>
+      <a href="#vivienda" data-xmb="vivienda"><i>03</i><span>Vivienda</span></a>
+      <a href="#poblacion" data-xmb="poblacion"><i>04</i><span>Población</span></a>
+      <a href="#informes" data-xmb="informes"><i>05</i><span>Informes</span></a>
+    </nav>
+
+    <div class="topbar-search search-shell" id="searchShell">
+      <span aria-hidden="true">⌕</span>
+      <input id="globalSearch" type="search" autocomplete="off" placeholder="Buscar en el portal…" aria-label="Buscar en el portal">
+      <kbd>Ctrl K</kbd>
+      <div class="search-results" id="searchResults" hidden></div>
     </div>
 
     <div class="top-actions">
@@ -37,34 +46,39 @@
         <span><b>Vigente</b><small id="publicationCut">Corte 18 ago 2026</small></span>
       </button>
       <button class="icon-button" id="themeToggle" type="button" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
-      <button class="admin-entry" id="adminEntry" type="button"><span>Área interna</span><b>↗</b></button>
+      <button class="admin-entry" id="adminEntry" type="button"><span>Gestión interna</span><b>↗</b></button>
     </div>
   </header>
 
   <aside class="sidebar" id="sidebar" aria-label="Navegación principal">
+    <div class="nav-intro">
+      <span class="nav-pill">PORTAL INFORMATIVO</span>
+      <strong>Información clara para <em>decidir y comprender.</em></strong>
+      <small>Explora por tema o sigue el recorrido recomendado.</small>
+    </div>
     <div class="nav-scroll">
       <div class="nav-group">
-        <span class="nav-caption">Panorama</span>
-        <a class="nav-link active" href="#inicio" data-route="inicio"><span>01</span><b>Inicio</b></a>
-        <a class="nav-link" href="#territorio" data-route="territorio"><span>02</span><b>Territorio</b></a>
-        <a class="nav-link" href="#vivienda" data-route="vivienda"><span>03</span><b>Vivienda</b></a>
-        <a class="nav-link" href="#poblacion" data-route="poblacion"><span>04</span><b>Población</b></a>
+        <span class="nav-caption">Conocer la situación</span>
+        <a class="nav-link active" href="#inicio" data-route="inicio"><span>01</span><b>Inicio</b><small>Resumen guiado</small></a>
+        <a class="nav-link" href="#territorio" data-route="territorio"><span>02</span><b>Territorio</b><small>Mapa y sectores</small></a>
+        <a class="nav-link" href="#vivienda" data-route="vivienda"><span>03</span><b>Vivienda</b><small>Estado registrado</small></a>
+        <a class="nav-link" href="#poblacion" data-route="poblacion"><span>04</span><b>Población</b><small>Caracterización</small></a>
       </div>
       <div class="nav-group">
-        <span class="nav-caption">Análisis</span>
-        <a class="nav-link" href="#calidad" data-route="calidad"><span>05</span><b>Calidad del dato</b></a>
-        <a class="nav-link" href="#evolucion" data-route="evolucion"><span>06</span><b>Evolución</b></a>
-        <a class="nav-link" href="#metodologia" data-route="metodologia"><span>07</span><b>Metodología</b></a>
+        <span class="nav-caption">Entender el dato</span>
+        <a class="nav-link" href="#calidad" data-route="calidad"><span>05</span><b>Calidad</b><small>Brechas y depuración</small></a>
+        <a class="nav-link" href="#evolucion" data-route="evolucion"><span>06</span><b>Evolución</b><small>Histórico de cortes</small></a>
+        <a class="nav-link" href="#metodologia" data-route="metodologia"><span>07</span><b>Metodología</b><small>Cómo se construye</small></a>
       </div>
       <div class="nav-group">
-        <span class="nav-caption">Transparencia</span>
-        <a class="nav-link" href="#informes" data-route="informes"><span>08</span><b>Informes y archivos</b></a>
-        <a class="nav-link" href="#actualizaciones" data-route="actualizaciones"><span>09</span><b>Actualizaciones</b></a>
-        <a class="nav-link" href="#fuentes" data-route="fuentes"><span>10</span><b>Fuentes y marco</b></a>
+        <span class="nav-caption">Consultar y verificar</span>
+        <a class="nav-link" href="#informes" data-route="informes"><span>08</span><b>Informes</b><small>Documentos y piezas</small></a>
+        <a class="nav-link" href="#actualizaciones" data-route="actualizaciones"><span>09</span><b>Actualizaciones</b><small>Qué cambió</small></a>
+        <a class="nav-link" href="#fuentes" data-route="fuentes"><span>10</span><b>Fuentes</b><small>Marco y límites</small></a>
       </div>
       <div class="nav-group admin-nav" id="adminNav" hidden>
         <span class="nav-caption">Gestión interna</span>
-        <a class="nav-link" href="#administracion" data-route="administracion"><span>⚙</span><b>Administración</b></a>
+        <a class="nav-link" href="#administracion" data-route="administracion"><span>⚙</span><b>Administración</b><small>Editar y publicar</small></a>
       </div>
     </div>
     <div class="sidebar-foot">
@@ -75,14 +89,15 @@
 
   <main id="contenido" class="main">
     <section class="view active" id="view-inicio" data-view="inicio">
-      <div class="hero">
+      <section class="cinema-hero" id="inicioHero">
+        <div class="cinema-grid" aria-hidden="true"></div>
         <div class="hero-copy">
-          <div class="hero-kicker"><span>INFORME TÉCNICO CONSOLIDADO</span><i>SITREP · RUFE</i></div>
+          <div class="hero-kicker"><span>INFORME TÉCNICO CONSOLIDADO</span><i>SITREP · RUFE · CORTE PÚBLICO</i></div>
           <h1><span class="hero-blue">Emergencia</span><br><strong>sísmica</strong> <em>en San Pedro</em></h1>
-          <p>Información pública para comprender el avance del censo, la situación registrada de las viviendas, la distribución territorial y las acciones de verificación posteriores al sismo del 10 de agosto de 2026.</p>
+          <p class="hero-lead">Un portal para entender, en lenguaje claro, qué registra el censo, dónde se concentran los casos, qué información está pendiente de verificar y qué documentos respaldan cada corte.</p>
           <div class="hero-actions">
-            <a class="btn primary" href="#territorio">Explorar el mapa <span>→</span></a>
-            <a class="btn ghost" href="#informes">Consultar informes</a>
+            <a class="btn primary pulse" href="#territorio">Ver mi territorio <span>→</span></a>
+            <a class="btn glass" href="#informes">Consultar informes</a>
           </div>
           <div class="hero-meta">
             <div><small>EVENTO</small><b>10 AGO 2026 · 7:34 a. m.</b></div>
@@ -91,35 +106,75 @@
           </div>
         </div>
         <div class="hero-media">
-          <figure class="hero-photo hero-photo-main"><img src="assets/iglesia-afectada.jpg" alt="Edificación afectada por el sismo en San Pedro"><figcaption>Registro visual de afectaciones · San Pedro</figcaption></figure>
-          <figure class="hero-photo hero-photo-secondary"><img src="assets/alcaldia.jpg" alt="Alcaldía Municipal de San Pedro"><figcaption>Coordinación municipal</figcaption></figure>
-          <div class="hero-orbit orbit-a"></div><div class="hero-orbit orbit-b"></div>
+          <figure class="hero-photo hero-photo-main"><img src="assets/iglesia-afectada.jpg" alt="Edificación afectada por el sismo en San Pedro"><figcaption><span>Registro visual</span> Afectaciones observadas</figcaption></figure>
+          <figure class="hero-photo hero-photo-secondary"><img src="assets/alcaldia.jpg" alt="Alcaldía Municipal de San Pedro"><figcaption><span>Coordinación</span> Respuesta municipal</figcaption></figure>
+          <div class="hero-data-float"><small>ÚLTIMO CORTE</small><strong>18·08</strong><span>2026</span></div>
           <div class="seismic-line" aria-hidden="true"><svg viewBox="0 0 620 80" preserveAspectRatio="none"><path d="M0 48h65l10-18 14 35 15-54 18 72 15-42 12 7h55l7-16 13 30 10-22 13 10h60l9-19 15 38 18-59 17 70 16-37 11 5h65l11-21 13 43 13-27 11 5h56"/></svg></div>
         </div>
-      </div>
+        <a class="scroll-cue" href="#guia-ciudadana"><span></span><b>Desliza para entender el corte</b></a>
+      </section>
 
-      <div class="public-strip">
+      <section class="public-ribbon" id="guia-ciudadana">
         <div class="public-state"><span></span><b>Información pública vigente</b><small id="lastUpdateText">Última actualización: 18 de agosto de 2026</small></div>
-        <p>Las cifras de vivienda corresponden a marcas consignadas en el censo y <strong>no equivalen por sí solas a un dictamen estructural.</strong></p>
-      </div>
+        <p><strong>Importante:</strong> las categorías de vivienda son marcas del censo y no equivalen por sí solas a un dictamen estructural.</p>
+      </section>
 
-      <section class="section-block kpi-section">
-        <div class="section-head"><div><span class="eyebrow">PANORAMA DEL CORTE</span><h2>La situación, <em>en cuatro cifras</em></h2></div><p>Indicadores agregados del último corte público disponible.</p></div>
+      <section class="citizen-guide section-block reveal">
+        <div class="section-head immersive"><div><span class="eyebrow">¿QUÉ QUIERES CONSULTAR?</span><h2>Encuentra la información <em>sin perderte.</em></h2></div><p>Elige una ruta. Cada módulo explica primero lo esencial y después permite profundizar.</p></div>
+        <div class="citizen-carousel scroll-snap" id="citizenCarousel">
+          <a href="#territorio" class="guide-card blue"><span>01</span><i>⌖</i><h3>Mi sector</h3><p>Busca tu barrio, vereda o territorio y consulta sus cifras.</p><b>Abrir mapa →</b></a>
+          <a href="#vivienda" class="guide-card coral"><span>02</span><i>⌂</i><h3>Viviendas</h3><p>Entiende qué significan habitable, averiada, no habitable y destruida.</p><b>Ver clasificación →</b></a>
+          <a href="#poblacion" class="guide-card violet"><span>03</span><i>◎</i><h3>Población</h3><p>Conoce la caracterización por edad, sexo y ubicación declarada.</p><b>Ver población →</b></a>
+          <a href="#actualizaciones" class="guide-card mint"><span>04</span><i>↻</i><h3>Qué cambió</h3><p>Revisa cada corte y los cambios publicados por la Alcaldía.</p><b>Ver actualizaciones →</b></a>
+          <a href="#informes" class="guide-card magenta"><span>05</span><i>▤</i><h3>Informes</h3><p>Consulta el documento fuente, anexos, fotografías e infografías.</p><b>Ir a documentos →</b></a>
+          <a href="#fuentes" class="guide-card navy"><span>06</span><i>§</i><h3>Fuentes y límites</h3><p>Conoce qué respalda el informe y qué no puede concluirse aún.</p><b>Consultar fuentes →</b></a>
+        </div>
+        <div class="carousel-controls" data-carousel-controls="citizenCarousel"><button type="button" data-dir="-1" aria-label="Anterior">←</button><span>Desliza o usa las flechas</span><button type="button" data-dir="1" aria-label="Siguiente">→</button></div>
+      </section>
+
+      <section class="scrolly-shell section-block" id="scrollyStory">
+        <div class="scrolly-sticky">
+          <div class="scrolly-visual" id="scrollyVisual">
+            <div class="scrolly-media-layer"><img id="scrollyImage" src="assets/iglesia-afectada.jpg" alt="Contexto visual del informe RUFE"></div>
+            <div class="scrolly-overlay"></div>
+            <div class="scrolly-stage-copy">
+              <span class="eyebrow light" id="scrollyKicker">PANORAMA DEL CORTE</span>
+              <strong id="scrollyNumber">432</strong>
+              <h2 id="scrollyTitle">familias con registro nominal</h2>
+              <p id="scrollyText">El censo consolida los núcleos familiares que cuentan con al menos una persona identificada.</p>
+              <a id="scrollyLink" href="#territorio">Explorar este dato →</a>
+            </div>
+            <div class="scrolly-progress"><span id="scrollyProgress"></span></div>
+          </div>
+        </div>
+        <div class="scrolly-steps" id="storySteps" aria-label="Resumen narrativo del corte"></div>
+      </section>
+
+      <section class="section-block kpi-section reveal">
+        <div class="section-head immersive"><div><span class="eyebrow">EL CORTE EN DATOS</span><h2>Cuatro cifras para <em>ubicarse rápido.</em></h2></div><p>Estas cifras corresponden al último corte público disponible y se actualizan con cada publicación validada.</p></div>
         <div class="kpi-grid" id="homeKpis"></div>
       </section>
 
-      <section class="section-block dashboard-grid">
-        <article class="panel panel-large" id="completionPanel"></article>
-        <article class="panel" id="priorityPanel"></article>
-        <article class="panel" id="topTerritoriesPanel"></article>
+      <section class="data-deck section-block reveal">
+        <div class="deck-header"><div><span class="eyebrow">LECTURA RÁPIDA</span><h2>Desliza los <em>tableros clave</em></h2></div><div class="deck-control"><button type="button" data-deck-prev>←</button><span>Paneles interactivos</span><button type="button" data-deck-next>→</button></div></div>
+        <div class="dashboard-deck scroll-snap" id="dashboardDeck">
+          <article class="panel deck-panel completion-deck" id="completionPanel"></article>
+          <article class="panel deck-panel priority-deck" id="priorityPanel"></article>
+          <article class="panel deck-panel territory-deck" id="topTerritoriesPanel"></article>
+          <article class="deck-panel explainer-card"><span class="script-word">recuerda</span><h3>Una cifra no cuenta toda la historia</h3><p>La información del RUFE es operativa y debe leerse junto con validaciones de campo, soportes y decisiones institucionales.</p><a href="#metodologia">Cómo se construye el dato →</a></article>
+        </div>
       </section>
 
-      <section class="story-band">
-        <div class="story-copy"><span class="eyebrow light">LEER EL INFORME COMO UNA HISTORIA</span><h2>De la emergencia al dato.<br><em>Del dato a la decisión.</em></h2><p>El portal conecta territorio, vivienda, población, calidad de la información e informes públicos para que cada actualización tenga contexto y trazabilidad.</p></div>
-        <div class="story-steps" id="storySteps"></div>
+      <section class="story-band reveal">
+        <div class="story-copy"><span class="eyebrow light">UNA RUTA DE INFORMACIÓN</span><h2>De la emergencia al dato.<br><em>Del dato a la decisión.</em></h2><p>El portal conecta territorio, vivienda, población, calidad, documentos y versiones para que la información pública tenga contexto y trazabilidad.</p></div>
+        <div class="story-cta-grid">
+          <a href="#territorio"><span>01</span><b>Ubicar</b><small>Dónde está la información</small></a>
+          <a href="#vivienda"><span>02</span><b>Entender</b><small>Qué significan las marcas</small></a>
+          <a href="#calidad"><span>03</span><b>Verificar</b><small>Qué falta depurar</small></a>
+          <a href="#informes"><span>04</span><b>Consultar</b><small>Qué documentos lo respaldan</small></a>
+        </div>
       </section>
     </section>
-
     <section class="view" id="view-territorio" data-view="territorio">
       <div class="page-hero compact aqua">
         <div><span class="eyebrow">EXPLORADOR TERRITORIAL</span><h1>El mapa como <em>puerta de entrada</em> a los datos</h1><p>Selecciona una localización y todo el panel se segmentará sobre ese territorio.</p></div>
@@ -267,8 +322,31 @@
     <a href="#inicio"><span>⌂</span><b>Inicio</b></a><a href="#territorio"><span>⌖</span><b>Mapa</b></a><a href="#vivienda"><span>⌂</span><b>Vivienda</b></a><a href="#informes"><span>▤</span><b>Informes</b></a><button id="mobileMore" type="button"><span>•••</span><b>Más</b></button>
   </nav>
 
-  <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="true"></div>
+  <div class="mobile-sheet" id="mobileSheet" hidden>
+    <div class="mobile-sheet-head"><div><span class="eyebrow">NAVEGAR EL PORTAL</span><h3>¿Qué necesitas consultar?</h3></div><button id="mobileSheetClose" type="button" aria-label="Cerrar">×</button></div>
+    <div class="mobile-sheet-grid">
+      <a href="#territorio"><span>⌖</span><b>Territorio</b><small>Mapa y sectores</small></a>
+      <a href="#poblacion"><span>◎</span><b>Población</b><small>Caracterización</small></a>
+      <a href="#calidad"><span>✓</span><b>Calidad</b><small>Brechas del dato</small></a>
+      <a href="#evolucion"><span>↻</span><b>Evolución</b><small>Histórico</small></a>
+      <a href="#metodologia"><span>→</span><b>Metodología</b><small>Cómo se construye</small></a>
+      <a href="#actualizaciones"><span>◷</span><b>Actualizaciones</b><small>Qué cambió</small></a>
+      <a href="#fuentes"><span>§</span><b>Fuentes</b><small>Marco y límites</small></a>
+      <button id="mobileSearchOpen" type="button"><span>⌕</span><b>Buscar</b><small>En todo el portal</small></button>
+    </div>
+  </div>
 
+  <div class="floating-guide" id="floatingGuide">
+    <button class="floating-guide-toggle" id="floatingGuideToggle" type="button" aria-expanded="false"><span>?</span><b>¿Qué buscas?</b></button>
+    <div class="floating-guide-panel" id="floatingGuidePanel" hidden>
+      <a href="#territorio">⌖ Buscar mi territorio</a>
+      <a href="#vivienda">⌂ Entender las viviendas</a>
+      <a href="#actualizaciones">↻ Ver qué cambió</a>
+      <a href="#informes">▤ Consultar un informe</a>
+    </div>
+  </div>
+
+  <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="true"></div>
   <dialog id="compareDialog" class="compare-dialog"><form method="dialog"><button class="dialog-close" aria-label="Cerrar">×</button><div id="compareDialogBody"></div></form></dialog>
 
   <script src="data/report-data.js"></script>
@@ -277,5 +355,6 @@
   <script src="map.js"></script>
   <script type="module" src="firebase-service.js"></script>
   <script type="module" src="app.js"></script>
+  <script type="module" src="experience.js"></script>
 </body>
 </html>
