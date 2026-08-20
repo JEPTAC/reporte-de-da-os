@@ -364,3 +364,40 @@ body{font-size:17px;line-height:1.65}
   #view-administracion .login-grid{grid-template-columns:1fr}
   #view-administracion .admin-hero h1{font-size:42px}
 }
+
+/* =========================================================
+   AJUSTE PUNTUAL SOLICITADO: títulos navegables del panel admin
+   Alcance estricto: solo #view-administracion .admin-tabs.
+   ========================================================= */
+#view-administracion .admin-tabs{
+  gap:14px;
+  padding:14px;
+  align-items:center;
+}
+#view-administracion .admin-tabs button{
+  min-height:62px;
+  padding:18px 26px;
+  border-radius:18px;
+  font-size:clamp(20px,1.45vw,24px) !important;
+  line-height:1.15;
+  font-weight:950;
+  letter-spacing:.005em;
+}
+#view-administracion .admin-tabs button.active{
+  box-shadow:0 16px 34px rgba(5,41,82,.22);
+}
+#view-administracion .admin-tabs button:focus-visible{
+  outline:3px solid rgba(7,89,217,.34);
+  outline-offset:3px;
+}
+@media (max-width:760px){
+  #view-administracion .admin-tabs{
+    gap:10px;
+    padding:11px;
+  }
+  #view-administracion .admin-tabs button{
+    min-height:56px;
+    padding:16px 20px;
+    font-size:clamp(18px,4.8vw,22px) !important;
+  }
+}
