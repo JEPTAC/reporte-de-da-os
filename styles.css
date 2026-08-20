@@ -528,3 +528,205 @@ section#view-administracion #adminTabs.admin-tabs button[data-admin-tab].active,
   }
 }
 
+/* =========================================================
+   CORRECCIÓN SOLICITADA — TODO EL TEXTO DEL CENTRO DE ADMINISTRACIÓN LEGIBLE
+   Alcance cerrado: únicamente #view-administracion y sus paneles internos.
+   No modifica vistas públicas, datos, rutas ni estructura.
+   ========================================================= */
+#view-administracion{
+  --admin-readable-body:20px;
+  --admin-readable-small:17px;
+  --admin-readable-label:18px;
+  --admin-readable-control:20px;
+}
+
+#view-administracion .admin-hero{
+  padding:52px !important;
+}
+#view-administracion .admin-hero h1{
+  font-size:clamp(62px,5.2vw,86px) !important;
+  line-height:.92 !important;
+  letter-spacing:-.035em !important;
+}
+#view-administracion .admin-hero p{
+  max-width:900px !important;
+  font-size:22px !important;
+  line-height:1.55 !important;
+}
+#view-administracion .eyebrow,
+#view-administracion .eyebrow.light{
+  font-size:17px !important;
+  letter-spacing:.16em !important;
+  line-height:1.35 !important;
+}
+
+#view-administracion #adminTabs.admin-tabs{
+  gap:14px !important;
+  padding:18px !important;
+  min-height:auto !important;
+  flex-wrap:wrap !important;
+  overflow:visible !important;
+}
+#view-administracion #adminTabs.admin-tabs button[data-admin-tab]{
+  min-height:58px !important;
+  padding:17px 24px !important;
+  border-radius:18px !important;
+  font-size:clamp(22px,1.45vw,27px) !important;
+  line-height:1.15 !important;
+  font-weight:950 !important;
+  letter-spacing:-.015em !important;
+  white-space:normal !important;
+  text-align:center !important;
+}
+#view-administracion #adminTabs.admin-tabs button[data-admin-tab="content"]{min-width:270px !important;}
+#view-administracion #adminTabs.admin-tabs button[data-admin-tab="workflow"]{min-width:330px !important;}
+
+#view-administracion .signed-user{
+  min-width:300px !important;
+  padding:20px !important;
+}
+#view-administracion .signed-user b{font-size:21px !important;line-height:1.25 !important;}
+#view-administracion .signed-user small{font-size:17px !important;line-height:1.35 !important;}
+#view-administracion .role-badge{font-size:16px !important;padding:8px 12px !important;}
+
+#view-administracion .login-card{padding:34px !important;}
+#view-administracion .login-card h2{font-size:clamp(42px,3vw,56px) !important;line-height:1.05 !important;}
+#view-administracion .login-card p{font-size:20px !important;line-height:1.6 !important;}
+
+#view-administracion .admin-section{
+  padding:34px !important;
+}
+#view-administracion .admin-section-head{
+  gap:22px !important;
+  margin-bottom:28px !important;
+}
+#view-administracion .admin-section-head h3{
+  font-size:clamp(38px,2.75vw,52px) !important;
+  line-height:1.05 !important;
+  letter-spacing:-.025em !important;
+}
+#view-administracion .admin-section-head p{
+  max-width:980px !important;
+  font-size:20px !important;
+  line-height:1.55 !important;
+}
+
+#view-administracion .admin-grid{gap:18px !important;}
+#view-administracion .admin-card{
+  padding:26px !important;
+  border-radius:24px !important;
+}
+#view-administracion .admin-card span{
+  font-size:18px !important;
+  line-height:1.35 !important;
+  font-weight:850 !important;
+}
+#view-administracion .admin-card strong{
+  font-size:clamp(54px,4vw,72px) !important;
+  line-height:1 !important;
+}
+#view-administracion .admin-card p{
+  font-size:18px !important;
+  line-height:1.45 !important;
+}
+
+#view-administracion .form-grid{gap:18px !important;}
+#view-administracion .field{gap:9px !important;}
+#view-administracion .field label{
+  font-size:18px !important;
+  line-height:1.25 !important;
+  font-weight:950 !important;
+}
+#view-administracion .field input,
+#view-administracion .field select,
+#view-administracion .field textarea{
+  min-height:58px !important;
+  padding:15px 18px !important;
+  border-radius:15px !important;
+  font-size:20px !important;
+  line-height:1.45 !important;
+}
+#view-administracion .field textarea{min-height:170px !important;}
+#view-administracion details summary{
+  font-size:22px !important;
+  line-height:1.35 !important;
+  font-weight:950 !important;
+  padding:10px 0 !important;
+}
+
+#view-administracion .btn,
+#view-administracion button.btn{
+  min-height:56px !important;
+  padding:15px 24px !important;
+  font-size:20px !important;
+  line-height:1.2 !important;
+}
+#view-administracion .btn.small,
+#view-administracion button.btn.small{
+  min-height:50px !important;
+  padding:13px 20px !important;
+  font-size:18px !important;
+}
+
+#view-administracion .workflow-steps{gap:16px !important;}
+#view-administracion .workflow-step{padding:22px !important;border-radius:20px !important;}
+#view-administracion .workflow-step b{font-size:22px !important;line-height:1.25 !important;}
+#view-administracion .workflow-step small{font-size:18px !important;line-height:1.4 !important;}
+
+#view-administracion .media-drop{padding:28px !important;}
+#view-administracion .media-drop p,
+#view-administracion .access-denied{
+  font-size:20px !important;
+  line-height:1.55 !important;
+}
+#view-administracion .access-denied{padding:28px !important;}
+
+#view-administracion .admin-table th,
+#view-administracion .admin-table td{
+  padding:18px 20px !important;
+  font-size:18px !important;
+  line-height:1.35 !important;
+}
+#view-administracion .admin-table th{
+  font-size:16px !important;
+  letter-spacing:.08em !important;
+}
+#view-administracion .admin-table select{
+  min-height:50px !important;
+  padding:10px 14px !important;
+  font-size:18px !important;
+}
+
+#view-administracion .audit-list{gap:14px !important;}
+#view-administracion .audit-item{
+  grid-template-columns:210px minmax(0,1fr) 260px !important;
+  gap:18px !important;
+  padding:18px 0 !important;
+}
+#view-administracion .audit-item time,
+#view-administracion .audit-item>small{font-size:16px !important;line-height:1.35 !important;}
+#view-administracion .audit-item b{font-size:20px !important;line-height:1.3 !important;}
+#view-administracion .audit-item small{font-size:17px !important;line-height:1.35 !important;}
+
+@media (max-width:900px){
+  #view-administracion .admin-hero{padding:34px !important;}
+  #view-administracion .admin-hero h1{font-size:clamp(48px,10vw,66px) !important;}
+  #view-administracion .admin-hero p{font-size:19px !important;}
+  #view-administracion #adminTabs.admin-tabs button[data-admin-tab]{
+    min-height:54px !important;
+    padding:15px 20px !important;
+    font-size:clamp(20px,5vw,24px) !important;
+  }
+  #view-administracion #adminTabs.admin-tabs button[data-admin-tab="content"],
+  #view-administracion #adminTabs.admin-tabs button[data-admin-tab="workflow"]{min-width:0 !important;}
+  #view-administracion .admin-section{padding:24px !important;}
+  #view-administracion .admin-section-head h3{font-size:clamp(32px,7vw,42px) !important;}
+  #view-administracion .admin-section-head p,
+  #view-administracion .field input,
+  #view-administracion .field select,
+  #view-administracion .field textarea,
+  #view-administracion .media-drop p,
+  #view-administracion .access-denied{font-size:18px !important;}
+  #view-administracion .field label{font-size:17px !important;}
+  #view-administracion .audit-item{grid-template-columns:1fr !important;}
+}
