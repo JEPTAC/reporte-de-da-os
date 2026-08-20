@@ -1,3 +1,54 @@
-<!DOCTYPE html>
-<html lang="es"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Vista imprimible · RUFE San Pedro</title><link rel="stylesheet" href="styles.css"/></head>
-<body class="print-body"><main class="print-report"><header class="print-header"><img src="assets/logo-san-pedro.svg" alt="Logo RUFE"/><div><small>INFORME TÉCNICO CONSOLIDADO</small><h1>Emergencia sísmica en San Pedro</h1><p>Corte público vigente: 18 de agosto de 2026 · Versión v3.0</p></div></header><section class="print-grid" id="printSummary"></section><section class="print-block"><h2>Lectura ejecutiva</h2><p>La base consolida 432 familias nominales y 1.024 personas únicas estimadas. Se identifican 92 casos de verificación prioritaria por marca censal de vivienda no habitable o destruida, 40 familias sin estado registrado y 111 núcleos vacíos que deben depurarse para evitar sobreestimación.</p></section><section class="print-block"><h2>Territorios con mayor prioridad</h2><div id="printTerritories"></div></section></main><script src="data.js"></script><script>const d=window.RUFE_DATA;const s=d.summary;document.getElementById('printSummary').innerHTML=[['Familias nominales',s.families],['Personas únicas',s.people],['Con estado',s.withStatus],['Sin estado',s.withoutStatus],['Núcleos vacíos',s.empty],['Prioridad',s.housing.noHab+s.housing.destroyed]].map(x=>`<article class="print-kpi"><small>${x[0]}</small><strong>${x[1]}</strong></article>`).join('');document.getElementById('printTerritories').innerHTML='<ol>'+d.sectors.sort((a,b)=>(b.noHab+b.destroyed)-(a.noHab+a.destroyed)).slice(0,8).map(t=>`<li><b>${t.name}</b> · prioridad ${t.noHab+t.destroyed} · familias ${t.families} · personas ${t.people}</li>`).join('')+'</ol>';</script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0a5be8">
+  <title>Informe RUFE — Vista imprimible | San Pedro</title>
+  <link rel="icon" href="assets/logo-san-pedro.jpg">
+  <link rel="stylesheet" href="report-print.css">
+</head>
+<body>
+  <div class="print-toolbar" role="toolbar" aria-label="Herramientas del informe">
+    <a href="index.html#informes">← Volver al portal</a>
+    <div class="source-state" id="printSourceState"><span></span><b>Preparando información…</b></div>
+    <button id="downloadJson" type="button">Descargar datos JSON</button>
+    <button class="primary" id="printReport" type="button">Imprimir / guardar PDF</button>
+  </div>
+
+  <main class="report" id="reportRoot" aria-live="polite">
+    <header class="cover">
+      <div class="cover-brand">
+        <img src="assets/logo-san-pedro.jpg" alt="Escudo de la Alcaldía Municipal de San Pedro">
+        <div><b>ALCALDÍA MUNICIPAL DE SAN PEDRO</b><span>Valle del Cauca · Portal RUFE</span></div>
+      </div>
+      <div class="cover-grid">
+        <div class="cover-copy">
+          <span class="kicker">INFORME TÉCNICO CONSOLIDADO</span>
+          <h1><em>Emergencia</em><br>sísmica</h1>
+          <p id="reportSubtitle">Avance del diligenciamiento RUFE y censo de familias afectadas</p>
+          <div class="cover-meta" id="coverMeta"></div>
+        </div>
+        <figure><img src="assets/iglesia-afectada.jpg" alt="Edificación afectada por el sismo en San Pedro"><figcaption>Registro visual incorporado al portal</figcaption></figure>
+      </div>
+      <div class="cover-kpis" id="coverKpis"></div>
+      <div class="warning">La información es preliminar y operativa. La clasificación censal de vivienda no constituye por sí sola un dictamen profesional de seguridad estructural.</div>
+    </header>
+
+    <section class="sheet" id="executiveSheet"><div class="sheet-head"><span>01</span><div><small>RESUMEN EJECUTIVO</small><h2>Panorama del corte</h2></div></div><div id="executiveSummary" class="prose-grid"></div><div id="completionPrint" class="metrics-panel"></div></section>
+    <section class="sheet"><div class="sheet-head"><span>02</span><div><small>VIVIENDA</small><h2>Clasificación registrada</h2></div></div><div class="two-col"><div id="housingPrint"></div><aside class="callout" id="housingCallout"></aside></div><div id="housingInterpretationPrint" class="list-grid"></div></section>
+    <section class="sheet"><div class="sheet-head"><span>03</span><div><small>POBLACIÓN</small><h2>Caracterización de las personas registradas</h2></div></div><div class="three-col" id="populationPrint"></div><div class="age-bars" id="lifeCyclePrint"></div></section>
+    <section class="sheet landscape"><div class="sheet-head"><span>04</span><div><small>TERRITORIO</small><h2>Distribución por sectores</h2></div></div><p class="lead" id="territorialReadingPrint"></p><div class="table-wrap"><table><thead><tr><th>Territorio</th><th>Familias</th><th>Personas</th><th>No hab.</th><th>Destr.</th><th>Sin estado*</th><th>Vacíos</th><th>Prioridad</th></tr></thead><tbody id="territoryPrint"></tbody></table></div><small class="footnote">* El valor territorial de “sin estado” procede de la tabla fuente y se interpreta junto con los núcleos vacíos.</small></section>
+    <section class="sheet"><div class="sheet-head"><span>05</span><div><small>CALIDAD DEL DATO</small><h2>Brechas para la decisión</h2></div></div><div class="issue-print" id="qualityPrint"></div></section>
+    <section class="sheet"><div class="sheet-head"><span>06</span><div><small>METODOLOGÍA Y CONTROL</small><h2>Cómo se consolida y valida</h2></div></div><div class="flow-print" id="methodologyPrint"></div><div class="two-col lower"><div><h3>Limitaciones técnicas</h3><div id="limitationsPrint" class="numbered"></div></div><div><h3>Reglas de aseguramiento</h3><div id="qualityRulesPrint" class="numbered"></div></div></div></section>
+    <section class="sheet"><div class="sheet-head"><span>07</span><div><small>PRIORIZACIÓN</small><h2>Acciones y siguiente hito</h2></div></div><div class="priority-print" id="prioritiesPrint"></div><div class="matrix-print" id="matrixPrint"></div></section>
+    <section class="sheet"><div class="sheet-head"><span>08</span><div><small>CONCLUSIONES Y FUENTES</small><h2>Cierre técnico del corte</h2></div></div><div id="conclusionsPrint" class="numbered strong"></div><div class="source-box"><h3>RUFE y RUD</h3><p id="rufeRudPrint"></p></div><div class="signatures" id="signaturesPrint"></div></section>
+  </main>
+
+  <script src="data/report-data.js"></script>
+  <script src="data/map-data.js"></script>
+  <script src="firebase-config.js"></script>
+  <script type="module" src="firebase-service.js"></script>
+  <script type="module" src="report-print.js"></script>
+</body>
+</html>

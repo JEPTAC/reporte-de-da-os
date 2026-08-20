@@ -1,304 +1,263 @@
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const fmt=n=>Number(n||0).toLocaleString('es-CO');
+const pct=n=>`${Number(n||0).toFixed(1).replace('.',',')}%`;
+const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const slug=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const parseDate=v=>{if(!v)return null;if(v?.toDate)return v.toDate();const d=new Date(v);return isNaN(d)?null:d};
+const niceDate=v=>{const d=parseDate(v);return d?d.toLocaleDateString('es-CO',{day:'numeric',month:'long',year:'numeric'}):String(v||'—')};
+const shortDate=v=>{const d=parseDate(v);return d?d.toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'}).replace('.',''):String(v||'—')};
+const number=val=>Math.max(0,Number(val)||0);
+const palette={blue:'#0a5be8',teal:'#0c9485',green:'#38a169',orange:'#f0a11e',amber:'#f0a11e',red:'#d93c45',darkred:'#9e2632',violet:'#7655d9',magenta:'#c63f92',gray:'#91a2b5',yellow:'#f4c542',mint:'#27b99a',aqua:'#08a8c6'};
+const PHOTO_LIBRARY=[
+  {src:'assets/photos/photo-11.jpg',title:'Afectación de cubierta',description:'Abertura y pérdida de elementos de cubierta en vivienda.',date:'2026-08-18'},
+  {src:'assets/photos/photo-17.jpg',title:'Daño interior',description:'Registro interior de material desprendido y afectación en muros.',date:'2026-08-18'},
+  {src:'assets/photos/photo-21.jpg',title:'Fisura en muro',description:'Afectación visible para soporte de verificación técnica.',date:'2026-08-18'},
+  {src:'assets/photos/photo-22.jpg',title:'Escombros en vivienda',description:'Registro de elementos desprendidos en espacio interior.',date:'2026-08-18'},
+  {src:'assets/photos/photo-24.jpg',title:'Cubierta afectada',description:'Registro visual complementario de cubierta y estructura.',date:'2026-08-18'},
+  {src:'assets/photos/photo-29.jpg',title:'Daño en techo',description:'Evidencia fotográfica de pérdida de elementos de cubierta.',date:'2026-08-18'}
+];
 
-(() => {
-  const data = window.RUFE_DATA;
-  const summary = data.summary;
-  const sectors = data.sectors.map(s => ({...s, priority: s.noHab + s.destroyed, rate: (s.noHab + s.destroyed) / Math.max(s.families, 1)}));
+let DATA=null, SOURCE='fallback', releases=[], map=null;
+let territoryFilters={search:'',sort:'families',minFamilies:0,onlyPriority:false,selected:null,compare:new Set()};
+let housingMode='pct', docFilter='all', admin={draft:null,territories:[],workflow:null};
 
-  const fmt = n => new Intl.NumberFormat('es-CO').format(n);
-  const q = sel => document.querySelector(sel);
-  const qa = sel => [...document.querySelectorAll(sel)];
-  const maxPriority = Math.max(...sectors.map(s => s.priority));
-  const state = { selected: null, view: 'cards', filter: '', sort: 'families', onlyPriority: false };
+function toast(message,type='info',timeout=3600){const el=document.createElement('div');el.className=`toast ${type}`;el.textContent=message;$('#toastStack').appendChild(el);setTimeout(()=>el.remove(),timeout)}
+function safeArray(v){return Array.isArray(v)?v:[]}
+function mergedTerritories(data=DATA){const geo=window.TERRITORY_MAP_DATA||[];return safeArray(data?.territories).map(t=>({...t,...(geo.find(g=>g.sector===t.sector)||{}),...t}));}
+function derived(t){const priority=number(t.noHab)+number(t.destroyed);return {...t,priority,rate:number(t.families)?priority/number(t.families)*100:0}}
+function parseCsv(text){
+  const rows=[];let row=[],field='',quoted=false;const input=String(text||'').replace(/^\uFEFF/,'');
+  for(let i=0;i<input.length;i++){const c=input[i],n=input[i+1];if(quoted){if(c==='"'&&n==='"'){field+='"';i++;}else if(c==='"'){quoted=false;}else field+=c;}else if(c==='"'){quoted=true;}else if(c===','){row.push(field);field='';}else if(c==='\n'){row.push(field);rows.push(row);row=[];field='';}else if(c!=='\r'){field+=c;}}
+  if(field.length||row.length){row.push(field);rows.push(row)}
+  const clean=rows.filter(r=>r.some(v=>String(v).trim()!==''));if(!clean.length)return [];const headers=clean.shift().map(x=>String(x).trim());
+  return clean.map(vals=>Object.fromEntries(headers.map((h,i)=>[h,String(vals[i]??'').trim()])));
+}
 
-  function revealSections(){
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
-    }, {threshold: .12});
-    qa('.reveal').forEach(el => observer.observe(el));
-  }
+function route(){const raw=(location.hash||'#inicio').slice(1).split('?')[0]||'inicio',aliases={resumen:'inicio',documento:'informes',documentos:'informes',marco:'fuentes'},id=aliases[raw]||raw;const view=$(`[data-view="${CSS.escape(id)}"]`)||$('#view-inicio');$$('.view').forEach(v=>v.classList.toggle('active',v===view));$$('.nav-link').forEach(a=>a.classList.toggle('active',a.dataset.route===view.dataset.view));$$('[data-xmb]').forEach(a=>a.classList.toggle('active',a.dataset.xmb===view.dataset.view));if(view.dataset.view==='territorio')setTimeout(()=>map?.render(),80);window.dispatchEvent(new CustomEvent('rufe:route',{detail:{view:view.dataset.view}}));window.scrollTo({top:0,behavior:'instant'});}
+window.addEventListener('hashchange',route);
 
-  function initHero(){
-    const cards = [
-      ['Familias nominales', summary.families, 'Núcleos familiares con registro nominal'],
-      ['Personas únicas', summary.people, 'Estimación consolidada del corte'],
-      ['Con estado', summary.withStatus, 'Familias con marca del inmueble'],
-      ['Prioridad', summary.housing.noHab + summary.housing.destroyed, 'No habitable + destruida']
-    ];
-    q('#heroSummaryGrid').innerHTML = cards.map(([label, value, desc]) => `<article class="hero-mini-kpi"><small>${label}</small><strong>${fmt(value)}</strong><span>${desc}</span></article>`).join('');
-  }
+function renderKpis(){
+  const k=DATA.kpis||{};const items=[
+    ['01',k.families,'Familias con registro nominal','Base familiar consolidada','var(--blue)'],
+    ['02',k.nominalPeople,'Personas registradas','Registros nominales','var(--aqua)'],
+    ['03',k.uniquePeopleEstimated,'Personas únicas estimadas','Cifra técnica provisional','var(--green)'],
+    ['04',k.territories,'Territorios / sectores','Cobertura analizada','var(--violet)']
+  ];
+  $('#homeKpis').innerHTML=items.map(([i,v,l,s,c])=>`<article class="kpi-card" style="--accent:${c}"><span class="kpi-index">${i}</span><strong>${fmt(v)}</strong><b>${l}</b><small>${s}</small></article>`).join('');
+}
+function renderCompletion(){
+  const rows=safeArray(DATA.completeness);$('#completionPanel').innerHTML=`<div class="panel-title"><div><span class="eyebrow">COMPLETITUD</span><h3>Campos críticos del registro</h3></div><small>Base verificable del corte</small></div><div class="completion-list">${rows.map(x=>`<div class="meter-row"><label>${esc(x.label)}</label><div class="meter-track"><span style="width:${Math.min(100,number(x.value))}%"></span></div><b>${pct(x.value)}</b></div>`).join('')}</div>`;
+  const priority=(safeArray(DATA.housing).find(x=>x.label==='No habitable')?.count||0)+(safeArray(DATA.housing).find(x=>x.label==='Destruida')?.count||0);const nohab=safeArray(DATA.housing).find(x=>x.label==='No habitable')?.count||0;const des=safeArray(DATA.housing).find(x=>x.label==='Destruida')?.count||0;
+  $('#priorityPanel').innerHTML=`<div class="priority-panel-rebuild">
+    <div class="panel-title"><div><span class="eyebrow">ATENCIÓN PRIORITARIA</span><h3>Primer universo de verificación</h3><p>Una lectura compacta del grupo que requiere verificación prioritaria.</p></div><span class="priority-percent">${pct(k.families?priority/k.families*100:0)} del universo</span></div>
+    <div class="priority-visual-row">
+      <div class="priority-orbit" style="--priority:${Math.min(100,k.families?priority/k.families*100:0)}%"><div><strong>${fmt(priority)}</strong><small>familias</small></div></div>
+      <div class="priority-metrics">
+        <article class="priority-metric danger"><small>NO HABITABLE</small><b>${fmt(nohab)}</b><span>Requiere verificación prioritaria</span></article>
+        <article class="priority-metric dark"><small>DESTRUIDA</small><b>${fmt(des)}</b><span>Marca censal de mayor severidad</span></article>
+      </div>
+    </div>
+    <div class="priority-explain"><i>!</i><p><b>Cómo leerlo:</b> orienta la prioridad operativa; no constituye por sí solo un dictamen estructural definitivo.</p></div>
+    <a class="priority-link" href="#vivienda">Entender la clasificación <span>→</span></a>
+  </div>`;
+  const top=mergedTerritories().map(derived).sort((a,b)=>b.families-a.families).slice(0,6),max=top[0]?.families||1;$('#topTerritoriesPanel').innerHTML=`<div class="panel-title"><div><span class="eyebrow">TERRITORIO</span><h3>Mayor concentración</h3></div></div><div class="top-bars">${top.map(t=>`<a class="top-bar" href="#territorio" data-sector-link="${esc(t.sector)}"><span>${esc(t.sector)}</span><i><b style="width:${t.families/max*100}%"></b></i><b>${fmt(t.families)}</b></a>`).join('')}</div>`;
+  $$('[data-sector-link]').forEach(a=>a.addEventListener('click',()=>territoryFilters.selected=a.dataset.sectorLink));
+}
+function renderStory(){const k=DATA.kpis||{};const priority=(safeArray(DATA.housing).find(x=>x.label==='No habitable')?.count||0)+(safeArray(DATA.housing).find(x=>x.label==='Destruida')?.count||0);const items=[[k.families,'familias','Registro nominal consolidado'],[priority,'prioridad','Casos iniciales de verificación'],[(k.minors||0)+(k.age60plus||0),'personas','Menores + 60 años o más'],[k.emptyPreEnumerated,'núcleos','Preenumerados vacíos a depurar']];$('#storySteps').innerHTML=items.map((x,i)=>`<article class="story-step"><span>0${i+1}</span><b>${fmt(x[0])}</b><small>${x[1]} · ${x[2]}</small></article>`).join('')}
 
-  function filterSectors(){
-    return sectors
-      .filter(s => s.name.toLowerCase().includes(state.filter.toLowerCase()))
-      .filter(s => !state.onlyPriority || s.priority > 0)
-      .sort((a,b) => {
-        if(state.sort==='name') return a.name.localeCompare(b.name, 'es');
-        if(state.sort==='people') return b.people - a.people;
-        if(state.sort==='priority') return b.priority - a.priority || b.families - a.families;
-        return b.families - a.families;
-      });
-  }
+function filterTerritories(){
+  let rows=mergedTerritories().map(derived);const q=territoryFilters.search.trim().toLowerCase();if(q)rows=rows.filter(t=>String(t.sector).toLowerCase().includes(q)||String(t.reference||'').toLowerCase().includes(q));rows=rows.filter(t=>number(t.families)>=territoryFilters.minFamilies);if(territoryFilters.onlyPriority)rows=rows.filter(t=>t.priority>0);
+  const sort=territoryFilters.sort;rows.sort((a,b)=>sort==='name'?String(a.sector).localeCompare(String(b.sector),'es'):number(b[sort])-number(a[sort]));return rows;
+}
+function initMap(){
+  if(map||!$('#rufeMap'))return;map=new window.RufeSlippyMap($('#rufeMap'),{center:{lat:3.985,lng:-76.22},zoom:12,onSelect:t=>selectTerritory(t.sector,false)});$('#mapZoomIn').addEventListener('click',()=>map.setZoom(map.zoom+1));$('#mapZoomOut').addEventListener('click',()=>map.setZoom(map.zoom-1));$('#mapReset').addEventListener('click',()=>{map.reset();territoryFilters.selected=null;renderTerritoryDetail()});
+}
+function renderTerritory(){
+  initMap();const rows=filterTerritories();$('#territoryCount').textContent=rows.length;$('#territoryFilterSummary').textContent=`${rows.length} sectores visibles · ${fmt(rows.reduce((s,x)=>s+number(x.families),0))} familias`;
+  map?.setPoints(rows);
+  const max=Math.max(1,...rows.map(x=>number(x.families)));$('#territoryBars').innerHTML=rows.slice(0,15).map(t=>`<div class="rank-bar" data-sector="${esc(t.sector)}"><span>${esc(t.sector)}</span><i><b style="width:${number(t.families)/max*100}%"></b></i><b>${fmt(t.families)}</b></div>`).join('');
+  $$('.rank-bar').forEach(e=>e.addEventListener('click',()=>selectTerritory(e.dataset.sector)));
+  const visibleFamilies=rows.reduce((s,x)=>s+number(x.families),0),visiblePeople=rows.reduce((s,x)=>s+number(x.people),0),visiblePriority=rows.reduce((s,x)=>s+number(x.priority),0),topPriority=rows.slice().sort((a,b)=>number(b.priority)-number(a.priority))[0];
+  if($('#territoryBaseSummary'))$('#territoryBaseSummary').innerHTML=`<article><small>SECTORES VISIBLES</small><b>${fmt(rows.length)}</b><span>de ${fmt(mergedTerritories().length)}</span></article><article><small>FAMILIAS</small><b>${fmt(visibleFamilies)}</b><span>en la selección</span></article><article><small>PERSONAS</small><b>${fmt(visiblePeople)}</b><span>registros nominales</span></article><article><small>PRIORIDAD</small><b>${fmt(visiblePriority)}</b><span>${topPriority?`mayor: ${esc(topPriority.sector)}`:'sin casos'}</span></article>`;
+  if($('#territoryCardBase'))$('#territoryCardBase').innerHTML=rows.map(t=>`<article class="territory-base-card ${territoryFilters.selected===t.sector?'selected':''}" data-base-sector="${esc(t.sector)}"><div class="territory-base-card-top"><label class="compare-check" title="Agregar a comparación"><input type="checkbox" data-compare-sector-card="${esc(t.sector)}" ${territoryFilters.compare.has(t.sector)?'checked':''}><span></span></label><div><small>${t.precision==='verified'?'REFERENCIA LOCALIZADA':'REFERENCIA APROXIMADA'}</small><h4>${esc(t.sector)}</h4></div><b class="priority-pill ${t.priority>=10?'high':t.priority>0?'mid':'low'}">${fmt(t.priority)} prioridad</b></div><div class="territory-card-metrics"><span><b>${fmt(t.families)}</b><small>familias</small></span><span><b>${fmt(t.people)}</b><small>personas</small></span><span><b>${fmt(t.noHab)}</b><small>no hab.</small></span><span><b>${fmt(Math.max(0,number(t.noState)-number(t.empty)))}</b><small>sin estado</small></span></div><div class="territory-priority-track"><i style="width:${Math.min(100,t.rate)}%"></i></div><footer><span>${pct(t.rate)} tasa prioritaria</span><button type="button" data-open-sector="${esc(t.sector)}">Ver ficha →</button></footer></article>`).join('');
+  $$('[data-base-sector]').forEach(card=>card.addEventListener('click',e=>{if(e.target.closest('input,button'))return;selectTerritory(card.dataset.baseSector)}));
+  $$('[data-open-sector]').forEach(b=>b.addEventListener('click',()=>selectTerritory(b.dataset.openSector)));
+  $$('[data-compare-sector-card]').forEach(ch=>ch.addEventListener('change',()=>{if(ch.checked){if(territoryFilters.compare.size>=4){ch.checked=false;toast('Puedes comparar hasta 4 territorios.','error');return}territoryFilters.compare.add(ch.dataset.compareSectorCard)}else territoryFilters.compare.delete(ch.dataset.compareSectorCard);renderTerritory()}));
+  $('#territoryTableBody').innerHTML=rows.map(t=>`<tr data-sector="${esc(t.sector)}"><td><input type="checkbox" data-compare-sector="${esc(t.sector)}" ${territoryFilters.compare.has(t.sector)?'checked':''} aria-label="Comparar ${esc(t.sector)}"></td><td><b>${esc(t.sector)}</b></td><td>${fmt(t.families)}</td><td>${fmt(t.people)}</td><td>${fmt(t.noHab)}</td><td>${fmt(t.destroyed)}</td><td>${fmt(t.noState)}</td><td>${fmt(t.empty)}</td><td><b style="color:${t.priority>=10?'var(--red)':t.priority>0?'var(--amber)':'var(--green)'}">${fmt(t.priority)}</b></td></tr>`).join('');
+  $$('#territoryTableBody tr').forEach(tr=>tr.addEventListener('click',e=>{if(e.target.matches('input'))return;selectTerritory(tr.dataset.sector)}));$$('[data-compare-sector]').forEach(ch=>ch.addEventListener('change',()=>{if(ch.checked){if(territoryFilters.compare.size>=4){ch.checked=false;toast('Puedes comparar hasta 4 territorios.','error');return}territoryFilters.compare.add(ch.dataset.compareSector)}else territoryFilters.compare.delete(ch.dataset.compareSector);renderTerritory()}));renderScatter(rows);renderTerritoryDetail();
+}
+function selectTerritory(sector,recenter=true){territoryFilters.selected=sector;const t=mergedTerritories().map(derived).find(x=>x.sector===sector);if(t)map?.select(sector,{recenter});renderTerritoryDetail()}
+function renderTerritoryDetail(){const t=mergedTerritories().map(derived).find(x=>x.sector===territoryFilters.selected);if(!t){$('#territoryDetail').innerHTML=`<div class="empty-state"><span>⌖</span><h3>Selecciona un territorio</h3><p>Haz clic en un marcador, una fila o una barra para ver su ficha completa.</p></div>`;return}
+  const nominalNoState=Math.max(0,number(t.noState)-number(t.empty));$('#territoryDetail').innerHTML=`<div class="territory-head"><small>FICHA TERRITORIAL</small><h2>${esc(t.sector)}</h2><span class="precision-badge"><i class="dot ${t.precision==='verified'?'verified':'approximate'}"></i>${t.precision==='verified'?'Referencia localizada':'Referencia aproximada'}</span></div><div class="territory-stat-grid"><div class="territory-stat"><b>${fmt(t.families)}</b><small>Familias</small></div><div class="territory-stat"><b>${fmt(t.people)}</b><small>Personas</small></div><div class="territory-stat"><b style="color:var(--red)">${fmt(t.priority)}</b><small>Prioridad</small></div><div class="territory-stat"><b>${pct(t.rate)}</b><small>Tasa exploratoria</small></div><div class="territory-stat"><b>${fmt(nominalNoState)}</b><small>Familias sin estado</small></div><div class="territory-stat"><b>${fmt(t.empty)}</b><small>Núcleos vacíos</small></div></div><div class="territory-ref"><b>${esc(t.reference||'Referencia cartográfica')}</b><p>${esc(t.source||'Pendiente de validación geográfica oficial')}</p><p>${Number.isFinite(Number(t.lat))?`${Number(t.lat).toFixed(5)}, ${Number(t.lng).toFixed(5)}`:'Sin coordenadas'}</p>${Number.isFinite(Number(t.lat))?`<a class="btn small ghost" target="_blank" rel="noopener" href="https://www.openstreetmap.org/?mlat=${Number(t.lat)}&mlon=${Number(t.lng)}#map=15/${Number(t.lat)}/${Number(t.lng)}">Abrir referencia OSM ↗</a>`:''}</div>`;
+}
+function renderScatter(rows){const host=$('#territoryScatter');const W=500,H=330,p=40,maxF=Math.max(1,...rows.map(x=>x.families)),maxR=Math.max(1,...rows.map(x=>x.rate));let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Relación entre familias y tasa prioritaria"><line class="scatter-axis" x1="${p}" y1="${H-p}" x2="${W-p}" y2="${H-p}"/><line class="scatter-axis" x1="${p}" y1="${p}" x2="${p}" y2="${H-p}"/><text class="scatter-label" x="${W/2}" y="${H-8}">Familias registradas</text><text class="scatter-label" x="8" y="18">Tasa prioritaria</text>`;rows.forEach(t=>{const x=p+t.families/maxF*(W-p*2),y=H-p-t.rate/maxR*(H-p*2),r=Math.max(4,Math.min(11,Math.sqrt(number(t.people))/2)),color=t.priority>=10?'#d93c45':t.priority>0?'#f0a11e':'#0a5be8';svg+=`<circle class="scatter-dot" data-scatter="${esc(t.sector)}" cx="${x}" cy="${y}" r="${r}" fill="${color}" opacity=".78"><title>${esc(t.sector)} · ${t.families} familias · ${pct(t.rate)}</title></circle>`});svg+='</svg>';host.innerHTML=svg;$$('[data-scatter]',host).forEach(c=>c.addEventListener('click',()=>selectTerritory(c.dataset.scatter)))}
+function compareTerritories(){const rows=mergedTerritories().map(derived).filter(t=>territoryFilters.compare.has(t.sector));if(rows.length<2){toast('Selecciona al menos dos territorios para comparar.','error');return}$('#compareDialogBody').innerHTML=`<span class="eyebrow">COMPARADOR TERRITORIAL</span><h2>${rows.length} territorios seleccionados</h2><div class="compare-dialog-grid">${rows.map(t=>`<article class="compare-sector"><h3>${esc(t.sector)}</h3><b>${fmt(t.families)}</b><small>familias</small><b>${fmt(t.people)}</b><small>personas</small><b style="color:var(--red)">${fmt(t.priority)}</b><small>prioridad · ${pct(t.rate)}</small></article>`).join('')}</div>`;$('#compareDialog').showModal()}
+function exportTerritoryCsv(){const rows=filterTerritories();const cols=['sector','families','people','noHab','destroyed','noState','empty','priority','rate','lat','lng','precision','reference','source'];const csv=[cols.join(','),...rows.map(r=>cols.map(k=>`"${String(r[k]??'').replace(/"/g,'""')}"`).join(','))].join('\n');const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='rufe-san-pedro-territorios.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
 
-  function selectTerritory(name){
-    state.selected = sectors.find(s => s.name === name) || null;
-    renderTerritoryFocus();
-    renderMap();
-    renderTerritoryCards();
-    renderTerritoryTable();
-  }
+function housingColor(label){return label==='Habitable'?palette.green:label==='Averiada'?palette.orange:label==='No habitable'?palette.red:label==='Destruida'?palette.darkred:label.includes('Evacuada')?palette.blue:palette.gray}
+function renderHousing(){const families=number(DATA.kpis?.families),rows=safeArray(DATA.housing),nohab=number(rows.find(x=>x.label==='No habitable')?.count),des=number(rows.find(x=>x.label==='Destruida')?.count),priority=nohab+des;$('#housingPriorityHero').textContent=fmt(priority);$('#housingUniverse').textContent=fmt(families);$('#housingPriorityBig').textContent=fmt(priority);$('#noHabBig').textContent=fmt(nohab);$('#destroyedBig').textContent=fmt(des);$('#housingNarrative').textContent=DATA.priorityHousingNarrative||'Los registros prioritarios deben verificarse en campo y articularse con medidas de seguridad, alojamiento y asistencia según necesidad.';renderHousingBars();const k=DATA.kpis||{};const alerts=[[k.familiesWithoutState,'Familias sin clasificación','No permite priorizar seguridad habitacional','var(--red)'],[k.multipleHousingMarks,'Marcas múltiples','Ambigüedad operacional','var(--teal)'],[2,'Evacuadas fuera de residencia','Completar acogida, composición y necesidades','var(--blue)']];$('#housingAlerts').innerHTML=alerts.map(a=>`<div class="mini-alert" style="--accent:${a[3]}"><b>${fmt(a[0])}</b><div><span>${a[1]}</span><small>${a[2]}</small></div></div>`).join('')}
+function renderHousingBars(){const families=number(DATA.kpis?.families),rows=safeArray(DATA.housing);$('#housingBars').innerHTML=rows.map(x=>{const val=housingMode==='pct'?number(x.count)/families*100:number(x.count);const width=number(x.count)/families*100;const col=housingColor(x.label);return `<div class="housing-row" style="--color:${col}"><label><b>${esc(x.label)}</b><small>${fmt(x.count)} registros</small></label><div class="housing-track"><span style="width:${Math.min(100,width)}%"></span></div><b>${housingMode==='pct'?pct(width):fmt(x.count)}</b></div>`}).join('')}
 
-  function renderMap(){
-    q('#schematicMap').innerHTML = filterSectors().map(s => {
-      const priorityClass = s.priority >= 8 ? 'priority' : '';
-      const selectedClass = state.selected && state.selected.name === s.name ? 'is-selected' : '';
-      return `<div class="map-marker ${priorityClass} ${selectedClass}" style="left:${s.x}%; top:${s.y}%"><button type="button" aria-label="${s.name}" data-select-territory="${s.name}"></button><span>${s.name}</span></div>`;
-    }).join('');
-    qa('[data-select-territory]').forEach(btn => btn.addEventListener('click', () => selectTerritory(btn.dataset.selectTerritory)));
-  }
+function renderPopulation(){
+  const k=DATA.kpis||{},people=number(k.nominalPeople);
+  $('#peopleHero').textContent=fmt(people);
+  const sex=safeArray(DATA.sexDistribution);let cum=0,stops=[];
+  sex.forEach(x=>{const start=cum;cum+=number(x.pct);stops.push(`${palette[x.tone]||palette.blue} ${start}% ${cum}%`)});
+  $('#sexChart').innerHTML=`<div class="donut-layout donut-layout-xl"><div class="donut donut-xl" style="background:conic-gradient(${stops.join(',')})"><div class="donut-center"><b>${fmt(people)}</b><small>personas registradas</small></div></div><div class="legend-list legend-list-large">${sex.map(x=>`<div class="legend-item legend-item-large" style="--color:${palette[x.tone]||palette.blue}"><i></i><div><b>${esc(x.label)}</b><small>${fmt(x.count)} personas</small></div><span>${pct(x.pct)}</span></div>`).join('')}</div></div>`;
+  const life=safeArray(DATA.lifeCycle),max=Math.max(1,...life.map(x=>number(x.count)));
+  $('#lifeCycleChart').innerHTML=`<div class="age-chart-grid">${life.map((x,i)=>{const color=[palette.orange,palette.yellow,'#efae48',palette.aqua,palette.blue,palette.green,palette.gray][i%7];return `<article class="age-card" style="--color:${color};--height:${Math.max(22,number(x.count)/max*220)}px"><header><span>${esc(x.label)}</span><b>${fmt(x.count)}</b></header><div class="age-bar-wrap"><div class="age-bar"></div></div><footer>${pct(x.pct)}</footer></article>`}).join('')}</div>`;
+  const loc=safeArray(DATA.locationDeclared),maxLoc=Math.max(1,...loc.map(x=>number(x.count)));
+  $('#locationChart').innerHTML=`<div class="location-bars location-bars-pro">${loc.map((x,i)=>`<div class="location-row-pro"><div><b>${esc(x.label)}</b><small>${pct(number(x.count)/Math.max(1,loc.reduce((s,r)=>s+number(r.count),0))*100)}</small></div><div class="location-track-pro"><span style="width:${number(x.count)/maxLoc*100}%;--color:${[palette.green,palette.blue,palette.gray][i%3]}"></span></div><strong>${fmt(x.count)}</strong></div>`).join('')}</div>`;
+  $('#differentialKpis').innerHTML=`<div class="differential-grid differential-grid-large"><div class="differential-stat"><b>${fmt(k.minors)}</b><small>0–17 años</small></div><div class="differential-stat"><b>${fmt(k.age60plus)}</b><small>60 años y más</small></div></div>`;
+}
 
-  function renderTerritoryFocus(){
-    const el = q('#territoryFocus');
-    if(!state.selected){
-      el.innerHTML = `<div class="focus-empty"><div><span>⌖</span><h3>Selecciona un territorio</h3><p>Haz clic en un punto del mapa, una tarjeta o una fila para ver su ficha territorial ampliada.</p></div></div>`;
-      return;
-    }
-    const s = state.selected;
-    el.innerHTML = `
-      <div class="territory-detail-card">
-        <span class="eyebrow">FICHA TERRITORIAL</span>
-        <h3>${s.name}</h3>
-        <div class="tag-line"><span class="tag">${s.zone}</span><span class="tag">Prioridad ${fmt(s.priority)}</span></div>
-        <div class="detail-kpis">
-          <div><small>Familias</small><b>${fmt(s.families)}</b></div>
-          <div><small>Personas</small><b>${fmt(s.people)}</b></div>
-          <div><small>Sin estado</small><b>${fmt(s.unset)}</b></div>
-          <div><small>No habitable</small><b>${fmt(s.noHab)}</b></div>
-          <div><small>Destruida</small><b>${fmt(s.destroyed)}</b></div>
-          <div><small>Núcleos vacíos</small><b>${fmt(s.empty)}</b></div>
-        </div>
-        <div class="detail-rate"><small>TASA RELATIVA DE PRIORIDAD</small><strong>${(s.rate*100).toFixed(1)}%</strong><span>sobre familias nominales del sector</span></div>
-      </div>`;
-  }
+function renderQuality(){const comp=safeArray(DATA.completeness);const avg=comp.length?comp.reduce((s,x)=>s+number(x.value),0)/comp.length:0;$('#qualityScore').textContent=pct(avg);$('#qualityCompletion').innerHTML=`<div class="completion-list">${comp.map(x=>`<div class="meter-row"><label>${esc(x.label)}</label><div class="meter-track"><span style="width:${Math.min(100,number(x.value))}%"></span></div><b>${pct(x.value)}</b></div>`).join('')}</div>`;$('#componentStatus').innerHTML=`<div class="status-list">${safeArray(DATA.componentStatus).map(x=>`<div class="status-item" style="--color:${palette[x.tone]||palette.blue}"><i></i><div><b>${esc(x.component)}</b><small>${esc(x.progress)} · ${esc(x.status)}</small></div></div>`).join('')}</div>`;$('#qualityIssues').innerHTML=safeArray(DATA.qualityIssues).map((x,i)=>`<article class="issue-card" style="--accent:${[palette.orange,palette.red,palette.red,palette.orange,palette.violet,palette.gray,palette.red,palette.teal,palette.violet][i%9]}"><strong>${fmt(x.count)}</strong><h3>${esc(x.label)}</h3><p><b>Riesgo:</b> ${esc(x.risk||'Requiere verificación')}</p><footer><b>Tratamiento:</b> ${esc(x.treatment||'Depurar y documentar.')}</footer></article>`).join('');$('#qualityRules').innerHTML=safeArray(DATA.qualityAssuranceRules).map((x,i)=>`<div class="rule-item"><span>${String(i+1).padStart(2,'0')}</span><p>${esc(x)}</p></div>`).join('')}
 
-  function renderTerritorySummary(){
-    const topByPriority = [...sectors].sort((a,b) => b.priority - a.priority)[0];
-    const topByFamilies = [...sectors].sort((a,b) => b.families - a.families)[0];
-    const zeroPriority = sectors.filter(s => s.priority === 0).length;
-    const cards = [
-      ['Sectores', sectors.length, 'territorios o sectores consolidados'],
-      ['Mayor prioridad', topByPriority.name, `${topByPriority.priority} casos priorizados`],
-      ['Mayor volumen', topByFamilies.name, `${topByFamilies.families} familias nominales`],
-      ['Sin prioridad', zeroPriority, 'sectores sin no habitable o destruida']
-    ];
-    q('#territorySummaryGrid').innerHTML = cards.map(([label, value, desc]) => `<article class="summary-card"><small>${label}</small><strong>${value}</strong><span>${desc}</span></article>`).join('');
-  }
+function renderEvolution(){
+  releases=safeArray(DATA.releases);
+  if(!releases.length)releases=[{version:DATA.publication?.version||DATA.meta?.version||'3.0',cutoffDate:DATA.publication?.cutoffDate||'2026-08-18',kpis:DATA.kpis,housing:DATA.housing,territories:DATA.territories,changeNote:DATA.publication?.changeNote||'Primer corte público consolidado.'}];
+  const ordered=releases.slice();
+  $('#releaseChart').innerHTML=`<div class="release-track">${ordered.map((r,i)=>`<article class="release-milestone ${i===ordered.length-1?'latest':''}" data-release="${i}"><span>${shortDate(r.cutoffDate)}</span><h3>v${esc(r.version||'—')}</h3><div class="release-metrics"><b>${fmt(r.kpis?.families)}</b><small>familias</small></div><p>${esc(r.changeNote||'Publicación preservada en el histórico.')}</p></article>`).join('')}</div>`;
+  $$('[data-release]',$('#releaseChart')).forEach(g=>g.addEventListener('click',()=>renderReleaseSummary(ordered[Number(g.dataset.release)])));
+  renderReleaseSummary(ordered.at(-1));
+  const opts=ordered.map((r,i)=>`<option value="${i}">${esc(r.version||'Corte')} · ${shortDate(r.cutoffDate)}</option>`).join('');
+  $('#compareFrom').innerHTML=opts;$('#compareTo').innerHTML=opts;
+  $('#compareFrom').value=0;$('#compareTo').value=ordered.length-1;
+  renderCompareReleases();
+}
+function renderReleaseSummary(r){const reportHref=r.id?`report.html?release=${encodeURIComponent(r.id)}`:'report.html';$('#releaseSummary').innerHTML=`<div class="release-summary-card release-summary-card-pro"><span class="eyebrow">CORTE SELECCIONADO</span><strong>${esc(r.version||'—')}</strong><p>${niceDate(r.cutoffDate)}</p><div class="territory-stat-grid"><div class="territory-stat"><b>${fmt(r.kpis?.families)}</b><small>Familias</small></div><div class="territory-stat"><b>${fmt(r.kpis?.nominalPeople)}</b><small>Personas</small></div></div><p>${esc(r.changeNote||'Versión publicada y conservada en el histórico.')}</p><a class="btn small ghost" href="${reportHref}" target="_blank" rel="noopener">Abrir informe de este corte ↗</a></div>`}
+function renderCompareReleases(){const a=releases[Number($('#compareFrom')?.value||0)],b=releases[Number($('#compareTo')?.value||0)];if(!a||!b)return;const priority=r=>number(safeArray(r.housing).find(x=>x.label==='No habitable')?.count)+number(safeArray(r.housing).find(x=>x.label==='Destruida')?.count);const metrics=[['Familias',number(a.kpis?.families),number(b.kpis?.families),'Registros familiares'],['Personas',number(a.kpis?.nominalPeople),number(b.kpis?.nominalPeople),'Registros nominales'],['Prioridad',priority(a),priority(b),'No habitable + destruida'],['Territorios',number(a.kpis?.territories),number(b.kpis?.territories),'Cobertura territorial']];$('#compareResults').innerHTML=metrics.map(([l,x,y,desc])=>{const d=y-x;return `<article class="delta-card delta-card-pro"><small>${l}</small><b>${fmt(y)}</b><p>${desc}</p><div class="${d>0?'positive':d<0?'negative':''}">${d>0?'+':''}${fmt(d)} vs. corte base</div></article>`}).join('')}
 
-  function renderTerritoryCards(){
-    q('#territoryCardGrid').innerHTML = filterSectors().map(s => {
-      const selectedClass = state.selected && state.selected.name === s.name ? 'is-selected' : '';
-      const meterClass = s.priority >= 8 ? 'high' : '';
-      return `<article class="territory-card ${selectedClass}" data-card-territory="${s.name}">
-        <div class="tag-line"><span class="tag">${s.zone}</span><span class="tag">Prioridad ${fmt(s.priority)}</span></div>
-        <h4>${s.name}</h4>
-        <div class="priority-meter ${meterClass}"><span style="width:${(s.priority/maxPriority)*100}%"></span></div>
-        <div class="meta">
-          <div><small>Familias</small><b>${fmt(s.families)}</b></div>
-          <div><small>Personas</small><b>${fmt(s.people)}</b></div>
-          <div><small>Sin estado</small><b>${fmt(s.unset)}</b></div>
-        </div>
-      </article>`;
-    }).join('');
-    qa('[data-card-territory]').forEach(card => card.addEventListener('click', () => selectTerritory(card.dataset.cardTerritory)));
-  }
+function wireInteractiveInfoDeck(host){if(!host)return;let dragged=null;$$('.info-deck-card',host).forEach(card=>{card.addEventListener('dragstart',()=>{dragged=card;card.classList.add('dragging')});card.addEventListener('dragend',()=>{card.classList.remove('dragging');dragged=null});card.addEventListener('dragover',e=>e.preventDefault());card.addEventListener('drop',e=>{e.preventDefault();if(!dragged||dragged===card)return;const cards=$$('.info-deck-card',host),from=cards.indexOf(dragged),to=cards.indexOf(card);host.insertBefore(dragged,from<to?card.nextSibling:card)})})}
+function shuffleInfoDeck(id){const root=$(`#${CSS.escape(id)}`),host=root?.querySelector('.info-deck-track');if(!host)return;$$('.info-deck-card',host).sort(()=>Math.random()-.5).forEach(card=>host.appendChild(card))}
+function renderMethodology(){const steps=safeArray(DATA.methodology);$('#methodFlow').innerHTML=steps.map((x,i)=>`<article class="method-step"><span>0${i+1}</span><h3>${esc(x.title||x.step||`Paso ${i+1}`)}</h3><p>${esc(x.description||x.detail||String(x))}</p></article>`).join('');const scope=safeArray(DATA.scope),limits=safeArray(DATA.limitations);$('#objectiveScope').innerHTML=`<div class="objective-intro"><span>OBJETIVO DEL CONSOLIDADO</span><p>${esc(DATA.objective||'')}</p></div><div class="info-deck-track">${scope.map((x,i)=>`<article class="info-deck-card scope-card" draggable="true"><span>${String(i+1).padStart(2,'0')}</span><i>↕</i><p>${esc(x)}</p></article>`).join('')}</div>`;$('#limitationsList').innerHTML=`<div class="info-deck-track">${limits.map((x,i)=>`<article class="info-deck-card limit-card" draggable="true"><span>${String(i+1).padStart(2,'0')}</span><i>↕</i><p>${esc(x)}</p></article>`).join('')}</div>`;wireInteractiveInfoDeck($('#objectiveScope .info-deck-track'));wireInteractiveInfoDeck($('#limitationsList .info-deck-track'));$$('[data-shuffle-deck]').forEach(btn=>{btn.onclick=()=>shuffleInfoDeck(btn.dataset.shuffleDeck)});$('#appliedRules').innerHTML=safeArray(DATA.appliedRules).map((x,i)=>`<div class="number-item"><span>${String(i+1).padStart(2,'0')}</span><p>${esc(x)}</p></div>`).join('')}
+function currentReportSrc(){const reports=safeArray(DATA.media).filter(x=>(x.status==='published'||x.public===true||x.includeInPublication===true)&&(x.type==='report'||/\.pdf$/i.test(x.name||'')));return reports.at(-1)?.publicUrl||reports.at(-1)?.url||'assets/informe-consolidado-18-agosto-2026.pdf'}
+function publicDocuments(){const reportSrc=currentReportSrc();const base=[{id:'main-report',type:'report',title:reportSrc==='assets/informe-consolidado-18-agosto-2026.pdf'?'Informe técnico consolidado — Corte 18/08/2026':'Informe técnico consolidado — último corte publicado',src:reportSrc,description:'Documento fuente del corte técnico consolidado.',date:DATA.publication?.cutoffDate||'2026-08-18'}];safeArray(DATA.visualReports).forEach(v=>base.push({id:'visual-'+v.id,type:'visual',title:v.title,src:v.src,description:v.category,date:DATA.publication?.cutoffDate||'2026-08-18'}));base.push({id:'photo-1',type:'photo',title:'Registro fotográfico — edificación afectada',src:'assets/iglesia-afectada.jpg',description:'Fotografía aportada al portal.',date:'2026-08-18'},{id:'photo-2',type:'photo',title:'Alcaldía Municipal de San Pedro',src:'assets/alcaldia.jpg',description:'Referencia institucional.',date:'2026-08-18'});safeArray(DATA.media).filter(x=>x.status==='published'||x.public===true||x.includeInPublication===true).forEach(x=>base.push({id:x.id,type:x.type||'annex',title:x.title||x.name,src:x.publicUrl||x.url,description:x.description||'Archivo publicado',date:x.publishedAt||x.createdAt}));return base}
+function renderDocuments(){const q=String($('#documentSearch')?.value||'').toLowerCase();const docs=publicDocuments().filter(d=>(docFilter==='all'||d.type===docFilter)&&(!q||`${d.title} ${d.description}`.toLowerCase().includes(q)));$('#documentGrid').innerHTML=docs.map(d=>{const isImg=/\.(png|jpe?g|webp)$/i.test(d.src||'')||['visual','photo'].includes(d.type);return `<article class="doc-card"><div class="doc-preview">${isImg?`<img loading="lazy" src="${esc(d.src)}" alt="${esc(d.title)}">`:`<div class="file-icon">▤</div>`}</div><div class="doc-body"><span>${esc(d.type)}</span><h3>${esc(d.title)}</h3><p>${esc(d.description||'')}</p><footer><small>${shortDate(d.date)}</small><a href="${esc(d.src)}" target="_blank" rel="noopener">Abrir ↗</a></footer></div></article>`}).join('');const reportSrc=currentReportSrc();$('#pdfObject').setAttribute('data',reportSrc);const isOriginal=reportSrc==='assets/informe-consolidado-18-agosto-2026.pdf';$('#pdfPageIndex').innerHTML=isOriginal?safeArray(DATA.pageIndex).map(x=>`<div class="page-index-item" data-page="${x.page}"><span>${String(x.page).padStart(2,'0')}</span><b>${esc(x.title)}</b></div>`).join(''):`<div class="page-index-item"><span>PDF</span><b>Último informe publicado</b></div>`;if(isOriginal)$$('[data-page]').forEach(x=>x.addEventListener('click',()=>$('#pdfObject').setAttribute('data',`assets/informe-consolidado-18-agosto-2026.pdf#page=${x.dataset.page}`)))}
+function renderUpdates(){const ups=safeArray(DATA.updates);const rows=(ups.length?ups:[{date:DATA.publication?.cutoffDate||'2026-08-18',version:DATA.publication?.version||'3.0',title:'Consolidado técnico',note:'Corte público vigente.'}]).slice().reverse(),latest=rows[0]||{};if($('#updatesKpiStrip'))$('#updatesKpiStrip').innerHTML=`<article><small>PUBLICACIONES</small><b>${fmt(rows.length)}</b><span>versiones trazables</span></article><article><small>ÚLTIMO CORTE</small><b>${shortDate(latest.date||latest.cutoffDate)}</b><span>fecha pública</span></article><article><small>VERSIÓN VIGENTE</small><b>v${esc(latest.version||DATA.publication?.version||'—')}</b><span>corte visible</span></article>`;$('#publicTimeline').innerHTML=rows.map((x,i)=>`<article class="update-card ${i===0?'current':''}"><div class="update-card-index"><span>${String(rows.length-i).padStart(2,'0')}</span><i></i></div><div class="update-card-body"><div class="update-card-meta"><time>${shortDate(x.date||x.cutoffDate)}</time><b>v${esc(x.version||'—')}</b><em>${i===0?'VIGENTE':'HISTÓRICO'}</em></div><h3>${esc(x.title||`Versión ${x.version||''}`)}</h3><p>${esc(x.note||x.changeNote||'Actualización publicada.')}</p></div></article>`).join('')}
+function renderSources(){$('#eventContext').textContent=DATA.eventContext||'';$('#rufeRud').textContent=DATA.rufeRud||'';$('#regulatoryFramework').innerHTML=safeArray(DATA.regulatoryFramework).map(x=>`<article class="framework-card"><b>${esc(x.axis)}</b><p>${esc(x.application)}</p></article>`).join('');$('#conclusionsList').innerHTML=safeArray(DATA.conclusions).map((x,i)=>`<div class="number-item"><span>${String(i+1).padStart(2,'0')}</span><p>${esc(x)}</p></div>`).join('');const dc=DATA.documentControl||{};let rows=[];if(Array.isArray(dc.finalSignatures))rows=dc.finalSignatures;else rows=[['Transcribió',dc.transcribedBy],['Revisó',dc.reviewedBy],['Aprobó',dc.approvedBy]].filter(x=>x[1]).map(x=>({role:x[0],name:x[1]}));$('#documentControl').innerHTML=rows.map(x=>`<div class="document-person"><span>${esc(x.role||'')}</span><b>${esc(x.name||'')}</b><small>${esc(x.title||'')}</small></div>`).join('')}
 
-  function renderTerritoryTable(){
-    q('#territoryTableBody').innerHTML = filterSectors().map(s => `
-      <tr data-row-territory="${s.name}">
-        <td><b>${s.name}</b></td>
-        <td>${fmt(s.families)}</td>
-        <td>${fmt(s.people)}</td>
-        <td>${fmt(s.noHab)}</td>
-        <td>${fmt(s.destroyed)}</td>
-        <td>${fmt(s.unset)}</td>
-        <td>${fmt(s.empty)}</td>
-        <td><b>${fmt(s.priority)}</b></td>
-      </tr>`).join('');
-    qa('[data-row-territory]').forEach(row => row.addEventListener('click', () => selectTerritory(row.dataset.rowTerritory)));
-  }
+function renderMeta(){
+  const pub=DATA.publication||{},cut=pub.cutoffDate||DATA.meta?.cutoffDate||'2026-08-18',chip=$('#publicationChip');
+  $('#publicationCut').textContent=`Corte ${shortDate(cut)}`;$('#heroCut').textContent=shortDate(cut).toUpperCase();$('#lastUpdateText').textContent=`Última actualización: ${niceDate(pub.publishedAt||cut)}`;
+  chip.classList.toggle('contingency',SOURCE!=='firebase');const label=chip.querySelector('b');
+  if(SOURCE==='firebase'){label.textContent='Vigente';chip.title='Información pública sincronizada con Firebase';}
+  else{label.textContent='Copia local';chip.title='La consulta en vivo no está disponible; se muestra el último corte local incluido en el portal.';}
+}
+function renderAll(){if(!DATA)return;renderMeta();renderKpis();renderCompletion();renderStory();renderTerritory();renderHousing();renderPopulation();renderQuality();renderEvolution();renderMethodology();renderDocuments();renderUpdates();renderSources();buildSearchIndex();window.dispatchEvent(new CustomEvent('rufe:render',{detail:{source:SOURCE}}));}
 
-  function bindTerritoryControls(){
-    q('#territorySearch').addEventListener('input', e => { state.filter = e.target.value; renderTerritory(); });
-    q('#territorySort').addEventListener('change', e => { state.sort = e.target.value; renderTerritory(); });
-    q('#onlyPriority').addEventListener('change', e => { state.onlyPriority = e.target.checked; renderTerritory(); });
-    q('#resetTerritoryFilters').addEventListener('click', () => {
-      state.filter = ''; state.sort = 'families'; state.onlyPriority = false; q('#territorySearch').value=''; q('#territorySort').value='families'; q('#onlyPriority').checked=false; renderTerritory();
-    });
-    qa('[data-territory-view]').forEach(btn => btn.addEventListener('click', () => {
-      state.view = btn.dataset.territoryView;
-      qa('[data-territory-view]').forEach(b => b.classList.toggle('is-active', b===btn));
-      qa('[data-territory-container]').forEach(box => box.hidden = box.dataset.territoryContainer !== state.view);
-    }));
-  }
+function buildSearchIndex(){
+  const items=[{icon:'⌂',title:'Resumen ejecutivo',desc:'Panorama general del corte',hash:'#inicio'},{icon:'⌖',title:'Mapa territorial',desc:'Explorar los 25 territorios',hash:'#territorio'},{icon:'⌂',title:'Vivienda',desc:'Clasificación y prioridad',hash:'#vivienda'},{icon:'◎',title:'Población',desc:'Caracterización y ciclo de vida',hash:'#poblacion'},{icon:'✓',title:'Calidad del dato',desc:'Brechas y depuración',hash:'#calidad'},{icon:'▤',title:'Informes y archivos',desc:'Centro documental',hash:'#informes'}];mergedTerritories().forEach(t=>items.push({icon:'⌖',title:t.sector,desc:`${fmt(t.families)} familias · ${fmt(t.people)} personas`,hash:'#territorio',sector:t.sector}));safeArray(DATA.qualityIssues).forEach(x=>items.push({icon:'!',title:x.label,desc:`${fmt(x.count)} · Calidad del dato`,hash:'#calidad'}));safeArray(DATA.regulatoryFramework).forEach(x=>items.push({icon:'§',title:x.axis,desc:'Marco normativo',hash:'#fuentes'}));window.__RUFE_SEARCH_INDEX=items;}
+function search(q){q=q.trim().toLowerCase();const box=$('#searchResults');if(!q){box.hidden=true;return}const rows=(window.__RUFE_SEARCH_INDEX||[]).filter(x=>`${x.title} ${x.desc}`.toLowerCase().includes(q)).slice(0,9);box.innerHTML=rows.length?rows.map((x,i)=>`<div class="search-result" data-search-i="${i}"><span>${x.icon}</span><div><b>${esc(x.title)}</b><small>${esc(x.desc)}</small></div><i>↗</i></div>`).join(''):`<div class="search-result"><span>⌕</span><div><b>Sin resultados</b><small>Prueba con otra palabra.</small></div></div>`;box.hidden=false;$$('[data-search-i]',box).forEach(el=>el.addEventListener('click',()=>{const x=rows[Number(el.dataset.searchI)];if(x.sector)territoryFilters.selected=x.sector;location.hash=x.hash;box.hidden=true;$('#globalSearch').value='';setTimeout(()=>x.sector&&selectTerritory(x.sector),100)}))}
 
-  function renderTerritory(){ renderMap(); renderTerritorySummary(); renderTerritoryCards(); renderTerritoryTable(); renderTerritoryFocus(); }
+function bindPublicUi(){
+  route();$('#themeToggle').addEventListener('click',()=>{const next=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=next;try{localStorage.setItem('rufe-theme',next)}catch(_){}});let saved=null;try{saved=localStorage.getItem('rufe-theme')}catch(_){}if(saved)document.documentElement.dataset.theme=saved;
+  $('#globalSearch').addEventListener('input',e=>search(e.target.value));document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$('#globalSearch').focus()}if(e.key==='Escape')$('#searchResults').hidden=true});document.addEventListener('click',e=>{if(!e.target.closest('#searchShell'))$('#searchResults').hidden=true});
+  $('#territorySearch').addEventListener('input',e=>{territoryFilters.search=e.target.value;renderTerritory()});$('#territorySort').addEventListener('change',e=>{territoryFilters.sort=e.target.value;renderTerritory()});$('#minFamilies').addEventListener('input',e=>{territoryFilters.minFamilies=Number(e.target.value);$('#minFamiliesValue').textContent=e.target.value;renderTerritory()});$('#onlyPriority').addEventListener('change',e=>{territoryFilters.onlyPriority=e.target.checked;renderTerritory()});$('#resetTerritoryFilters').addEventListener('click',()=>{territoryFilters={...territoryFilters,search:'',sort:'families',minFamilies:0,onlyPriority:false};$('#territorySearch').value='';$('#territorySort').value='families';$('#minFamilies').value=0;$('#minFamiliesValue').textContent='0';$('#onlyPriority').checked=false;renderTerritory()});$('#compareSelected').addEventListener('click',compareTerritories);$('#exportTerritoryCsv').addEventListener('click',exportTerritoryCsv);$$('[data-base-view]').forEach(btn=>btn.addEventListener('click',()=>{$$('[data-base-view]').forEach(x=>x.classList.toggle('active',x===btn));$$('[data-base-panel]').forEach(panel=>panel.hidden=panel.dataset.basePanel!==btn.dataset.baseView)}));
+  $$('[data-housing-mode]').forEach(b=>b.addEventListener('click',()=>{$$('[data-housing-mode]').forEach(x=>x.classList.toggle('active',x===b));housingMode=b.dataset.housingMode;renderHousingBars()}));
+  $('#runCompare').addEventListener('click',renderCompareReleases);$('#compareFrom').addEventListener('change',renderCompareReleases);$('#compareTo').addEventListener('change',renderCompareReleases);
+  $('#documentSearch').addEventListener('input',renderDocuments);$$('[data-doc-filter]').forEach(b=>b.addEventListener('click',()=>{$$('[data-doc-filter]').forEach(x=>x.classList.toggle('active',x===b));docFilter=b.dataset.docFilter;renderDocuments()}));
+  $('#adminEntry').addEventListener('click',()=>{location.hash='#administracion'});
+  $('#mobileMore').addEventListener('click',()=>{const sheet=$('#mobileSheet');if(sheet)sheet.hidden=!sheet.hidden;});
+}
 
-  function renderHousing(){
-    q('#priorityUniverse').textContent = fmt(summary.housing.noHab + summary.housing.destroyed);
-    q('#priorityNoHab').textContent = fmt(summary.housing.noHab);
-    q('#priorityDestroyed').textContent = fmt(summary.housing.destroyed);
-    q('#priorityEvacuated').textContent = fmt(summary.housing.evacuated);
-    q('#priorityMultiple').textContent = fmt(summary.housing.multiple);
-    const bars = [
-      ['Habitable', summary.housing.habitable, 'default'],
-      ['Averiada', summary.housing.damaged, 'warn'],
-      ['No habitable', summary.housing.noHab, 'danger'],
-      ['Destruida', summary.housing.destroyed, 'dark'],
-      ['Sin estado', summary.withoutStatus, 'default']
-    ];
-    q('#housingBars').innerHTML = bars.map(([label, value, cls]) => `<div class="meter-item"><div class="label"><b>${label}</b><span>${fmt(value)} · ${((value/summary.families)*100).toFixed(1)}%</span></div><div class="meter ${cls}"><span style="width:${(value/summary.families)*100}%"></span></div></div>`).join('');
-    const mini = [
-      ['Sin estado', summary.withoutStatus, 'Dificulta priorizar la seguridad habitacional y exige revisión de campo.'],
-      ['Núcleos vacíos', summary.empty, 'No deben confundirse con familias efectivas del censo.'],
-      ['Marcas múltiples', summary.housing.multiple, 'Generan ambigüedad y deben resolverse antes del cierre.'],
-      ['Evacuadas', summary.housing.evacuated, 'Apoyan la lectura de riesgo y las medidas de protección.']
-    ];
-    q('#housingAlerts').innerHTML = mini.map(([label,val,text]) => `<article class="mini-issue"><small>${label}</small><b>${fmt(val)}</b><p>${text}</p></article>`).join('');
-  }
+// ---- Administración ----
+function roleLabel(r){return ({editor:'Editor',validator:'Validador',admin:'Administrador',super_admin:'Super Admin',guest:'Sin rol'})[window.RUFE_FIREBASE?.normalizeRole(r)]||r}
+function currentProfile(){return window.RUFE_FIREBASE?.profile||null}
+function renderAdminAuth(){const F=window.RUFE_FIREBASE,p=currentProfile(),u=F?.user;$('#adminNav').hidden=!(p?.active&&['editor','validator','admin','super_admin'].includes(F.normalizeRole(p.role)));if(u&&p){$('#adminUserCard').innerHTML=`<div class="signed-user"><b>${esc(p.displayName||u.displayName||p.email||u.email)}</b><small>${esc(p.email||u.email||'')}</small><span class="role-badge">${esc(roleLabel(p.role))}</span></div>`;$('#adminLoginState').innerHTML=`<div style="display:flex;justify-content:flex-end;margin:8px 0"><button class="btn small ghost" id="logoutBtn">Cerrar sesión</button></div>`;$('#logoutBtn').addEventListener('click',()=>F.logout());$('#adminWorkspace').hidden=!(p.active&&['editor','validator','admin','super_admin'].includes(F.normalizeRole(p.role)));if(!$('#adminWorkspace').hidden)startAdminListeners();}else{$('#adminUserCard').innerHTML='';$('#adminWorkspace').hidden=true;$('#adminLoginState').innerHTML=`<article class="login-card"><span class="eyebrow">ACCESO AUTORIZADO</span><h2>Ingresar al área interna</h2><p>Solo usuarios habilitados en Firebase pueden editar, validar o publicar información. La ciudadanía no necesita iniciar sesión para consultar el portal.</p><div class="login-grid"><div class="field"><label>Correo</label><input id="loginEmail" type="email" autocomplete="username" placeholder="usuario@dominio.gov.co"></div><div class="field"><label>Contraseña</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••"></div></div><div class="form-actions" style="justify-content:flex-start"><button class="btn primary" id="loginEmailBtn">Ingresar</button><button class="btn ghost" id="loginGoogleBtn">Ingresar con Google</button><button class="btn small ghost" id="resetPasswordBtn">Restablecer contraseña</button></div></article>`;$('#loginEmailBtn').addEventListener('click',async()=>{try{await F.loginEmail($('#loginEmail').value,$('#loginPassword').value)}catch(e){toast(e.message,'error')}});$('#loginGoogleBtn').addEventListener('click',async()=>{try{await F.loginGoogle()}catch(e){toast(e.message,'error')}});$('#resetPasswordBtn').addEventListener('click',async()=>{const email=$('#loginEmail').value;if(!email)return toast('Escribe tu correo primero.','error');try{await F.resetPassword(email);toast('Correo de restablecimiento enviado.','success')}catch(e){toast(e.message,'error')}})}}
+let adminListening=false;
+function startAdminListeners(){if(adminListening)return;adminListening=true;const F=window.RUFE_FIREBASE;try{F.listenDraft(d=>{admin.draft=d;renderAdminPanels()});F.listenTerritories(t=>{admin.territories=t;renderAdminPanels()});F.listenWorkflow(w=>{admin.workflow=w;renderAdminPanels()})}catch(e){toast(e.message,'error')}renderAdminPanels()}
+function bindAdminTabs(){$$('[data-admin-tab]').forEach(b=>b.addEventListener('click',()=>{$$('[data-admin-tab]').forEach(x=>x.classList.toggle('active',x===b));$$('[data-admin-panel]').forEach(p=>p.classList.toggle('active',p.dataset.adminPanel===b.dataset.adminTab));renderAdminPanels(b.dataset.adminTab)}))}
+function adminCan(...roles){return window.RUFE_FIREBASE?.hasRole(...roles)}
+function renderAdminPanels(tab){const p=currentProfile();if(!p)return;const r=window.RUFE_FIREBASE.normalizeRole(p.role);renderAdminOverview();renderAdminTerritories();renderAdminContent();renderAdminWorkflow();if(!tab||tab==='media')renderAdminMedia();if(!tab||tab==='users')renderAdminUsers();if(!tab||tab==='audit')renderAdminAudit();$$('[data-admin-tab="users"],[data-admin-tab="audit"]').forEach(b=>b.hidden=r!=='super_admin');$$('[data-admin-tab="media"]').forEach(b=>b.hidden=r!=='super_admin')}
+function renderAdminOverview(){const t=admin.territories.length?admin.territories:mergedTerritories(),families=t.reduce((s,x)=>s+number(x.families),0),people=t.reduce((s,x)=>s+number(x.people),0),priority=t.reduce((s,x)=>s+number(x.noHab)+number(x.destroyed),0),w=admin.workflow||{};$('#adminOverview').innerHTML=`<div class="admin-grid"><article class="admin-card"><span>Familias del borrador</span><strong>${fmt(families)}</strong><p>Recalculadas desde territorios</p></article><article class="admin-card"><span>Personas</span><strong>${fmt(people)}</strong><p>Registros nominales territoriales</p></article><article class="admin-card"><span>Prioridad</span><strong style="color:var(--red)">${fmt(priority)}</strong><p>No habitable + destruida</p></article><article class="admin-card"><span>Revisión</span><strong>${fmt(w.revision||0)}</strong><p>Estado: ${esc(w.reviewStatus||'sin inicializar')}</p></article></div><article class="admin-section"><div class="admin-section-head"><div><span class="eyebrow">ARQUITECTURA DEL FLUJO</span><h3>Una sola fuente de datos</h3><p>El mapa y las gráficas públicas se alimentan del corte publicado. Los editores trabajan en borrador.</p></div>${adminCan('super_admin')?'<button class="btn primary small" id="seedBtn">Inicializar / sincronizar base</button>':''}</div><div class="workflow-steps"><div class="workflow-step active"><b>1 · Editar</b><small>Territorios y contenido</small></div><div class="workflow-step"><b>2 · Revisar</b><small>Control de calidad</small></div><div class="workflow-step"><b>3 · Aprobar</b><small>Validador / administración</small></div><div class="workflow-step"><b>4 · Publicar</b><small>Snapshot público trazable</small></div></div></article>`;$('#seedBtn')?.addEventListener('click',async()=>{if(!confirm('Inicializará/actualizará el borrador con la base precargada. ¿Continuar?'))return;try{await window.RUFE_FIREBASE.seedInitialData();toast('Base inicial sincronizada.','success')}catch(e){toast(e.message,'error')}})}
+function renderAdminTerritories(){const can=adminCan('editor','admin','super_admin'),rows=admin.territories.length?admin.territories:mergedTerritories();$('#adminTerritories').innerHTML=`<article class="admin-section"><div class="admin-section-head"><div><span class="eyebrow">EDICIÓN TERRITORIAL</span><h3>Actualizar desde el mapa y la base</h3><p>Al guardar un territorio se incrementa la revisión y se invalida cualquier aprobación anterior.</p></div>${can?'<button class="btn small ghost" id="downloadTemplate">Plantilla CSV</button>':''}</div>${can?`<div class="form-grid"><div class="field span-2"><label>Territorio</label><select id="adminTerritorySelect">${rows.map(x=>`<option value="${esc(x.sector)}">${esc(x.sector)}</option>`).join('')}</select></div><div class="field"><label>Familias</label><input id="atFamilies" type="number" min="0"></div><div class="field"><label>Personas</label><input id="atPeople" type="number" min="0"></div><div class="field"><label>No habitable</label><input id="atNoHab" type="number" min="0"></div><div class="field"><label>Destruida</label><input id="atDestroyed" type="number" min="0"></div><div class="field"><label>Sin estado*</label><input id="atNoState" type="number" min="0"></div><div class="field"><label>Núcleos vacíos</label><input id="atEmpty" type="number" min="0"></div><div class="field"><label>Latitud</label><input id="atLat" type="number" step="0.000001"></div><div class="field"><label>Longitud</label><input id="atLng" type="number" step="0.000001"></div><div class="field"><label>Precisión</label><select id="atPrecision"><option value="verified">Referencia localizada</option><option value="reference">Referencia aproximada</option></select></div><div class="field span-3"><label>Referencia</label><input id="atReference"></div><div class="field span-4"><label>Fuente cartográfica</label><input id="atSource"></div></div><div class="form-actions"><button class="btn primary" id="saveTerritoryBtn">Guardar territorio</button></div><details style="margin-top:18px"><summary style="cursor:pointer;font-size:10px;font-weight:800">Importación masiva CSV</summary><div class="field" style="margin-top:10px"><label>CSV</label><input id="territoryCsv" type="file" accept=".csv,text/csv"></div><button class="btn small ghost" id="importTerritoryCsv" style="margin-top:8px">Importar CSV</button></details>`:`<div class="access-denied">Tu rol puede consultar el borrador territorial, pero no editarlo.</div>`}</article>`;if(!can)return;const select=$('#adminTerritorySelect');const fill=()=>{const t=rows.find(x=>x.sector===select.value)||{};$('#atFamilies').value=t.families??0;$('#atPeople').value=t.people??0;$('#atNoHab').value=t.noHab??0;$('#atDestroyed').value=t.destroyed??0;$('#atNoState').value=t.noState??0;$('#atEmpty').value=t.empty??0;$('#atLat').value=t.lat??'';$('#atLng').value=t.lng??'';$('#atPrecision').value=t.precision==='verified'?'verified':'reference';$('#atReference').value=t.reference||'';$('#atSource').value=t.source||''};select.addEventListener('change',fill);fill();$('#saveTerritoryBtn').addEventListener('click',async()=>{try{await window.RUFE_FIREBASE.saveTerritory({sector:select.value,families:$('#atFamilies').value,people:$('#atPeople').value,noHab:$('#atNoHab').value,destroyed:$('#atDestroyed').value,noState:$('#atNoState').value,empty:$('#atEmpty').value,lat:$('#atLat').value,lng:$('#atLng').value,precision:$('#atPrecision').value,reference:$('#atReference').value,source:$('#atSource').value});toast('Territorio guardado. La revisión anterior quedó invalidada.','success')}catch(e){toast(e.message,'error')}});$('#downloadTemplate').addEventListener('click',()=>{const csv='sector,families,people,noHab,destroyed,noState,empty,lat,lng,precision,reference,source\n';const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='plantilla-rufe-territorios.csv';a.click()});$('#importTerritoryCsv').addEventListener('click',async()=>{const f=$('#territoryCsv').files[0];if(!f)return toast('Selecciona un CSV.','error');const text=await f.text(),parsed=parseCsv(text);const required=['sector','families','people','noHab','destroyed','noState','empty'];if(!parsed.length)return toast('El CSV no contiene filas válidas.','error');const missing=required.filter(k=>!(k in parsed[0]));if(missing.length)return toast(`Faltan columnas: ${missing.join(', ')}`,'error');try{const r=await window.RUFE_FIREBASE.saveTerritoriesBulk(parsed);toast(`${r.count} territorios importados.`,'success')}catch(e){toast(e.message,'error')}})}
+function renderAdminContent(){
+  const can=adminCan('editor','admin','super_admin'),d=admin.draft||DATA;
+  if(!can){$('#adminContent').innerHTML='<div class="access-denied">Tu rol puede revisar el contenido, pero no modificarlo.</div>';return}
+  const life=safeArray(d.lifeCycle||DATA.lifeCycle),loc=safeArray(d.locationDeclared||DATA.locationDeclared),housing=structuredClone(d.housing||DATA.housing);
+  const listText=v=>safeArray(v).map(x=>typeof x==='string'?x:(x.title||x.label||JSON.stringify(x))).join('\n');
+  const methodText=safeArray(d.methodology||DATA.methodology).map(x=>`${x.title||x.step||''} | ${x.detail||x.description||''}`).join('\n');
+  const frameworkText=safeArray(d.regulatoryFramework||DATA.regulatoryFramework).map(x=>`${x.axis||''} | ${x.application||''}`).join('\n');
+  const matrixText=safeArray(d.prioritizationMatrix||DATA.prioritizationMatrix).map(x=>`${x.level||x.nivel||''} | ${x.criteria||x.criterios||''} | ${x.action||x.accion||''}`).join('\n');
+  const dc=d.documentControl||DATA.documentControl||{};
+  $('#adminContent').innerHTML=`<article class="admin-section">
+    <div class="admin-section-head"><div><span class="eyebrow">DATOS DEL CORTE</span><h3>Caracterización, narrativa y contenido técnico</h3><p>El editor modifica una sola fuente. Al publicar, el backend recalcula los indicadores derivados del territorio.</p></div></div>
+    <div class="form-grid">
+      <div class="field"><label>Versión</label><input id="draftVersion" value="${esc(d.draftVersion||DATA.publication?.version||'3.0')}"></div>
+      <div class="field"><label>Fecha de corte</label><input id="draftCutoff" type="date" value="${esc(d.draftCutoff||DATA.publication?.cutoffDate||'2026-08-18')}"></div>
+      <div class="field"><label>Mujeres</label><input id="draftWomen" type="number" min="0" value="${number(d.kpis?.women)}"></div>
+      <div class="field"><label>Hombres</label><input id="draftMen" type="number" min="0" value="${number(d.kpis?.men)}"></div>
+      <div class="field"><label>Sexo sin dato</label><input id="draftSexMissing" type="number" min="0" value="${number(d.kpis?.sexMissing)}"></div>
+      <div class="field"><label>Dirección completa</label><input id="draftAddress" type="number" min="0" value="${number(d.kpis?.familiesWithAddress)}"></div>
+      <div class="field"><label>Teléfono</label><input id="draftPhone" type="number" min="0" value="${number(d.kpis?.familiesWithPhone)}"></div>
+      <div class="field"><label>Personas únicas estimadas</label><input id="draftUnique" type="number" min="0" value="${number(d.kpis?.uniquePeopleEstimated)}"></div>
+      <div class="field"><label>Docs. repetidos — grupos</label><input id="draftRepeated" type="number" min="0" value="${number(d.kpis?.repeatedDocGroups)}"></div>
+      <div class="field"><label>Jefaturas repetidas</label><input id="draftRepeatedHeads" type="number" min="0" value="${number(d.kpis?.repeatedHeads)}"></div>
+      <div class="field"><label>Sin documento válido</label><input id="draftNoDoc" type="number" min="0" value="${number(d.kpis?.peopleWithoutValidDocument)}"></div>
+      <div class="field"><label>Fechas inválidas</label><input id="draftInvalidBirth" type="number" min="0" value="${number(d.kpis?.invalidBirthDates)}"></div>
+      <div class="field"><label>Marcas múltiples</label><input id="draftMultiple" type="number" min="0" value="${number(d.kpis?.multipleHousingMarks)}"></div>
+      <div class="field"><label>Zona no homologable</label><input id="draftNoZone" type="number" min="0" value="${number(d.kpis?.noZoneHomologable)}"></div>
+      <div class="field"><label>Habitable</label><input id="draftHabitable" type="number" min="0" value="${number(housing.find(x=>x.label==='Habitable')?.count)}"></div>
+      <div class="field"><label>Averiada</label><input id="draftDamaged" type="number" min="0" value="${number(housing.find(x=>x.label==='Averiada')?.count)}"></div>
+      <div class="field"><label>Evacuada fuera residencia</label><input id="draftEvacuated" type="number" min="0" value="${number(housing.find(x=>x.label==='Evacuada fuera de residencia')?.count)}"></div>
+      <div class="field span-4"><label>Resumen ejecutivo — un párrafo por línea</label><textarea id="draftSummary">${esc(safeArray(d.executiveSummary).join('\n'))}</textarea></div>
+      <div class="field span-4"><label>Objeto</label><textarea id="draftObjective">${esc(d.objective||'')}</textarea></div>
+      <div class="field span-4"><label>Lectura territorial</label><textarea id="draftTerritorialReading">${esc(d.territorialReading||'')}</textarea></div>
+      <div class="field span-4"><label>Prioridad de vivienda</label><textarea id="draftPriorityNarrative">${esc(d.priorityHousingNarrative||'')}</textarea></div>
+    </div>
 
-  function renderSimpleCharts(){
-    const chart = (target, items, total) => {
-      q(target).innerHTML = items.map(([label, value]) => `<div class="bar-row"><b>${label}</b><div class="bar-track"><span style="width:${(value/total)*100}%"></span></div><div class="bar-value">${fmt(value)} · ${((value/total)*100).toFixed(1)}%</div></div>`).join('');
-    }
-    chart('#sexChart', summary.sex, summary.people);
-    chart('#ageChart', summary.ages, summary.people);
-    chart('#locationChart', summary.location, summary.families);
-  }
+    <details style="margin-top:16px"><summary style="cursor:pointer;font-size:10px;font-weight:900">Ciclo de vida y ubicación declarada</summary><div class="form-grid" style="margin-top:12px">${life.map((x,i)=>`<div class="field"><label>${esc(x.label)}</label><input type="number" min="0" data-life-index="${i}" value="${number(x.count)}"></div>`).join('')}${loc.map((x,i)=>`<div class="field"><label>${esc(x.label)}</label><input type="number" min="0" data-loc-index="${i}" value="${number(x.count)}"></div>`).join('')}</div></details>
 
-  function renderQuality(){
-    q('#completenessGrid').innerHTML = summary.completeness.map(([label, count, total]) => `<div class="meter-item"><div class="label"><b>${label}</b><span>${fmt(count)} / ${fmt(total)} · ${((count/total)*100).toFixed(1)}%</span></div><div class="meter"><span style="width:${(count/total)*100}%"></span></div></div>`).join('');
-    q('#qualityIssueGrid').innerHTML = summary.qualityIssues.map(([title, count, risk, treatment]) => `<article class="issue-card"><small>${fmt(count)} casos</small><h4>${title}</h4><p><b>Riesgo:</b> ${risk}</p><p><b>Tratamiento:</b> ${treatment}</p></article>`).join('');
-  }
+    <details style="margin-top:12px"><summary style="cursor:pointer;font-size:10px;font-weight:900">Contenido técnico completo del informe</summary>
+      <div class="form-grid" style="margin-top:12px">
+        <div class="field span-4"><label>Alcance — un ítem por línea</label><textarea id="draftScope">${esc(listText(d.scope||DATA.scope))}</textarea></div>
+        <div class="field span-4"><label>Limitaciones — un ítem por línea</label><textarea id="draftLimitations">${esc(listText(d.limitations||DATA.limitations))}</textarea></div>
+        <div class="field span-4"><label>Contexto del evento</label><textarea id="draftEventContext">${esc(d.eventContext||DATA.eventContext||'')}</textarea></div>
+        <div class="field span-4"><label>RUFE / RUD</label><textarea id="draftRufeRud">${esc(d.rufeRud||DATA.rufeRud||'')}</textarea></div>
+        <div class="field span-4"><label>Interpretación de vivienda — un ítem por línea</label><textarea id="draftHousingInterpretation">${esc(listText(d.housingInterpretation||DATA.housingInterpretation))}</textarea></div>
+        <div class="field span-4"><label>Reglas de aseguramiento — un ítem por línea</label><textarea id="draftQualityRules">${esc(listText(d.qualityAssuranceRules||DATA.qualityAssuranceRules))}</textarea></div>
+        <div class="field span-4"><label>Reglas aplicadas — un ítem por línea</label><textarea id="draftAppliedRules">${esc(listText(d.appliedRules||DATA.appliedRules))}</textarea></div>
+        <div class="field span-4"><label>Prioridades — un ítem por línea</label><textarea id="draftPriorities">${esc(listText(d.priorities||DATA.priorities))}</textarea></div>
+        <div class="field span-4"><label>Conclusiones — un ítem por línea</label><textarea id="draftConclusions">${esc(listText(d.conclusions||DATA.conclusions))}</textarea></div>
+        <div class="field span-4"><label>Metodología — formato: Título | Detalle</label><textarea id="draftMethodology">${esc(methodText)}</textarea></div>
+        <div class="field span-4"><label>Marco normativo — formato: Eje | Aplicación</label><textarea id="draftFramework">${esc(frameworkText)}</textarea></div>
+        <div class="field span-4"><label>Matriz de priorización — formato: Nivel | Criterios | Acción</label><textarea id="draftPriorityMatrix">${esc(matrixText)}</textarea></div>
+      </div>
+    </details>
 
-  function renderDeck(target, items, prefix){
-    q(target).innerHTML = items.map((text, i) => `<article class="deck-card" draggable="true"><small>${prefix} ${String(i+1).padStart(2,'0')}</small><p>${text}</p></article>`).join('');
-    enableDeckDnD(q(target));
-  }
+    <details style="margin-top:12px"><summary style="cursor:pointer;font-size:10px;font-weight:900">Control documental</summary>
+      <div class="form-grid" style="margin-top:12px">
+        <div class="field span-4"><label>Transcribió</label><input id="draftTranscribed" value="${esc(dc.transcribedBy||'')}"></div>
+        <div class="field span-4"><label>Revisó</label><input id="draftReviewed" value="${esc(dc.reviewedBy||'')}"></div>
+        <div class="field span-4"><label>Aprobó</label><input id="draftApproved" value="${esc(dc.approvedBy||'')}"></div>
+      </div>
+    </details>
 
-  function enableDeckDnD(deck){
-    let dragged = null;
-    [...deck.children].forEach(card => {
-      card.addEventListener('dragstart', () => { dragged = card; card.classList.add('dragging'); });
-      card.addEventListener('dragend', () => { card.classList.remove('dragging'); dragged = null; });
-      card.addEventListener('dragover', e => e.preventDefault());
-      card.addEventListener('drop', e => {
-        e.preventDefault();
-        if(dragged && dragged !== card){
-          const nodes = [...deck.children];
-          const draggedIndex = nodes.indexOf(dragged);
-          const targetIndex = nodes.indexOf(card);
-          if(draggedIndex < targetIndex) deck.insertBefore(dragged, card.nextSibling); else deck.insertBefore(dragged, card);
-        }
-      });
-    });
-  }
+    <div class="form-actions"><button class="btn primary" id="saveDraftBtn">Guardar contenido del corte</button></div>
+  </article>`;
 
-  function shuffleDeck(selector){
-    const deck = q(selector);
-    const items = [...deck.children];
-    items.sort(() => Math.random() - .5).forEach(el => deck.appendChild(el));
-  }
+  $('#saveDraftBtn').addEventListener('click',async()=>{
+    try{
+      const toLines=id=>$(id).value.split('\n').map(x=>x.trim()).filter(Boolean);
+      const k={...(d.kpis||DATA.kpis),women:number($('#draftWomen').value),men:number($('#draftMen').value),sexMissing:number($('#draftSexMissing').value),familiesWithAddress:number($('#draftAddress').value),familiesWithPhone:number($('#draftPhone').value),uniquePeopleEstimated:number($('#draftUnique').value),repeatedDocGroups:number($('#draftRepeated').value),repeatedHeads:number($('#draftRepeatedHeads').value),peopleWithoutValidDocument:number($('#draftNoDoc').value),invalidBirthDates:number($('#draftInvalidBirth').value),multipleHousingMarks:number($('#draftMultiple').value),noZoneHomologable:number($('#draftNoZone').value)};
+      const housingNew=structuredClone(housing);for(const [label,id] of [['Habitable','#draftHabitable'],['Averiada','#draftDamaged'],['Evacuada fuera de residencia','#draftEvacuated']]){const item=housingNew.find(x=>x.label===label);if(item)item.count=number($(id).value)}
+      const lifeNew=life.map((x,i)=>({...x,count:number($(`[data-life-index="${i}"]`).value)})),locNew=loc.map((x,i)=>({...x,count:number($(`[data-loc-index="${i}"]`).value)}));
+      const methodology=toLines('#draftMethodology').map((line,i)=>{const [title,...rest]=line.split('|');return {step:i+1,title:title.trim(),detail:rest.join('|').trim()}});
+      const regulatoryFramework=toLines('#draftFramework').map(line=>{const [axis,...rest]=line.split('|');return {axis:axis.trim(),application:rest.join('|').trim()}});
+      const prioritizationMatrix=toLines('#draftPriorityMatrix').map(line=>{const [level,criteria,...rest]=line.split('|');return {level:(level||'').trim(),criteria:(criteria||'').trim(),action:rest.join('|').trim()}});
+      await window.RUFE_FIREBASE.saveDraft({draftVersion:$('#draftVersion').value,draftCutoff:$('#draftCutoff').value,kpis:k,housing:housingNew,lifeCycle:lifeNew,locationDeclared:locNew,executiveSummary:toLines('#draftSummary'),objective:$('#draftObjective').value,territorialReading:$('#draftTerritorialReading').value,priorityHousingNarrative:$('#draftPriorityNarrative').value,scope:toLines('#draftScope'),limitations:toLines('#draftLimitations'),eventContext:$('#draftEventContext').value,rufeRud:$('#draftRufeRud').value,housingInterpretation:toLines('#draftHousingInterpretation'),qualityAssuranceRules:toLines('#draftQualityRules'),appliedRules:toLines('#draftAppliedRules'),priorities:toLines('#draftPriorities'),conclusions:toLines('#draftConclusions'),methodology,regulatoryFramework,prioritizationMatrix,documentControl:{...dc,transcribedBy:$('#draftTranscribed').value,reviewedBy:$('#draftReviewed').value,approvedBy:$('#draftApproved').value}});
+      toast('Contenido completo guardado. La revisión anterior quedó invalidada.','success');
+    }catch(e){toast(e.message,'error')}
+  });
+}
+function renderAdminWorkflow(){const w=admin.workflow||{},r=window.RUFE_FIREBASE.normalizeRole(currentProfile()?.role),revision=number(w.revision),approved=number(w.approvedRevision),status=w.reviewStatus||'draft';const step= status==='published'?4:status==='approved'?3:status==='in_review'?2:1;$('#adminWorkflow').innerHTML=`<article class="admin-section"><div class="admin-section-head"><div><span class="eyebrow">FLUJO DE CONTROL</span><h3>Revisión ${revision} · ${esc(status)}</h3><p>Una edición posterior a la aprobación obliga a revisar de nuevo antes de publicar.</p></div></div><div class="workflow-steps">${['Editar','Revisar','Aprobar','Publicar'].map((x,i)=>`<div class="workflow-step ${i+1<step?'done':i+1===step?'active':''}"><b>${i+1} · ${x}</b><small>${i===0?'Construcción del borrador':i===1?'Control de consistencia':i===2?'Aprobación de revisión':'Snapshot ciudadano'}</small></div>`).join('')}</div><div class="form-grid" style="margin-top:18px"><div class="field span-4"><label>Nota de trámite / cambio</label><textarea id="workflowNote" placeholder="Describe brevemente qué cambió o qué se verificó."></textarea></div></div><div class="form-actions" style="justify-content:flex-start"><button class="btn ghost" id="validateDraftBtn">Comprobar consistencia</button>${adminCan('editor','admin','super_admin')?'<button class="btn ghost" id="submitReviewBtn">Enviar a revisión</button>':''}${adminCan('validator','admin','super_admin')?'<button class="btn success" id="approveReviewBtn">Aprobar revisión</button><button class="btn danger" id="rejectReviewBtn">Solicitar ajustes</button>':''}${adminCan('super_admin')?'<button class="btn primary" id="publishBtn">Publicar corte</button>':''}</div><p style="font-size:8px;color:var(--muted)">Revisión aprobada: ${approved||'—'} · Revisión actual: ${revision}</p></article>`;$('#validateDraftBtn')?.addEventListener('click',async()=>{try{const r=await window.RUFE_FIREBASE.validateDraft();toast(`Consistencia aprobada · ${fmt(r.families)} familias · ${fmt(r.people)} personas · revisión ${r.revision}`,'success',5200)}catch(e){toast(e.message,'error',6000)}});$('#submitReviewBtn')?.addEventListener('click',async()=>{try{await window.RUFE_FIREBASE.submitForReview($('#workflowNote').value);toast('Borrador enviado a revisión.','success')}catch(e){toast(e.message,'error')}});$('#approveReviewBtn')?.addEventListener('click',async()=>{try{await window.RUFE_FIREBASE.reviewDraft('approve',$('#workflowNote').value);toast('Revisión aprobada.','success')}catch(e){toast(e.message,'error')}});$('#rejectReviewBtn')?.addEventListener('click',async()=>{try{await window.RUFE_FIREBASE.reviewDraft('reject',$('#workflowNote').value);toast('Ajustes solicitados.','success')}catch(e){toast(e.message,'error')}});$('#publishBtn')?.addEventListener('click',async()=>{const d=admin.draft||{};if(!confirm(`Publicar la revisión ${revision} como corte ${d.draftCutoff||'actual'}?`))return;try{await window.RUFE_FIREBASE.publish({version:d.draftVersion||'3.0',cutoffDate:d.draftCutoff||'2026-08-18',changeNote:$('#workflowNote').value});toast('Corte publicado correctamente.','success')}catch(e){toast(e.message,'error')}})}
+async function renderAdminMedia(){const host=$('#adminMedia');if(!host)return;if(!adminCan('super_admin')){host.innerHTML='<div class="access-denied">Solo Super Admin administra archivos y evidencias.</div>';return}host.innerHTML=`<article class="admin-section"><div class="admin-section-head"><div><span class="eyebrow">BIBLIOTECA DE ARCHIVOS</span><h3>Subir evidencias, informes y anexos</h3><p>Los archivos internos permanecen en borrador hasta que se marquen para publicación.</p></div></div><div class="media-drop" id="mediaDrop"><input id="mediaFile" type="file"><p>PDF, imágenes, CSV, hojas de cálculo, presentaciones o ZIP · máximo 40 MB.</p><div class="form-grid" style="margin-top:10px"><div class="field span-2"><label>Título público</label><input id="mediaTitle"></div><div class="field"><label>Tipo</label><select id="mediaType"><option value="report">Informe</option><option value="photo">Fotografía</option><option value="annex">Anexo</option><option value="dataset">Dataset</option></select></div><label class="switch"><input id="mediaPublish" type="checkbox"><span></span><b>Incluir en publicación</b></label></div><div class="progress" style="margin-top:10px"><span id="uploadProgress" style="width:0%"></span></div><button class="btn primary small" id="uploadMediaBtn" style="margin-top:10px">Subir archivo</button></div><div id="mediaList" style="margin-top:16px"></div></article>`;$('#uploadMediaBtn').addEventListener('click',async()=>{const f=$('#mediaFile').files[0];if(!f)return toast('Selecciona un archivo.','error');try{await window.RUFE_FIREBASE.uploadMedia(f,{title:$('#mediaTitle').value,type:$('#mediaType').value,includeInPublication:$('#mediaPublish').checked,onProgress:p=>$('#uploadProgress').style.width=p+'%'});toast('Archivo cargado.','success');renderAdminMedia()}catch(e){toast(e.message,'error')}});try{const rows=await window.RUFE_FIREBASE.listMedia();$('#mediaList').innerHTML=rows.length?`<table class="admin-table"><thead><tr><th>Archivo</th><th>Tipo</th><th>Estado</th><th>Publicar</th><th></th></tr></thead><tbody>${rows.map(x=>`<tr><td><b>${esc(x.title||x.name)}</b><br><small>${Math.round(number(x.size)/1024)} KB</small></td><td>${esc(x.type||'anexo')}</td><td>${esc(x.status||'draft')}</td><td>${x.includeInPublication?'Sí':'No'}</td><td><a class="btn small ghost" href="${esc(x.url||'#')}" target="_blank" rel="noopener">Abrir</a> <button class="btn small ghost" data-media-toggle="${x.id}" data-current="${x.includeInPublication?'1':'0'}">${x.includeInPublication?'Retirar':'Incluir'}</button> <button class="btn small danger" data-media-delete="${x.id}">Eliminar</button></td></tr>`).join('')}</tbody></table>`:'<div class="access-denied">Aún no hay archivos cargados.</div>';$$('[data-media-toggle]').forEach(b=>b.addEventListener('click',async()=>{try{await window.RUFE_FIREBASE.manageMedia({mediaId:b.dataset.mediaToggle,action:'publication',includeInPublication:b.dataset.current!=='1'});toast('Archivo actualizado.','success');renderAdminMedia()}catch(e){toast(e.message,'error')}}));$$('[data-media-delete]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm('¿Eliminar este archivo del borrador? Las copias de cortes ya publicados se conservarán.'))return;try{await window.RUFE_FIREBASE.manageMedia({mediaId:b.dataset.mediaDelete,action:'delete'});toast('Archivo eliminado del borrador.','success');renderAdminMedia()}catch(e){toast(e.message,'error')}}))}catch(e){$('#mediaList').innerHTML=`<div class="access-denied">${esc(e.message)}</div>`}}
+async function renderAdminUsers(){const host=$('#adminUsers');if(!host)return;if(!adminCan('super_admin')){host.innerHTML='<div class="access-denied">Solo Super Admin gestiona usuarios.</div>';return}host.innerHTML=`<article class="admin-section"><div class="admin-section-head"><div><span class="eyebrow">USUARIOS Y ROLES</span><h3>Accesos del Portal RUFE</h3><p>Los permisos se validan en Firebase y en las reglas del servidor.</p></div></div><div class="form-grid"><div class="field span-2"><label>Nombre</label><input id="newUserName"></div><div class="field span-2"><label>Correo</label><input id="newUserEmail" type="email"></div><div class="field span-2"><label>Contraseña temporal</label><input id="newUserPassword" type="password" minlength="8"></div><div class="field span-2"><label>Rol</label><select id="newUserRole"><option value="editor">Editor</option><option value="validator">Validador</option><option value="admin">Administrador</option><option value="super_admin">Super Admin</option></select></div></div><div class="form-actions"><button class="btn primary" id="createUserBtn">Crear usuario</button></div><div id="usersTable" style="margin-top:18px"></div></article>`;$('#createUserBtn').addEventListener('click',async()=>{try{await window.RUFE_FIREBASE.createUser({email:$('#newUserEmail').value,password:$('#newUserPassword').value,displayName:$('#newUserName').value,role:$('#newUserRole').value});toast('Usuario creado.','success');renderAdminUsers()}catch(e){toast(e.message,'error')}});try{const rows=await window.RUFE_FIREBASE.listUsers();$('#usersTable').innerHTML=`<table class="admin-table"><thead><tr><th>Usuario</th><th>Rol</th><th>Activo</th><th>Acciones</th></tr></thead><tbody>${rows.map(x=>`<tr><td><b>${esc(x.displayName||'Sin nombre')}</b><br><small>${esc(x.email||x.docId)}</small></td><td><select data-user-role="${esc(x.uid||x.docId)}">${['editor','validator','admin','super_admin'].map(r=>`<option value="${r}" ${window.RUFE_FIREBASE.normalizeRole(x.role)===r?'selected':''}>${roleLabel(r)}</option>`).join('')}</select></td><td>${x.active===true?'Sí':'No'}</td><td><button class="btn small ghost" data-save-user="${esc(x.uid||x.docId)}">Guardar</button> <button class="btn small ghost" data-reset-user="${esc(x.email||'')}">Restablecer clave</button> <button class="btn small ${x.active===true?'danger':'success'}" data-toggle-user="${esc(x.uid||x.docId)}" data-active="${x.active===true?'1':'0'}">${x.active===true?'Desactivar':'Activar'}</button> ${x.uid&&x.uid!==window.RUFE_FIREBASE.user?.uid?`<button class="btn small danger" data-delete-user="${esc(x.uid)}" data-delete-email="${esc(x.email||'')}">Eliminar</button>`:''}</td></tr>`).join('')}</tbody></table>`;$$('[data-save-user]').forEach(b=>b.addEventListener('click',async()=>{const uid=b.dataset.saveUser,role=$(`[data-user-role="${CSS.escape(uid)}"]`).value;try{await window.RUFE_FIREBASE.manageUser({uid,action:'role',role});toast('Rol actualizado.','success');renderAdminUsers()}catch(e){toast(e.message,'error')}}));$$('[data-reset-user]').forEach(b=>b.addEventListener('click',async()=>{const email=b.dataset.resetUser;if(!email)return toast('Este usuario no tiene correo disponible.','error');try{await window.RUFE_FIREBASE.resetPassword(email);toast(`Correo de restablecimiento enviado a ${email}.`,'success')}catch(e){toast(e.message,'error')}}));$$('[data-toggle-user]').forEach(b=>b.addEventListener('click',async()=>{try{await window.RUFE_FIREBASE.manageUser({uid:b.dataset.toggleUser,action:'active',active:b.dataset.active!=='1'});toast('Estado actualizado.','success');renderAdminUsers()}catch(e){toast(e.message,'error')}}));$$('[data-delete-user]').forEach(b=>b.addEventListener('click',async()=>{const email=b.dataset.deleteEmail||b.dataset.deleteUser;if(!confirm(`Eliminar definitivamente la cuenta ${email}? Esta acción elimina el acceso de Firebase Authentication y su perfil RUFE.`))return;try{await window.RUFE_FIREBASE.manageUser({uid:b.dataset.deleteUser,action:'delete'});toast('Usuario eliminado.','success');renderAdminUsers()}catch(e){toast(e.message,'error')}}))}catch(e){$('#usersTable').innerHTML=`<div class="access-denied">${esc(e.message)}</div>`}}
+async function renderAdminAudit(){const host=$('#adminAudit');if(!host)return;if(!adminCan('super_admin')){host.innerHTML='<div class="access-denied">Solo Super Admin consulta la auditoría.</div>';return}host.innerHTML='<article class="admin-section"><div class="admin-section-head"><div><span class="eyebrow">AUDITORÍA</span><h3>Últimos movimientos</h3></div></div><div id="auditRows" class="audit-list">Cargando…</div></article>';try{const rows=await window.RUFE_FIREBASE.listAudit();$('#auditRows').innerHTML=rows.length?rows.map(x=>`<div class="audit-item"><time>${niceDate(x.createdAt)}</time><div><b>${esc(x.action)}</b><small>${esc(x.detail||'')}</small></div><small>${esc(x.actorEmail||x.actorUid||'')}</small></div>`).join(''):'<div class="access-denied">Sin registros.</div>'}catch(e){$('#auditRows').innerHTML=`<div class="access-denied">${esc(e.message)}</div>`}}
 
-  function renderMethod(){
-    renderDeck('#objectiveDeck', summary.methodObjective, 'A');
-    renderDeck('#limitationsDeck', summary.limitations, 'L');
-    q('#appliedRules').innerHTML = summary.appliedRules.map(t => `<li>${t}</li>`).join('');
-    q('#shuffleObjective').addEventListener('click', () => shuffleDeck('#objectiveDeck'));
-    q('#shuffleLimitations').addEventListener('click', () => shuffleDeck('#limitationsDeck'));
-  }
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));}
 
-  function renderTimeline(){
-    q('#timelineList').innerHTML = summary.updates.map(item => `
-      <div class="timeline-item">
-        <div class="timeline-dot"></div>
-        <div class="timeline-content">
-          <div class="meta"><b>${item.date}</b><span>${item.version}</span><span class="status">${item.status}</span></div>
-          <h4>${item.title}</h4>
-          <p>${item.note}</p>
-        </div>
-      </div>`).join('');
-  }
-
-  function renderDocuments(){
-    q('#documentGrid').innerHTML = summary.documents.map(([title,type,text]) => `<article class="document-card"><small>${type}</small><h3>${title}</h3><p>${text}</p></article>`).join('');
-  }
-
-  function renderAdmin(){
-    const adminKpis = [
-      ['Familias nominales', summary.families], ['Casos prioritarios', summary.housing.noHab + summary.housing.destroyed], ['Sin estado', summary.withoutStatus], ['Núcleos vacíos', summary.empty]
-    ];
-    q('#adminKpis').innerHTML = adminKpis.map(([label,val]) => `<article class="admin-kpi"><small>${label}</small><strong>${fmt(val)}</strong></article>`).join('');
-    q('#adminTerritoryQueue').innerHTML = `<ol>${[...sectors].sort((a,b) => b.priority-a.priority).slice(0,8).map(s => `<li><b>${s.name}</b> · prioridad ${s.priority}</li>`).join('')}</ol>`;
-    qa('#adminTabs [data-admin]').forEach(btn => btn.addEventListener('click', () => {
-      qa('#adminTabs [data-admin]').forEach(b => b.classList.toggle('is-active', b===btn));
-      qa('[data-admin-panel]').forEach(panel => panel.classList.toggle('is-active', panel.dataset.adminPanel === btn.dataset.admin));
-    }));
-  }
-
-  function initSearch(){
-    const search = q('#globalSearch');
-    const results = q('#searchResults');
-    const docs = [
-      {title:'Inicio', target:'#inicio', desc:'Portada institucional reconstruida'},
-      {title:'Base territorial', target:'#territorio', desc:'Mapa, tarjetas y tabla clara'},
-      {title:'Universo de verificación', target:'#vivienda', desc:'No habitable, destruida y lectura operativa'},
-      {title:'Población', target:'#poblacion', desc:'Sexo, edad y ubicación declarada'},
-      {title:'Calidad', target:'#calidad', desc:'Completitud y brechas'},
-      {title:'Metodología', target:'#metodologia', desc:'Alcance, limitaciones y reglas'},
-      {title:'Actualizaciones', target:'#actualizaciones', desc:'Bitácora pública'},
-      {title:'Panel admin', target:'#admin', desc:'Gestión interna'}
-    ];
-    search.addEventListener('input', () => {
-      const term = search.value.trim().toLowerCase();
-      if(!term){ results.hidden = true; results.innerHTML=''; return; }
-      const hits = docs.filter(item => (item.title + ' ' + item.desc).toLowerCase().includes(term));
-      results.hidden = hits.length === 0;
-      results.innerHTML = hits.map(item => `<a href="${item.target}"><b>${item.title}</b><small>${item.desc}</small></a>`).join('');
-      qa('#searchResults a').forEach(a => a.addEventListener('click', () => { results.hidden=true; search.value=''; }));
-    });
-    document.addEventListener('click', e => {
-      if(!results.contains(e.target) && e.target !== search) results.hidden = true;
-    });
-  }
-
-  function initTheme(){
-    q('#themeToggle').addEventListener('click', () => document.body.classList.toggle('light-mode'));
-  }
-
-  function initNavSpy(){
-    const sections = qa('main section[id]');
-    const navLinks = qa('.main-nav a');
-    const spy = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if(entry.isIntersecting){
-          navLinks.forEach(link => link.classList.toggle('is-active', link.getAttribute('href') === '#' + entry.target.id));
-        }
-      });
-    }, { threshold:.3 });
-    sections.forEach(sec => spy.observe(sec));
-  }
-
-  initHero();
-  bindTerritoryControls();
-  renderTerritory();
-  renderHousing();
-  renderSimpleCharts();
-  renderQuality();
-  renderMethod();
-  renderTimeline();
-  renderDocuments();
-  renderAdmin();
-  initSearch();
-  initTheme();
-  initNavSpy();
-  revealSections();
-})();
+bindPublicUi();bindAdminTabs();
+window.addEventListener('rufe:auth',()=>{window.RUFE_FIREBASE?.stopInternalListeners?.();adminListening=false;if(!window.RUFE_FIREBASE?.user)admin={draft:null,territories:[],workflow:null};renderAdminAuth()});
+const F=window.RUFE_FIREBASE;if(F){F.listenPublic((data,meta)=>{DATA=data;SOURCE=meta.source;renderAll();});renderAdminAuth()}else{DATA=window.REPORT_DATA;renderAll()}
