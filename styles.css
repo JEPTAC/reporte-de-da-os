@@ -161,114 +161,113 @@ body{font-size:17px;line-height:1.65}
 @media (max-width:1250px){.cinema-hero{grid-template-columns:1fr}.hero-media{margin-top:26px;height:560px}.hero-photo-main{width:56%;right:2%}.hero-photo-secondary{left:2%}.hero-photo-tertiary{right:5%}.document-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.age-chart-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.method-flow{grid-template-columns:repeat(3,1fr)}}
 @media (max-width:760px){body{font-size:16px}.topbar-search input,.btn{font-size:14px}.cinema-hero{padding:46px 18px 90px;min-height:auto}.hero-media{height:520px}.hero-photo-main{width:74%;height:64%;right:0}.hero-photo-secondary{width:45%;height:34%;left:0;bottom:28%}.hero-photo-tertiary{width:42%;height:26%;right:6%;bottom:4%}.hero-photo-strip{grid-template-columns:repeat(4,46px);gap:8px;left:4%;bottom:4%}.hero-photo-strip img{width:46px;height:46px;border-radius:12px}.hero-data-float{width:118px;height:118px;right:-4px;bottom:46px}.hero-data-float strong{font-size:30px}.hero-data-float span{font-size:15px}.hero-lead,.section-head>p,.page-hero p,.story-step small,.scrolly-stage-copy p{font-size:15px}.housing-row{grid-template-columns:1fr}.housing-row>b{justify-self:end}.photo-mosaic{height:auto;grid-template-columns:1fr 1fr}.donut-layout-xl{grid-template-columns:1fr;justify-items:center}.donut-xl{width:190px}.age-chart-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.location-row-pro{grid-template-columns:1fr}.updates-summary{grid-template-columns:1fr}.update-item-pro{grid-template-columns:1fr;padding-left:0}.update-date{margin-bottom:8px}.public-timeline{padding-left:0}.public-timeline::before,.update-item::before{display:none}.document-grid{grid-template-columns:1fr}.scope-card,.limitation-card,.number-item-pro{grid-template-columns:42px 1fr}}
 
+
 /* =========================================================
-   CORRECCIÓN FINAL FORZADA — LEGIBILIDAD DEL CENTRO DE ADMINISTRACIÓN
-   Alcance: solo section#view-administracion.
-   Motivo: elevar todos los textos del centro de administración, no solo tabs.
+   AJUSTE RESPONSIVE COMPACTO — 2026-08-21
+   Alcance: reducir el gigantismo causado por las pruebas anteriores
+   y mantener el Centro de administración legible en portátil.
+   No modifica datos, rutas ni estructura funcional.
    ========================================================= */
-html body section#view-administracion{
-  --admin-force-label:18px;
-  --admin-force-copy:18px;
-  --admin-force-control:20px;
-  --admin-force-title:42px;
-  --admin-force-tab:28px;
+@media (max-width:1440px) and (min-width:761px){
+  :root{--top:72px;--side:248px;--radius-lg:28px;--radius-xl:40px}
+  body{font-size:14px;line-height:1.48}
+  .topbar{height:var(--top);grid-template-columns:268px minmax(300px,1fr) minmax(160px,230px) auto;gap:14px;padding:0 16px}
+  .brand-mark{width:44px;height:44px;border-radius:13px}
+  .brand-copy strong{font-size:20px}.brand-copy strong em{font-size:23px}.brand-copy small{font-size:9px}
+  .xmb-nav{max-width:560px}.xmb-nav a{padding:8px 10px;border-radius:13px}.xmb-nav a span{font-size:11px}.xmb-nav a i{font-size:8px}
+  .topbar-search{height:38px}.admin-entry,.icon-button{height:38px}.status-chip{padding:7px 10px}
+  .sidebar{top:var(--top);width:var(--side)}
+  .nav-intro{padding:18px 16px 12px}.nav-intro strong{font-size:18px}.nav-intro strong em{font-size:22px}.nav-link{padding:9px 9px}.nav-link b{font-size:10px}.nav-link small{font-size:7.5px}
+  .main{margin-left:var(--side);padding-top:var(--top)}
+  .view:not(#view-inicio){padding:22px clamp(18px,2.5vw,34px) 72px}
+  .page-hero,.admin-hero{border-radius:28px}
 }
-html body section#view-administracion #adminTabs.admin-tabs{
-  display:flex !important;
-  flex-wrap:wrap !important;
-  align-items:center !important;
-  gap:18px !important;
-  padding:20px !important;
-  min-height:108px !important;
-  overflow:visible !important;
-  border-radius:26px !important;
+
+/* Centro de administración: tamaños moderados y adaptables */
+#view-administracion{
+  --admin-tabs-size:clamp(10px,.74vw,13px);
+  --admin-label-size:clamp(9.5px,.72vw,12px);
+  --admin-copy-size:clamp(11px,.82vw,14px);
+  --admin-input-size:clamp(11.5px,.86vw,14px);
+  --admin-title-size:clamp(28px,2.15vw,38px);
+  --admin-card-number:clamp(34px,2.8vw,48px);
 }
-html body section#view-administracion #adminTabs.admin-tabs button[data-admin-tab],
-html body section#view-administracion .admin-tabs button[data-admin-tab]{
-  display:inline-flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  min-height:70px !important;
-  padding:18px 28px !important;
-  border-radius:22px !important;
-  font-size:var(--admin-force-tab) !important;
-  line-height:1.12 !important;
-  font-weight:950 !important;
-  letter-spacing:-.018em !important;
-  white-space:normal !important;
-  text-align:center !important;
+#view-administracion .admin-hero{padding:clamp(24px,2.6vw,38px);gap:22px}
+#view-administracion .admin-hero h1{font-size:clamp(38px,3.6vw,56px);line-height:.92}
+#view-administracion .admin-hero p,
+#view-administracion .signed-user b,
+#view-administracion .login-card p{font-size:var(--admin-copy-size);line-height:1.5}
+#view-administracion .signed-user small{font-size:clamp(9px,.65vw,11px)}
+#view-administracion .role-badge{font-size:clamp(8px,.62vw,10px);padding:5px 8px}
+#view-administracion .admin-tabs{gap:8px;padding:9px 10px;margin:14px 0;border-radius:18px;overflow:auto;align-items:center}
+#view-administracion .admin-tabs button{min-height:38px;padding:9px 13px;border-radius:12px;font-size:var(--admin-tabs-size);line-height:1.15;font-weight:900;white-space:nowrap}
+#view-administracion .admin-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+#view-administracion .admin-card{padding:18px;border-radius:20px}
+#view-administracion .admin-card span{font-size:var(--admin-label-size)}
+#view-administracion .admin-card strong{font-size:var(--admin-card-number);line-height:1.02}
+#view-administracion .admin-card p{font-size:var(--admin-copy-size);line-height:1.45}
+#view-administracion .admin-section{padding:clamp(20px,2.1vw,30px);margin-top:14px;border-radius:26px}
+#view-administracion .admin-section-head{gap:16px;margin-bottom:18px;align-items:flex-start}
+#view-administracion .admin-section-head h3{font-size:var(--admin-title-size);line-height:1.05;margin:5px 0}
+#view-administracion .admin-section-head p{font-size:var(--admin-copy-size);line-height:1.5;max-width:860px}
+#view-administracion .eyebrow,
+#view-administracion .eyebrow.light{font-size:clamp(9px,.68vw,12px);line-height:1.25;letter-spacing:.15em}
+#view-administracion .workflow-steps{gap:10px}
+#view-administracion .workflow-step{padding:14px;border-radius:15px}
+#view-administracion .workflow-step b{font-size:clamp(10px,.78vw,13px);line-height:1.25}
+#view-administracion .workflow-step small{font-size:clamp(9.5px,.72vw,12px);line-height:1.35}
+#view-administracion .form-grid{gap:12px}
+#view-administracion .field{gap:6px}
+#view-administracion .field label{font-size:var(--admin-label-size);line-height:1.25;font-weight:900}
+#view-administracion .field input,
+#view-administracion .field select,
+#view-administracion .field textarea{min-height:42px;padding:9px 12px;border-radius:12px;font-size:var(--admin-input-size);line-height:1.35}
+#view-administracion .field textarea{min-height:112px}
+#view-administracion .form-actions{gap:10px;margin-top:14px}
+#view-administracion .btn,
+#view-administracion button.btn{min-height:42px;padding:10px 16px;border-radius:14px;font-size:clamp(11.5px,.86vw,15px);line-height:1.2}
+#view-administracion .btn.small,
+#view-administracion button.btn.small{min-height:36px;padding:8px 13px;font-size:clamp(10.5px,.78vw,13px)}
+#view-administracion details summary{font-size:var(--admin-copy-size);line-height:1.35}
+#view-administracion .media-drop p,
+#view-administracion .access-denied{font-size:var(--admin-copy-size);line-height:1.45}
+#view-administracion .admin-table{width:100%;border-collapse:collapse}
+#view-administracion .admin-table th,
+#view-administracion .admin-table td{font-size:var(--admin-copy-size);line-height:1.35;padding:11px 12px;vertical-align:middle}
+#view-administracion .admin-table select{font-size:clamp(10px,.75vw,12.5px);min-height:34px}
+#view-administracion .audit-item{grid-template-columns:minmax(100px,140px) 1fr minmax(130px,190px);gap:10px}
+#view-administracion .audit-item b{font-size:var(--admin-copy-size)}
+#view-administracion .audit-item small,
+#view-administracion .audit-item time{font-size:clamp(9px,.66vw,11px);line-height:1.3}
+
+@media (max-width:1200px) and (min-width:761px){
+  #view-administracion{--admin-tabs-size:11px;--admin-label-size:10px;--admin-copy-size:12px;--admin-input-size:12px;--admin-title-size:30px;--admin-card-number:38px}
+  #view-administracion .admin-hero{padding:24px;align-items:flex-start}
+  #view-administracion .admin-hero h1{font-size:42px}
+  #view-administracion .admin-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #view-administracion .form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #view-administracion .span-2,
+  #view-administracion .span-3,
+  #view-administracion .span-4{grid-column:span 2}
+  #view-administracion .workflow-steps{grid-template-columns:repeat(2,1fr)}
+  #view-administracion .admin-section-head{flex-direction:column;align-items:stretch}
 }
-html body section#view-administracion #adminTabs.admin-tabs button[data-admin-tab="content"]{min-width:300px !important;}
-html body section#view-administracion #adminTabs.admin-tabs button[data-admin-tab="workflow"]{min-width:385px !important;}
-html body section#view-administracion .admin-section{padding:38px !important;}
-html body section#view-administracion .admin-section-head{gap:24px !important; margin-bottom:30px !important;}
-html body section#view-administracion .admin-section-head h3{
-  font-size:var(--admin-force-title) !important;
-  line-height:1.08 !important;
-  letter-spacing:-.025em !important;
-}
-html body section#view-administracion .admin-section-head p,
-html body section#view-administracion .admin-card p,
-html body section#view-administracion .workflow-step small,
-html body section#view-administracion .media-drop p,
-html body section#view-administracion .access-denied{
-  font-size:var(--admin-force-copy) !important;
-  line-height:1.55 !important;
-}
-html body section#view-administracion .eyebrow,
-html body section#view-administracion .eyebrow.light{
-  font-size:17px !important;
-  line-height:1.35 !important;
-  letter-spacing:.16em !important;
-}
-html body section#view-administracion .field{gap:10px !important;}
-html body section#view-administracion .field label{
-  font-size:var(--admin-force-label) !important;
-  line-height:1.3 !important;
-  font-weight:950 !important;
-}
-html body section#view-administracion .field input,
-html body section#view-administracion .field select,
-html body section#view-administracion .field textarea{
-  min-height:60px !important;
-  padding:15px 18px !important;
-  border-radius:16px !important;
-  font-size:var(--admin-force-control) !important;
-  line-height:1.45 !important;
-}
-html body section#view-administracion .field textarea{min-height:180px !important;}
-html body section#view-administracion .btn,
-html body section#view-administracion button.btn{
-  min-height:58px !important;
-  padding:16px 26px !important;
-  font-size:22px !important;
-  line-height:1.2 !important;
-  border-radius:18px !important;
-}
-html body section#view-administracion .btn.small,
-html body section#view-administracion button.btn.small{
-  min-height:52px !important;
-  padding:14px 22px !important;
-  font-size:19px !important;
-}
-html body section#view-administracion details summary{
-  font-size:22px !important;
-  line-height:1.35 !important;
-  font-weight:950 !important;
-}
-html body section#view-administracion .admin-card span{font-size:18px !important; line-height:1.35 !important;}
-html body section#view-administracion .admin-card strong{font-size:58px !important; line-height:1 !important;}
-html body section#view-administracion .workflow-step b{font-size:22px !important; line-height:1.25 !important;}
-html body section#view-administracion .admin-table th,
-html body section#view-administracion .admin-table td{font-size:18px !important; line-height:1.4 !important; padding:18px 20px !important;}
-html body section#view-administracion .audit-item b{font-size:20px !important; line-height:1.35 !important;}
-html body section#view-administracion .audit-item small,
-html body section#view-administracion .audit-item time{font-size:17px !important; line-height:1.35 !important;}
-@media (max-width:900px){
-  html body section#view-administracion{--admin-force-label:17px; --admin-force-copy:17px; --admin-force-control:18px; --admin-force-title:34px; --admin-force-tab:23px;}
-  html body section#view-administracion #adminTabs.admin-tabs{gap:12px !important; padding:16px !important; min-height:92px !important;}
-  html body section#view-administracion #adminTabs.admin-tabs button[data-admin-tab]{min-height:62px !important; padding:15px 20px !important;}
-  html body section#view-administracion #adminTabs.admin-tabs button[data-admin-tab="content"],
-  html body section#view-administracion #adminTabs.admin-tabs button[data-admin-tab="workflow"]{min-width:0 !important;}
-  html body section#view-administracion .admin-section{padding:26px !important;}
+
+@media (max-width:760px){
+  #view-administracion{--admin-tabs-size:12px;--admin-label-size:11px;--admin-copy-size:13px;--admin-input-size:14px;--admin-title-size:28px;--admin-card-number:36px}
+  #view-administracion .admin-hero{padding:22px;border-radius:24px;display:grid;align-items:start}
+  #view-administracion .admin-hero h1{font-size:38px;line-height:.95}
+  #view-administracion .admin-tabs{position:sticky;top:8px;gap:7px;padding:8px;border-radius:16px}
+  #view-administracion .admin-tabs button{min-height:36px;padding:8px 11px}
+  #view-administracion .admin-grid,
+  #view-administracion .form-grid,
+  #view-administracion .workflow-steps{grid-template-columns:1fr}
+  #view-administracion .span-2,
+  #view-administracion .span-3,
+  #view-administracion .span-4{grid-column:auto}
+  #view-administracion .admin-section{padding:18px;border-radius:22px}
+  #view-administracion .admin-section-head{display:grid;align-items:start}
+  #view-administracion .form-actions{justify-content:stretch;flex-wrap:wrap}
+  #view-administracion .form-actions .btn{width:100%;justify-content:center}
+  #view-administracion .audit-item{grid-template-columns:1fr}
 }

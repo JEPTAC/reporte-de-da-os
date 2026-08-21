@@ -1,36 +1,3 @@
-
-function forceAdminReadableText(){
-  if(document.getElementById('admin-force-readable-runtime')) return;
-  const st=document.createElement('style');
-  st.id='admin-force-readable-runtime';
-  st.textContent=`
-  html body section#view-administracion #adminTabs.admin-tabs{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:18px!important;padding:20px!important;min-height:108px!important;overflow:visible!important;border-radius:26px!important;}
-  html body section#view-administracion #adminTabs.admin-tabs button[data-admin-tab]{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-height:70px!important;padding:18px 28px!important;border-radius:22px!important;font-size:28px!important;line-height:1.12!important;font-weight:950!important;letter-spacing:-.018em!important;white-space:normal!important;text-align:center!important;}
-  html body section#view-administracion #adminTabs.admin-tabs button[data-admin-tab="content"]{min-width:300px!important;}
-  html body section#view-administracion #adminTabs.admin-tabs button[data-admin-tab="workflow"]{min-width:385px!important;}
-  html body section#view-administracion .admin-section{padding:38px!important;}
-  html body section#view-administracion .admin-section-head h3{font-size:42px!important;line-height:1.08!important;letter-spacing:-.025em!important;}
-  html body section#view-administracion .admin-section-head p,html body section#view-administracion .admin-card p,html body section#view-administracion .workflow-step small,html body section#view-administracion .media-drop p,html body section#view-administracion .access-denied{font-size:18px!important;line-height:1.55!important;}
-  html body section#view-administracion .eyebrow,html body section#view-administracion .eyebrow.light{font-size:17px!important;line-height:1.35!important;letter-spacing:.16em!important;}
-  html body section#view-administracion .field{gap:10px!important;}
-  html body section#view-administracion .field label{font-size:18px!important;line-height:1.3!important;font-weight:950!important;}
-  html body section#view-administracion .field input,html body section#view-administracion .field select,html body section#view-administracion .field textarea{min-height:60px!important;padding:15px 18px!important;border-radius:16px!important;font-size:20px!important;line-height:1.45!important;}
-  html body section#view-administracion .field textarea{min-height:180px!important;}
-  html body section#view-administracion .btn,html body section#view-administracion button.btn{min-height:58px!important;padding:16px 26px!important;font-size:22px!important;line-height:1.2!important;border-radius:18px!important;}
-  html body section#view-administracion .btn.small,html body section#view-administracion button.btn.small{min-height:52px!important;padding:14px 22px!important;font-size:19px!important;}
-  html body section#view-administracion details summary{font-size:22px!important;line-height:1.35!important;font-weight:950!important;}
-  html body section#view-administracion .admin-card span{font-size:18px!important;line-height:1.35!important;}
-  html body section#view-administracion .admin-card strong{font-size:58px!important;line-height:1!important;}
-  html body section#view-administracion .workflow-step b{font-size:22px!important;line-height:1.25!important;}
-  html body section#view-administracion .admin-table th,html body section#view-administracion .admin-table td{font-size:18px!important;line-height:1.4!important;padding:18px 20px!important;}
-  html body section#view-administracion .audit-item b{font-size:20px!important;line-height:1.35!important;}
-  html body section#view-administracion .audit-item small,html body section#view-administracion .audit-item time{font-size:17px!important;line-height:1.35!important;}
-  @media (max-width:900px){html body section#view-administracion #adminTabs.admin-tabs{gap:12px!important;padding:16px!important;min-height:92px!important;}html body section#view-administracion #adminTabs.admin-tabs button[data-admin-tab]{min-height:62px!important;padding:15px 20px!important;font-size:23px!important;}html body section#view-administracion #adminTabs.admin-tabs button[data-admin-tab="content"],html body section#view-administracion #adminTabs.admin-tabs button[data-admin-tab="workflow"]{min-width:0!important;}html body section#view-administracion .admin-section{padding:26px!important;}html body section#view-administracion .admin-section-head h3{font-size:34px!important;}html body section#view-administracion .field label{font-size:17px!important;}html body section#view-administracion .field input,html body section#view-administracion .field select,html body section#view-administracion .field textarea{font-size:18px!important;}}
-  `;
-  document.head.appendChild(st);
-}
-forceAdminReadableText();
-
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const fmt=n=>Number(n||0).toLocaleString('es-CO');
 const pct=n=>`${Number(n||0).toFixed(1).replace('.',',')}%`;
