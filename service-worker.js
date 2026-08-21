@@ -1,7 +1,7 @@
-const CACHE='rufe-san-pedro-v6-2-facebook-posts-20260821-1051';
+const CACHE='rufe-san-pedro-v6-2-creditos-institucionales-20260821-1102';
 const CORE=[
-  './','./index.html','./report.html','./styles.css?v=facebook-posts-20260821-1051','./styles.css','./report-print.css','./app.js?v=facebook-posts-20260821-1051','./app.js','./experience.js','./report-print.js','./map.js',
-  './firebase-config.js','./firebase-service.js?v=facebook-posts-20260821-1051','./firebase-service.js','./manifest.json','./data/report-data.js','./data/map-data.js',
+  './','./index.html','./report.html','./styles.css?v=creditos-institucionales-20260821-1102','./styles.css','./report-print.css','./app.js?v=creditos-institucionales-20260821-1102','./app.js','./experience.js','./report-print.js','./map.js',
+  './firebase-config.js','./firebase-service.js?v=creditos-institucionales-20260821-1102','./firebase-service.js','./manifest.json','./data/report-data.js','./data/map-data.js',
   './assets/logo-san-pedro.jpg','./assets/icon-192.png','./assets/icon-512.png','./assets/alcaldia.jpg','./assets/iglesia-afectada.jpg'
 ];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));

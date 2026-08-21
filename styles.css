@@ -386,3 +386,66 @@ body{font-size:17px;line-height:1.65}
 .facebook-post-copy{padding:18px 20px 20px}.facebook-post-copy span{display:inline-flex;margin-bottom:9px;padding:5px 9px;border-radius:999px;background:#e8f2ff;color:var(--blue);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}.facebook-post-copy h3{margin:0 0 8px;font-family:var(--wide);font-size:24px;line-height:1.05;text-transform:uppercase}.facebook-post-copy p{margin:0 0 14px;color:var(--muted);font-size:14px;line-height:1.55}
 #view-administracion [data-admin-panel="facebook"] .admin-table td:first-child{min-width:320px;max-width:650px;word-break:break-word}
 @media (max-width:760px){.facebook-public-section{padding:0 18px}.facebook-post-card{border-radius:22px}.facebook-post-frame{min-height:360px}.facebook-post-frame iframe{min-height:360px}.facebook-post-copy h3{font-size:20px}}
+
+/* Crédito institucional y enfoque de la herramienta */
+.portal-credit{
+  margin:0 auto 34px;
+  width:min(1180px,calc(100% - 40px));
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  padding:18px 22px;
+  border:1px solid var(--line);
+  border-radius:24px;
+  background:linear-gradient(135deg,rgba(255,255,255,.96),rgba(239,247,255,.92));
+  box-shadow:var(--shadow-xs);
+  color:var(--ink);
+}
+.portal-credit span{
+  display:block;
+  margin-bottom:4px;
+  font:900 10px/1 var(--mono);
+  letter-spacing:.16em;
+  color:var(--blue);
+}
+.portal-credit p{
+  margin:0;
+  max-width:760px;
+  font-size:13px;
+  line-height:1.45;
+  color:var(--muted);
+}
+.portal-credit strong{
+  flex:0 0 auto;
+  padding:10px 14px;
+  border-radius:999px;
+  background:#fff;
+  border:1px solid rgba(28,105,212,.18);
+  color:var(--ink);
+  font-size:13px;
+  box-shadow:var(--shadow-xs);
+}
+html[data-theme="dark"] body .portal-credit{
+  background:linear-gradient(135deg,rgba(14,34,52,.96),rgba(9,28,43,.94));
+  border-color:rgba(255,255,255,.12);
+}
+html[data-theme="dark"] body .portal-credit strong{
+  background:rgba(255,255,255,.08);
+  border-color:rgba(255,255,255,.12);
+}
+@media (max-width:760px){
+  .portal-credit{
+    width:calc(100% - 26px);
+    margin-bottom:94px;
+    display:grid;
+    padding:16px;
+    border-radius:20px;
+  }
+  .portal-credit p{font-size:12px}
+  .portal-credit strong{
+    width:100%;
+    text-align:center;
+    font-size:12px;
+  }
+}
