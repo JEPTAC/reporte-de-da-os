@@ -271,3 +271,104 @@ body{font-size:17px;line-height:1.65}
   #view-administracion .form-actions .btn{width:100%;justify-content:center}
   #view-administracion .audit-item{grid-template-columns:1fr}
 }
+
+/* ========================= Inicio: banner simple, informativo y sin imágenes ========================= */
+#view-inicio .cinema-hero.hero-inicio-simple{
+  min-height:auto!important;
+  display:block!important;
+  grid-template-columns:1fr!important;
+  padding:clamp(28px,4vw,48px) clamp(20px,5vw,64px)!important;
+  background:linear-gradient(135deg,#061f3b 0%,#083b68 58%,#0759d9 100%)!important;
+  color:#fff!important;
+  overflow:hidden!important;
+}
+#view-inicio .hero-inicio-simple::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at 86% 20%,rgba(117,217,255,.22),transparent 34%),linear-gradient(90deg,rgba(255,255,255,.06),transparent 55%);
+  pointer-events:none;
+  z-index:-1;
+}
+#view-inicio .hero-inicio-simple .cinema-grid{
+  opacity:.08!important;
+  background-size:48px 48px!important;
+}
+#view-inicio .hero-inicio-simple .hero-copy{
+  max-width:980px!important;
+  position:relative!important;
+  z-index:2!important;
+}
+#view-inicio .hero-inicio-simple .hero-kicker{
+  gap:10px!important;
+  margin-bottom:14px!important;
+}
+#view-inicio .hero-inicio-simple .hero-kicker span,
+#view-inicio .hero-inicio-simple .hero-kicker i{
+  font-size:clamp(8px,.75vw,10px)!important;
+}
+#view-inicio .hero-inicio-simple h1{
+  margin:0!important;
+  max-width:900px!important;
+  font-family:var(--wide)!important;
+  font-size:clamp(34px,4.4vw,58px)!important;
+  line-height:.96!important;
+  letter-spacing:-.035em!important;
+  text-transform:uppercase!important;
+  color:#fff!important;
+}
+#view-inicio .hero-inicio-simple .hero-lead{
+  margin:14px 0 0!important;
+  max-width:820px!important;
+  color:rgba(240,248,255,.84)!important;
+  font-size:clamp(14px,1.35vw,17px)!important;
+  line-height:1.6!important;
+}
+#view-inicio .hero-inicio-simple .hero-meta{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:10px!important;
+  max-width:920px!important;
+  margin-top:20px!important;
+  border:0!important;
+}
+#view-inicio .hero-inicio-simple .hero-meta>div{
+  margin:0!important;
+  padding:13px 15px!important;
+  border:1px solid rgba(255,255,255,.16)!important;
+  border-radius:18px!important;
+  background:rgba(255,255,255,.08)!important;
+  backdrop-filter:blur(12px)!important;
+}
+#view-inicio .hero-inicio-simple .hero-meta small{
+  font-size:clamp(7px,.7vw,9px)!important;
+  color:#9eeaff!important;
+}
+#view-inicio .hero-inicio-simple .hero-meta b{
+  margin-top:5px!important;
+  font-size:clamp(11px,1vw,14px)!important;
+  line-height:1.25!important;
+}
+#view-inicio .hero-inicio-simple .hero-actions{
+  margin-top:20px!important;
+}
+#view-inicio .hero-inicio-simple .hero-media,
+#view-inicio .hero-inicio-simple .hero-photo,
+#view-inicio .hero-inicio-simple .hero-photo-strip,
+#view-inicio .hero-inicio-simple .hero-data-float,
+#view-inicio .hero-inicio-simple .seismic-line,
+#view-inicio .hero-inicio-simple .scroll-cue{
+  display:none!important;
+}
+@media (max-width:760px){
+  #view-inicio .cinema-hero.hero-inicio-simple{
+    padding:26px 18px 34px!important;
+  }
+  #view-inicio .hero-inicio-simple .hero-meta{
+    grid-template-columns:1fr!important;
+    gap:8px!important;
+  }
+  #view-inicio .hero-inicio-simple h1{
+    font-size:clamp(30px,9vw,42px)!important;
+  }
+}
