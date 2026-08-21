@@ -9,7 +9,7 @@
 <title>Portal RUFE | San Pedro, Valle del Cauca</title>
 <link href="manifest.json" rel="manifest"/>
 <link href="assets/logo-san-pedro.jpg" rel="icon"/>
-<link href="styles.css?v=banner-simple-20260821-0920" rel="stylesheet"/>
+<link href="styles.css?v=facebook-posts-20260821-1051" rel="stylesheet"/>
 </head>
 <body>
 <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -104,6 +104,10 @@
 <section class="public-ribbon" id="guia-ciudadana">
 <div class="public-state"><span></span><b>Información pública vigente</b><small id="lastUpdateText">Última actualización: 18 de agosto de 2026</small></div>
 <p><strong>Importante:</strong> las categorías de vivienda son marcas del censo y no equivalen por sí solas a un dictamen estructural.</p>
+</section>
+<section class="facebook-public-section section-block reveal" id="facebookPostsSection" hidden>
+<div class="section-head immersive"><div><span class="eyebrow">PUBLICACIONES OFICIALES</span><h2>Actualidad desde <em>Facebook.</em></h2></div><p>Enlaces publicados por administradores del portal. Solo se muestran publicaciones activas.</p></div>
+<div class="facebook-post-grid" id="facebookPostsGrid"></div>
 </section>
 <section class="citizen-guide section-block reveal">
 <div class="section-head immersive"><div><span class="eyebrow">¿QUÉ QUIERES CONSULTAR?</span><h2>Encuentra la información <em>sin perderte.</em></h2></div><p>Elige una ruta. Cada módulo explica primero lo esencial y después permite profundizar.</p></div>
@@ -277,6 +281,7 @@
 <button data-admin-tab="content">Contenido del corte</button>
 <button data-admin-tab="workflow">Validación y publicación</button>
 <button data-admin-tab="media">Archivos</button>
+<button data-admin-tab="facebook">Facebook</button>
 <button data-admin-tab="users">Usuarios</button>
 <button data-admin-tab="audit">Auditoría</button>
 </nav>
@@ -285,6 +290,7 @@
 <div class="admin-panel" data-admin-panel="content" id="adminContent"></div>
 <div class="admin-panel" data-admin-panel="workflow" id="adminWorkflow"></div>
 <div class="admin-panel" data-admin-panel="media" id="adminMedia"></div>
+<div class="admin-panel" data-admin-panel="facebook" id="adminFacebook"></div>
 <div class="admin-panel" data-admin-panel="users" id="adminUsers"></div>
 <div class="admin-panel" data-admin-panel="audit" id="adminAudit"></div>
 </div>
@@ -321,8 +327,8 @@
 <script src="data/map-data.js"></script>
 <script src="firebase-config.js"></script>
 <script src="map.js"></script>
-<script src="firebase-service.js?v=banner-simple-20260821-0920" type="module"></script>
-<script src="app.js?v=banner-simple-20260821-0920" type="module"></script>
+<script src="firebase-service.js?v=facebook-posts-20260821-1051" type="module"></script>
+<script src="app.js?v=facebook-posts-20260821-1051" type="module"></script>
 <script src="experience.js" type="module"></script>
 </body>
 </html>

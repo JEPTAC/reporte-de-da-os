@@ -372,3 +372,17 @@ body{font-size:17px;line-height:1.65}
     font-size:clamp(30px,9vw,42px)!important;
   }
 }
+
+
+/* =========================================================
+   PUBLICACIONES FACEBOOK — 2026-08-21
+   Alcance: bloque público + gestión admin por enlaces, sin Cloud Functions.
+   ========================================================= */
+.facebook-public-section{max-width:1380px;margin:24px auto 0;padding:0 clamp(18px,3.5vw,54px)}
+.facebook-post-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.facebook-post-card{display:grid;grid-template-rows:auto 1fr;overflow:hidden;border:1px solid var(--line);border-radius:28px;background:linear-gradient(180deg,#fff,#f5f9fd);box-shadow:var(--shadow-sm)}
+.facebook-post-frame{display:grid;place-items:center;min-height:420px;background:#eef5fb;border-bottom:1px solid var(--line);overflow:hidden}
+.facebook-post-frame iframe{width:100%;max-width:500px;min-height:420px;background:#fff}
+.facebook-post-copy{padding:18px 20px 20px}.facebook-post-copy span{display:inline-flex;margin-bottom:9px;padding:5px 9px;border-radius:999px;background:#e8f2ff;color:var(--blue);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}.facebook-post-copy h3{margin:0 0 8px;font-family:var(--wide);font-size:24px;line-height:1.05;text-transform:uppercase}.facebook-post-copy p{margin:0 0 14px;color:var(--muted);font-size:14px;line-height:1.55}
+#view-administracion [data-admin-panel="facebook"] .admin-table td:first-child{min-width:320px;max-width:650px;word-break:break-word}
+@media (max-width:760px){.facebook-public-section{padding:0 18px}.facebook-post-card{border-radius:22px}.facebook-post-frame{min-height:360px}.facebook-post-frame iframe{min-height:360px}.facebook-post-copy h3{font-size:20px}}

@@ -1,7 +1,7 @@
-const CACHE='rufe-san-pedro-v6-2-banner-simple-20260821-0920';
+const CACHE='rufe-san-pedro-v6-2-facebook-posts-20260821-1051';
 const CORE=[
-  './','./index.html','./report.html','./styles.css?v=banner-simple-20260821-0920','./styles.css','./report-print.css','./app.js?v=banner-simple-20260821-0920','./app.js','./experience.js','./report-print.js','./map.js',
-  './firebase-config.js','./firebase-service.js?v=banner-simple-20260821-0920','./firebase-service.js','./manifest.json','./data/report-data.js','./data/map-data.js',
+  './','./index.html','./report.html','./styles.css?v=facebook-posts-20260821-1051','./styles.css','./report-print.css','./app.js?v=facebook-posts-20260821-1051','./app.js','./experience.js','./report-print.js','./map.js',
+  './firebase-config.js','./firebase-service.js?v=facebook-posts-20260821-1051','./firebase-service.js','./manifest.json','./data/report-data.js','./data/map-data.js',
   './assets/logo-san-pedro.jpg','./assets/icon-192.png','./assets/icon-512.png','./assets/alcaldia.jpg','./assets/iglesia-afectada.jpg'
 ];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));

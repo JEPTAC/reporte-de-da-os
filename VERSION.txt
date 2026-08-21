@@ -1,1 +1,1 @@
-6.1.1-banner-simple-sin-imagenes
+6.1.2-facebook-publicaciones-sin-functions
