@@ -1,7 +1,7 @@
-const CACHE='rufe-san-pedro-v6-2-responsive-compact-admin-20260821-0755';
+const CACHE='rufe-san-pedro-v6-2-sin-functions-20260821-0903';
 const CORE=[
-  './','./index.html','./report.html','./styles.css?v=responsive-compact-admin-20260821-0755','./styles.css','./report-print.css','./app.js?v=responsive-compact-admin-20260821-0755','./app.js','./experience.js','./report-print.js','./map.js',
-  './firebase-config.js','./firebase-service.js','./manifest.json','./data/report-data.js','./data/map-data.js',
+  './','./index.html','./report.html','./styles.css?v=sin-functions-20260821-0903','./styles.css','./report-print.css','./app.js?v=sin-functions-20260821-0903','./app.js','./experience.js','./report-print.js','./map.js',
+  './firebase-config.js','./firebase-service.js?v=sin-functions-20260821-0903','./firebase-service.js','./manifest.json','./data/report-data.js','./data/map-data.js',
   './assets/logo-san-pedro.jpg','./assets/icon-192.png','./assets/icon-512.png','./assets/alcaldia.jpg','./assets/iglesia-afectada.jpg'
 ];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));

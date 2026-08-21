@@ -7,7 +7,7 @@ Esta entrega se publica como **reconstrucción completa de la experiencia**, no 
 1. Descargar y conservar una copia de la versión publicada actual.
 2. Vaciar los archivos RUFE del repositorio, salvo elementos externos que pertenezcan a otros proyectos.
 3. Copiar todo el contenido de este paquete en la raíz del sitio RUFE.
-4. Verificar que existan `index.html`, `styles.css`, `experience.js`, `app.js`, `map.js`, `firebase-service.js`, `service-worker.js`, `data/`, `assets/`, `functions/` y `rules/`.
+4. Verificar que existan `index.html`, `styles.css`, `experience.js`, `app.js`, `map.js`, `firebase-service.js`, `service-worker.js`, `data/`, `assets/`, `rules/`.
 5. Publicar en GitHub.
 6. Forzar recarga una vez para que el nuevo service worker elimine la caché anterior.
 7. Ejecutar `SMOKE-TEST.md`.
